@@ -1,0 +1,16 @@
+{
+    "Installments": {
+        "payment 1": {"type": "paymentinfo"},
+        "payment 2": {"type": "paymentinfo"}, 
+        "payment 3": {"type": "paymentinfo"}, 
+        "payment 4": {"type": "paymentinfo"}, 
+        "payment 5": {"type": "paymentinfo"}, 
+        "payment 6": {"type": "paymentinfo"}, 
+        "payment 7": {"type": "paymentinfo"}, 
+        "payment 8": {"type": "paymentinfo"}, 
+        "payment 9": {"type": "paymentinfo"},
+        "payment 10": {"type": "paymentinfo"},
+        "payment 11": {"type": "paymentinfo"},
+        "payment 12": {"type": "paymentinfo"}
+    }
+}
