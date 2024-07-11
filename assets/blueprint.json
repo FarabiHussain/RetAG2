@@ -1,16 +1,63 @@
 {
-    "Installments": {
-        "payment 1": {"type": "paymentinfo"},
-        "payment 2": {"type": "paymentinfo"}, 
-        "payment 3": {"type": "paymentinfo"}, 
-        "payment 4": {"type": "paymentinfo"}, 
-        "payment 5": {"type": "paymentinfo"}, 
-        "payment 6": {"type": "paymentinfo"}, 
-        "payment 7": {"type": "paymentinfo"}, 
-        "payment 8": {"type": "paymentinfo"}, 
-        "payment 9": {"type": "paymentinfo"},
-        "payment 10": {"type": "paymentinfo"},
-        "payment 11": {"type": "paymentinfo"},
-        "payment 12": {"type": "paymentinfo"}
+    "Authorization": {
+        "first name": {"column": 0, "type": "entry"},
+        "last name": {"column": 0, "type": "entry"},
+        "address": {"column": 0, "type": "entry"},
+        "city": {"column": 0, "type": "entry"},
+        "province": {"column": 0, "type": "entry"},
+        "postal code": {"column": 0, "type": "entry"},
+        "phone": {"column": 0, "type": "entry"},
+        "email": {"column": 0, "type": "entry"},
+
+        "card type": {"column": 0, "type": "combo", "options": ["Visa", "MasterCard"]},
+        "card number": {"column": 0, "type": "entry"},
+        "cardholder name": {"column": 0, "type": "entry"},
+        "expiration": {"column": 0, "type": "datepicker", "show_day":"false"},
+        "security code": {"column": 0, "type": "entry"},
+        "billing address": {"column": 0, "type": "entry"},
+        
+        "payment 1": {"column": 1, "type": "paymentinfo"},
+        "payment 2": {"column": 1, "type": "paymentinfo"},
+        "payment 3": {"column": 1, "type": "paymentinfo"},
+        "payment 4": {"column": 1, "type": "paymentinfo"},
+        "payment 5": {"column": 1, "type": "paymentinfo"},
+        "payment 6": {"column": 1, "type": "paymentinfo"},
+        "payment 7": {"column": 1, "type": "paymentinfo"},
+        "payment 8": {"column": 1, "type": "paymentinfo"},
+        "payment 9": {"column": 1, "type": "paymentinfo"},
+        "payment 10": {"column": 1, "type": "paymentinfo"},
+        "payment 11": {"column": 1, "type": "paymentinfo"},
+        "payment 12": {"column": 1, "type": "paymentinfo"}
+    },
+
+    "Retainer": {
+        "first name": {"column": 0, "type": "entry"},
+        "last name": {"column": 0, "type": "entry"},
+        "address": {"column": 0, "type": "entry"},
+        "city": {"column": 0, "type": "entry"},
+        "province": {"column": 0, "type": "entry"},
+        "postal code": {"column": 0, "type": "entry"},
+        "phone": {"column": 0, "type": "entry"},
+        "email": {"column": 0, "type": "entry"},
+
+        "card type": {"column": 0, "type": "combo", "options": ["Visa", "MasterCard"]},
+        "card number": {"column": 0, "type": "entry"},
+        "cardholder name": {"column": 0, "type": "entry"},
+        "expiration": {"column": 0, "type": "datepicker", "show_day":"false"},
+        "security code": {"column": 0, "type": "entry"},
+        "billing address": {"column": 0, "type": "entry"},
+        
+        "payment 1": {"column": 1, "type": "paymentinfo"},
+        "payment 2": {"column": 1, "type": "paymentinfo"},
+        "payment 3": {"column": 1, "type": "paymentinfo"},
+        "payment 4": {"column": 1, "type": "paymentinfo"},
+        "payment 5": {"column": 1, "type": "paymentinfo"},
+        "payment 6": {"column": 1, "type": "paymentinfo"},
+        "payment 7": {"column": 1, "type": "paymentinfo"},
+        "payment 8": {"column": 1, "type": "paymentinfo"},
+        "payment 9": {"column": 1, "type": "paymentinfo"},
+        "payment 10": {"column": 1, "type": "paymentinfo"},
+        "payment 11": {"column": 1, "type": "paymentinfo"},
+        "payment 12": {"column": 1, "type": "paymentinfo"}
     }
 }

@@ -23,7 +23,7 @@ class GUI:
         self.component = None
 
         self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w")
-        self.label.grid(row=top_offset, column=0, pady=5, padx=5, columnspan=1)
+        self.label.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=1)
 
     def get(self) -> str:
         field = self.component
@@ -59,7 +59,7 @@ class ComboBox(GUI):
         )
 
         # self.component.place(x=left_offset + 210, y=top_offset + 8)
-        self.component.grid(row=top_offset, column=1, pady=5, padx=5, columnspan=3)
+        self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
 
     def get(self) -> str:
         """returns the first option if nothing was selected"""
@@ -96,7 +96,7 @@ class Entry(GUI):
             textvariable=self.stringvar,
         )
 
-        self.component.grid(row=top_offset, column=1, pady=5, padx=5, columnspan=3)
+        self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
 
 
 class DatePicker(GUI):
@@ -126,9 +126,9 @@ class DatePicker(GUI):
 
         # in some cases, like credit card expirations, the day is not needed
         if show_day is True:
-            self.component_day.grid(row=top_offset, column=1, pady=5, padx=5)
+            self.component_day.grid(row=top_offset, column=1, pady=10, padx=5)
         else:
-            ctk.CTkLabel(master, height=32, width=70, text="").grid(row=top_offset, column=1, pady=5, padx=5)
+            ctk.CTkLabel(master, height=32, width=70, text="").grid(row=top_offset, column=1, pady=10, padx=5)
 
 
         self.component_month = ctk.CTkComboBox(
@@ -144,7 +144,7 @@ class DatePicker(GUI):
             command=self.repopulate_days
         )
 
-        self.component_month.grid(row=top_offset, column=2, pady=5, padx=5)
+        self.component_month.grid(row=top_offset, column=2, pady=10, padx=5)
 
         self.component_year = ctk.CTkComboBox(
             master,
@@ -159,7 +159,7 @@ class DatePicker(GUI):
             command=self.repopulate_days
         )
 
-        self.component_year.grid(row=top_offset, column=3, pady=5, padx=5)
+        self.component_year.grid(row=top_offset, column=3, pady=10, padx=5)
 
 
     # returns a list of days depending on the month
@@ -262,12 +262,12 @@ class PaymentInfo(GUI):
         self.pay_amount = Entry(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
         self.pay_amount.component.configure(width=70)
         self.pay_amount.stringvar.set(value="$")
-        self.pay_amount.component.grid(row=top_offset, column=1, pady=5, padx=5, columnspan=1)
+        self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=1)
 
         self.pay_date = DatePicker(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
-        self.pay_date.component_day.grid(row=top_offset, column=2, pady=5, padx=5)
-        self.pay_date.component_month.grid(row=top_offset, column=3, pady=5, padx=5)
-        self.pay_date.component_year.grid(row=top_offset, column=4, pady=5, padx=5)
+        self.pay_date.component_day.grid(row=top_offset, column=2, pady=10, padx=5)
+        self.pay_date.component_month.grid(row=top_offset, column=3, pady=10, padx=5)
+        self.pay_date.component_year.grid(row=top_offset, column=4, pady=10, padx=5)
 
         # shorten the width of the label to fit the window
         self.label.configure(width=100, text=label_text)
@@ -336,7 +336,7 @@ class AppButton():
             command=lambda:self.__open_app(app_name=app_name, app=app),
             width=width,
             height=height,
-        ).grid(row=row, column=0, pady=5, padx=5)
+        ).grid(row=row, column=0, pady=10, padx=5)
 
         self.desc_frame = ctk.CTkFrame(
             master=master, 
@@ -347,7 +347,7 @@ class AppButton():
             fg_color="#ffffff",
         )
         
-        self.desc_frame.grid(row=row, column=1, pady=5, padx=5)
+        self.desc_frame.grid(row=row, column=1, pady=10, padx=5)
 
         bold_font = ctk.CTkFont(family="Roboto Bold", weight="bold")
         normal_font = ctk.CTkFont(family="Roboto")
@@ -382,7 +382,7 @@ class ActionButton():
             command=lambda:self.assign_action(app, action),
             width=width,
             height=height,
-        ).grid(row=row, column=col, pady=5, padx=5)
+        ).grid(row=row, column=col, pady=10, padx=5)
 
 
     def assign_action(self, app, action) -> None:
