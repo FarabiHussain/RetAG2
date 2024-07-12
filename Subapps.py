@@ -9,7 +9,7 @@ class Subapp():
         self.button.configure(command=lambda:self.lift_app(subapp_components))
 
         self.subapp_name = subapp_name
-        self.button.place(x=0, y=(70*button_position)+20)
+        self.button.place(x=0, y=(50*button_position)+10)
         self.blueprint = blueprint
 
         self.render_app(self.frame, blueprint, app, imgs)
@@ -52,7 +52,7 @@ class Subapp():
             elif specs['type'] == "paymentinfo":
                 new_component = PaymentInfo(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset)
             elif specs['type'] == "combo":
-                new_component = ComboBox(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset, options=specs['options'])
+                new_component = ComboBox(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset, options=specs['options'], default_option=(None if 'default' not in specs else specs['default']))
             elif specs['type'] == "break":
                 new_component = RowBreak(master=self.auth_columns[specs['column']], left_offset=10, top_offset=offset, heading=specs['heading'])
 
@@ -64,9 +64,10 @@ class Subapp():
         btn_frame.place(x=25, y=800)
 
         ActionButton(master=btn_frame, action="reset", app=app, image=imgs.get("reset.png"), btn_color="red", row=0, col=0)
-        ActionButton(master=btn_frame, action="create", app=app, image=imgs.get("create.png"), btn_color="blue", row=0, col=1)
-        ActionButton(master=btn_frame, action="decrypt", app=app, image=imgs.get("decrypt.png"), btn_color="gray", row=0, col=2)
-        ActionButton(master=btn_frame, action="import", app=app, image=imgs.get("import.png"), btn_color="gray", row=0, col=3)
-        ActionButton(master=btn_frame, action="output", app=app, image=imgs.get("output.png"), btn_color="gray", row=0, col=4)
-        ActionButton(master=btn_frame, action="test", app=app, image=imgs.get("test.png"), btn_color="lightgray", row=0, col=5)
+        ActionButton(master=btn_frame, action="retainer", app=app, image=imgs.get("retainer.png"), btn_color="dark blue", row=0, col=1)
+        ActionButton(master=btn_frame, action="payments", app=app, image=imgs.get("payments.png"), btn_color="dark blue", row=0, col=2)
+        ActionButton(master=btn_frame, action="conduct", app=app, image=imgs.get("conduct.png"), btn_color="dark green", row=0, col=3)
+        ActionButton(master=btn_frame, action="decrypt", app=app, image=imgs.get("decrypt.png"), btn_color="gray", row=0, col=4)
+        ActionButton(master=btn_frame, action="output", app=app, image=imgs.get("output.png"), btn_color="gray", row=0, col=5)
+        ActionButton(master=btn_frame, action="test", app=app, image=imgs.get("test.png"), btn_color="lightgray", row=0, col=6)
 

@@ -114,7 +114,7 @@ def save_doc(doc, data):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        output_filename = f"Payment Authorization - {re.sub(r' \((.*?)\)', '', data['first name']).strip()} {re.sub(r' \((.*?)\)', '', data['last name']).strip()}.docx"
+        output_filename = f"Payment Authorization - {re.sub(r' \((.*?)\)', '', data['client 1 first name']).strip()} {re.sub(r' \((.*?)\)', '', data['client 1 last name']).strip()}.docx"
 
         # save the file to the output folder
         doc.save(output_dir + output_filename)
@@ -179,7 +179,7 @@ def insert_2col_table(document, table_heading=None, table_items=[], table_props=
             for cell in (table_obj.columns[1].cells):
                 cell.width = CM(25)
                 set_cell_border(cell, top={"sz": 1, "color": "#ffffff", "val": "single", "space": "8"})
-                set_cell_border(cell, bottom={"sz": 1, "color": "#aaaaaa", "val": "single", "space": "0"})
+                set_cell_border(cell, bottom={"sz": 1, "color": "#888888", "val": "single", "space": "0"})
 
     except Exception as e:
         ErrorPopup(f'Exception when adding table contents\n\n{e}')
@@ -243,7 +243,7 @@ def insert_4col_table(document, table_heading=None, table_items=[], table_props=
                 cell.width = CM(14)
                 set_cell_border(cell, top={"sz": 1, "color": "#ffffff", "val": "single", "space": "8"})
                 if len(cell.text) > 0:
-                    set_cell_border(cell, bottom={"sz": 1, "color": "#aaaaaa", "val": "single", "space": "0"})
+                    set_cell_border(cell, bottom={"sz": 1, "color": "#888888", "val": "single", "space": "0"})
 
             for cell in (table_obj.columns[2].cells):
                 cell.width = CM(8)
@@ -252,7 +252,7 @@ def insert_4col_table(document, table_heading=None, table_items=[], table_props=
                 cell.width = CM(14)
                 set_cell_border(cell, top={"sz": 1, "color": "#ffffff", "val": "single", "space": "4"})
                 if len(cell.text) > 0:
-                    set_cell_border(cell, bottom={"sz": 1, "color": "#aaaaaa", "val": "single", "space": "0"})
+                    set_cell_border(cell, bottom={"sz": 1, "color": "#888888", "val": "single", "space": "0"})
 
     except Exception as e:
         ErrorPopup(f'Exception when adding table contents\n\n{e}')

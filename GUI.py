@@ -9,7 +9,7 @@ from CTkMessagebox import CTkMessagebox
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from writer import obscure, write_auth, unobscure
+from writer import *
 from dotenv import load_dotenv
 from dateutil import relativedelta as rd
 
@@ -42,9 +42,12 @@ class RowBreak(GUI):
         self.breakline = ctk.CTkLabel(master, text=heading, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family="Roboto Bold"))
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
 
+    def reset(self) -> None:
+        return
+
 
 class ComboBox(GUI):
-    def __init__(self, master=None, label_text="", options=None, left_offset=0, top_offset=0, default_string = 'click to select') -> None:
+    def __init__(self, master=None, label_text="", options=None, left_offset=0, top_offset=0, default_string='click to select', default_option=None) -> None:
         """create a new GUI ComboBox object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
@@ -65,6 +68,9 @@ class ComboBox(GUI):
             variable=self.stringvar,
             font=ctk.CTkFont(family="Roboto Bold"),
         )
+
+        if default_option is not None:
+            self.stringvar.set(default_option)
 
         # self.component.place(x=left_offset + 210, y=top_offset + 8)
         self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
@@ -298,8 +304,8 @@ class PaymentSplitter(GUI):
 
 
     def reset(self) -> None:
-        self.pay_amount.reset()
-        self.split_quantity.reset()
+        self.pay_amount.set("$")
+        self.split_quantity.set("number of months")
 
 
     def get(self) -> dict[str, str]:
@@ -497,8 +503,14 @@ class ActionButton():
             for component in app.get_all_components().values():
                 component.reset()
 
-        elif ("create" == action):
-            self.docx_button(app)
+        elif ("retainer" == action):
+            self.retainer_button(app)
+
+        elif ("payments" == action):
+            self.payments_button(app)
+
+        elif ("conduct" == action):
+            self.conduct_button(app)
 
         elif ("test" == action):
             self.test_button(app)
@@ -567,28 +579,54 @@ class ActionButton():
             ErrorPopup(msg=f'Wrong password')
 
 
-    def docx_button(self, app):
+    def retainer_button(self, app) -> bool:
+
+        try:
+            document_data = {}
+
+            doc = Document(resource_path("assets\\templates\\auth.docx"))
+            write_retainer(doc, document_data)
+        except Exception as e:
+            print(e)
+
+        return False
+
+
+    def payments_button(self, app) -> bool:
         # initiate the data and document
         try:
-            cardholder = {}
-            comp_vals = app.get_all_components().values()
-            comp_names = app.get_all_components().keys()
+            document_data = {}
 
-            for comp_name, comp_val in zip(comp_names, comp_vals):
-                if ("payment" in comp_name):
-                    pay_amount = comp_val.get()['amount']
+            for component_name, component_value in zip(app.get_all_components().keys(), app.get_all_components().values()):
+                if ("break" in component_name):
+                    pass
+
+                elif ("payment" in component_name):
+                    pay_amount = component_value.get()['amount']
+
                     if (pay_amount != "$" and len(pay_amount) != 0):
-                        cardholder[comp_name] = comp_val.get()
+                        document_data[component_name] = component_value.get()
+
+                elif component_name == "application fee":
+                    document_data['total_amount'] = float(component_value.get()['amount'].replace("$", ""))
+                    document_data['total_months'] = int(component_value.get()['months'])
+
+                elif component_name == "add taxes":
+                    document_data['add taxes'] = True if component_value.get().lower() == "yes" else False
+
                 else:
-                    cardholder[comp_name] = comp_val.get()
+                    document_data[component_name] = component_value.get()
 
             doc = Document(resource_path("assets\\templates\\auth.docx"))
 
-            write_auth(doc, cardholder)
+            write_auth(doc, document_data)
 
         except Exception as e:
+            print(e)
             ErrorPopup(msg=f'Exception while initializing data:\n\n{str(e)}')
             return False
+
+        return True
 
 
     def test_button(self, app):
@@ -597,24 +635,37 @@ class ActionButton():
             component.reset()
 
         legal_name = names.get_full_name(gender=random.choice(['male', 'female']))
+        legal_name_2 = names.get_full_name(gender=random.choice(['male', 'female']))
 
         app.components['address'].set("Address")
         app.components['billing address'].set("Address, Winnipeg, MB")
         app.components['card number'].set(f"{str(random.randint(1000000000000000, 9999999999999999))}")
         app.components['card type'].set("Visa")
         app.components['cardholder name'].set(legal_name)
+        app.components['add taxes'].set("Yes")
         app.components['city'].set("Winnipeg")
-        app.components['email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
         app.components['expiration'].set(y="2026", m="Dec", d="31")
-        app.components['first name'].set(legal_name.split(" ")[0])
-        app.components['last name'].set(legal_name.split(" ")[1])
+        app.components['client 1 first name'].set(legal_name.split(" ")[0])
+        app.components['client 1 last name'].set(legal_name.split(" ")[1])
+        app.components['client 1 email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
+        app.components['client 1 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
+        app.components['email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
         app.components['phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
+        app.components['client 2 first name'].set(legal_name_2.split(" ")[0])
+        app.components['client 2 last name'].set(legal_name_2.split(" ")[1])
+        app.components['client 2 email'].set(f"{legal_name_2.lower().replace(" ","")}@gmail.com")
+        app.components['client 2 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
         app.components['postal code'].set(f"X1X Y2Y")
         app.components['province'].set(f"Manitoba")
         app.components['security code'].set(f"{str(random.randint(100, 999))}")
 
-        for i in range(random.randint(1,12)):
-            app.components[f'payment {i+1}'].set("100", "2025", "Jan", i)
+        total_amount = 0
+        total_months = random.randint(1,12)
+        for i in range(total_months):
+            total_amount += 100
+            app.components[f'payment {i+1}'].set("100", "2025", "Jan", i+1)
+
+        app.components['application fee'].set(f"${total_amount}", total_months)
 
 
 class Tabview:

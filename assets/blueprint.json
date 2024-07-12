@@ -1,5 +1,5 @@
 {
-    "Retainer": {
+    "Agreements": {
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT 1 INFORMATION"},
         "client 1 first name": {"column": 0, "type": "entry"},
         "client 1 last name": {"column": 0, "type": "entry"},
@@ -15,7 +15,7 @@
         "break 2": {"column": 0, "type": "break", "heading": "APPLICATION DETAILS"},
         "date on document": {"column": 0, "type": "datepicker", "show_day":"true"},
         "Application type": {"column": 0, "type": "combo", "options": ["EOI", "MPNP", "PR", "Sousal Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]},
-        "Add Taxes": {"column": 0, "type": "combo", "options": ["Yes", "No"]},
+        "add taxes": {"column": 0, "type": "combo", "options": ["Yes", "No"], "default": "Yes"},
 
         "break 3": {"column": 1, "type": "break", "heading": "PAYER INFORMATION"},
         "address": {"column": 1, "type": "entry"},
@@ -34,7 +34,7 @@
         "billing address": {"column": 1, "type": "entry"},
 
         "break 5": {"column": 2, "type": "break", "heading": "PAYMENT PLAN"},
-        "Application fee": {"column": 2, "type": "paymentsplitter"},
+        "application fee": {"column": 2, "type": "paymentsplitter"},
         "payment 1": {"column": 2, "type": "paymentinfo"},
         "payment 2": {"column": 2, "type": "paymentinfo"},
         "payment 3": {"column": 2, "type": "paymentinfo"},

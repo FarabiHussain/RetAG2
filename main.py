@@ -29,7 +29,7 @@ for subapp_name in blueprint:
         corner_radius=0,
         fg_color="lightgray",
         width=170,
-        height=70,
+        height=50,
         font=ctk.CTkFont(family="Roboto Bold")
     )
 
