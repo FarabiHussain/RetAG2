@@ -11,6 +11,7 @@ from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
 from writer import obscure, write_auth, unobscure
 from dotenv import load_dotenv
+from dateutil import relativedelta as rd
 
 
 class GUI:
@@ -22,7 +23,7 @@ class GUI:
         self.stringvar = StringVar(value="")
         self.component = None
 
-        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w")
+        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family="Roboto Bold"))
         self.label.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=1)
 
     def get(self) -> str:
@@ -36,15 +37,21 @@ class GUI:
         self.stringvar.set("")
 
 
+class RowBreak(GUI):
+    def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
+        self.breakline = ctk.CTkLabel(master, text=heading, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family="Roboto Bold"))
+        self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
+
+
 class ComboBox(GUI):
-    def __init__(self, master=None, label_text="", options=None, left_offset=0, top_offset=0) -> None:
+    def __init__(self, master=None, label_text="", options=None, left_offset=0, top_offset=0, default_string = 'click to select') -> None:
         """create a new GUI ComboBox object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
 
         self.options = options
-
-        self.stringvar = StringVar(value="no options added" if options is None else 'click to select')
+        self.default_string = default_string
+        self.stringvar = StringVar(value="no options added" if options is None else self.default_string)
 
         self.component = ctk.CTkComboBox(
             master,
@@ -56,6 +63,7 @@ class ComboBox(GUI):
             fg_color="#ddd",
             values=options,
             variable=self.stringvar,
+            font=ctk.CTkFont(family="Roboto Bold"),
         )
 
         # self.component.place(x=left_offset + 210, y=top_offset + 8)
@@ -63,7 +71,7 @@ class ComboBox(GUI):
 
     def get(self) -> str:
         """returns the first option if nothing was selected"""
-        if self.component.get() == 'click to select':
+        if self.component.get() == self.default_string:
             return self.options[0]
         else:
             return self.component.get()
@@ -71,14 +79,13 @@ class ComboBox(GUI):
     def set(self, opt) -> None:
         self.stringvar.set(opt)
 
-
     def reset(self) -> None:
         textvar = self.component
         textvar.set('click to select')
 
 
 class Entry(GUI):
-    def __init__(self, master=None, label_text="", left_offset=0, top_offset=0) -> None:
+    def __init__(self, master=None, label_text="", left_offset=0, top_offset=0, placeholder = "") -> None:
         """create a new GUI Entry object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
@@ -94,6 +101,7 @@ class Entry(GUI):
             bg_color="#fff",
             fg_color="#ddd",
             textvariable=self.stringvar,
+            font=ctk.CTkFont(family="Roboto Bold"),
         )
 
         self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
@@ -122,6 +130,7 @@ class DatePicker(GUI):
             fg_color="#ddd",
             values=self.populate_days(),
             variable=self.stringvar_day,
+            font=ctk.CTkFont(family="Roboto Bold")
         )
 
         # in some cases, like credit card expirations, the day is not needed
@@ -141,7 +150,8 @@ class DatePicker(GUI):
             fg_color="#ddd",
             values=self.populate_months(),
             variable=self.stringvar_month,
-            command=self.repopulate_days
+            command=self.repopulate_days,
+            font=ctk.CTkFont(family="Roboto Bold"),
         )
 
         self.component_month.grid(row=top_offset, column=2, pady=10, padx=5)
@@ -156,7 +166,8 @@ class DatePicker(GUI):
             fg_color="#ddd",
             values=self.populate_years(),
             variable=self.stringvar_year,
-            command=self.repopulate_days
+            command=self.repopulate_days,
+            font=ctk.CTkFont(family="Roboto Bold"),
         )
 
         self.component_year.grid(row=top_offset, column=3, pady=10, padx=5)
@@ -254,13 +265,109 @@ class DatePicker(GUI):
         return self.get()
 
 
+class PaymentSplitter(GUI):
+    def __init__(self, master=None, app=None, label_text="", left_offset=0, top_offset=0) -> None:
+
+        super().__init__(master, label_text, left_offset, top_offset)
+
+        self.app = app
+
+        self.pay_amount = Entry(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
+        self.pay_amount.component.configure(width=152)
+        self.pay_amount.stringvar.set(value="$1000")
+        self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=2)
+
+        self.split_quantity = ComboBox(
+            master=master, 
+            label_text=label_text, 
+            left_offset=10, 
+            top_offset=top_offset, 
+            default_string = "number of months", 
+            options=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+        )
+
+        self.split_quantity.component.configure(width=172, command=self.dropdown_callback)
+        self.split_quantity.component.grid(row=top_offset, column=3, pady=10, padx=5, columnspan=2)
+
+        # shorten the width of the label to fit the window
+        self.label.configure(width=100, text=label_text)
+
+        # get rid of the labels that come with the Entry and DatePicker objects
+        self.pay_amount.label.destroy()
+        self.split_quantity.label.destroy()
+
+
+    def reset(self) -> None:
+        self.pay_amount.reset()
+        self.split_quantity.reset()
+
+
+    def get(self) -> dict[str, str]:
+        payment = {
+            "amount": self.pay_amount.get(),
+            "months": self.split_quantity.get()
+        }
+
+        return payment
+
+
+    def set(self, amount, opt) -> None:
+        self.pay_amount.set(amount)
+        self.split_quantity.set(opt)
+
+
+    def dropdown_callback(self, choice):
+        self.split_payment()
+
+
+    def split_payment(self) -> None:
+        amount = 0 if self.pay_amount.get() == "" else float(self.pay_amount.get().replace("$", ""))
+        months = int(self.split_quantity.get())
+        amount_per_month = float(amount/months)
+        self.pay_amount.set("${:.2f}".format(float(self.pay_amount.get().replace("$", ""))))
+
+        curr_month = 0
+        start_point = ""
+        for component_name, component_obj in zip(self.app.components.keys(), self.app.components.values()):
+
+            if "payment 1" in component_name:
+                start_point = component_obj.get()['date']
+
+            if "payment" in component_name:
+                dt_object = datetime.datetime.strptime(start_point, "%b %d, %Y")
+                dt_object = dt_object + rd.relativedelta(days=curr_month*30)
+
+                component_obj.set(
+                    "{:.2f}".format(amount_per_month), 
+                    month=dt_object.strftime("%b"), 
+                    date=dt_object.strftime("%d"), 
+                    year=dt_object.strftime("%Y")
+                )
+
+                component_obj.label.configure(text_color="#000")
+                component_obj.pay_amount.component.configure(fg_color="light green", text_color="#000")
+                component_obj.pay_date.component_day.configure(fg_color="light green", text_color="#000")
+                component_obj.pay_date.component_month.configure(fg_color="light green", text_color="#000")
+                component_obj.pay_date.component_year.configure(fg_color="light green", text_color="#000")
+
+                curr_month += 1
+
+            if curr_month > months:
+                component_obj.label.configure(text_color="#bbb")
+                component_obj.pay_amount.component.configure(fg_color="#ddd", text_color="#aaa")
+                component_obj.pay_date.component_day.configure(fg_color="#ddd", text_color="#aaa")
+                component_obj.pay_date.component_month.configure(fg_color="#ddd", text_color="#aaa")
+                component_obj.pay_date.component_year.configure(fg_color="#ddd", text_color="#aaa")
+                component_obj.reset()
+
+
 class PaymentInfo(GUI):
     def __init__(self, master=None, label_text="", left_offset=0, top_offset=0) -> None:
 
         super().__init__(master, label_text, left_offset, top_offset)
 
         self.pay_amount = Entry(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
-        self.pay_amount.component.configure(width=70)
+        self.pay_amount.component.configure(width=70, fg_color="#ddd")
         self.pay_amount.stringvar.set(value="$")
         self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=1)
 
@@ -278,7 +385,7 @@ class PaymentInfo(GUI):
 
 
     def reset(self) -> None:
-        self.pay_amount.reset()
+        self.pay_amount.stringvar.set("$")
         self.pay_date.reset()
 
 
@@ -292,7 +399,7 @@ class PaymentInfo(GUI):
 
 
     def set(self, amount, year, month, date) -> None:
-        self.pay_amount.set(amount)
+        self.pay_amount.set(f"${amount}")
         self.pay_date.set(y=year, m=month, d=date)
 
 

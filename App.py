@@ -15,18 +15,18 @@ class App():
 
         self.root = ctk.CTk()
         self.root.resizable(False, False)
-        self.root.configure(fg_color='white')
-        self.version = "v1.0.2"
-        self.root.title(f"AMCAIM PayAuth {self.version}")
-        self.subapps = self.__read_subapps()
+        self.root.configure(fg_color='lightgray')
+        self.version = "v1.0.0"
+        self.root.title(f"AMCAIM Toolbox {self.version}")
+        # self.subapps = self.__read_subapps()
         self.blueprint = self.__read_blueprint()
         self.components = {}
         self.windows = {}
 
-        try:
-            self.root.iconbitmap(f"{os.getcwd()}\\assets\\icons\\app.ico")
-        except Exception as e:
-            print(e)
+        # try:
+        #     self.root.iconbitmap(f"{os.getcwd()}\\assets\\icons\\app.ico")
+        # except Exception as e:
+        #     print(e)
 
 
     def __read_subapps(self) -> dict:
