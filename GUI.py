@@ -9,7 +9,7 @@ from CTkMessagebox import CTkMessagebox
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from writer import *
+from writer import obscure, unobscure, write_auth, write_retainer
 from dotenv import load_dotenv
 from dateutil import relativedelta as rd
 
@@ -308,11 +308,16 @@ class PaymentSplitter(GUI):
         self.split_quantity.set("number of months")
 
 
-    def get(self) -> dict[str, str]:
+    def get(self, part=None) -> dict[str, str]:
         payment = {
-            "amount": self.pay_amount.get(),
-            "months": self.split_quantity.get()
+            "amount": float(0) if self.pay_amount.get().replace("$", "") == "" else float(self.pay_amount.get().replace("$", "")),
+            "months": int(self.split_quantity.get())
         }
+
+        if part == "amount":
+            return payment['amount']
+        if part == "month":
+            return payment['month']
 
         return payment
 
@@ -395,11 +400,16 @@ class PaymentInfo(GUI):
         self.pay_date.reset()
 
 
-    def get(self) -> dict[str, str]:
+    def get(self, part=None) -> dict[float, int]:
         payment = {
-            "amount": self.pay_amount.get(),
+            "amount": float(0) if self.pay_amount.get().replace("$", "") == "" else float(self.pay_amount.get().replace("$", "")),
             "date": self.pay_date.get()
         }
+
+        if part == "amount":
+            return payment['amount']
+        if part == "date":
+            return payment['date']
 
         return payment
 
@@ -510,7 +520,8 @@ class ActionButton():
             self.payments_button(app)
 
         elif ("conduct" == action):
-            self.conduct_button(app)
+            # self.conduct_button(app)
+            pass
 
         elif ("test" == action):
             self.test_button(app)
@@ -580,50 +591,23 @@ class ActionButton():
 
 
     def retainer_button(self, app) -> bool:
-
         try:
-            document_data = {}
-
-            doc = Document(resource_path("assets\\templates\\auth.docx"))
-            write_retainer(doc, document_data)
+            doc = Document(resource_path("assets\\templates\\retainer.docx"))
+            write_retainer(doc, app.get_all_components())
         except Exception as e:
-            print(e)
+            ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
+            return False
 
-        return False
+        return True
 
 
     def payments_button(self, app) -> bool:
-        # initiate the data and document
         try:
-            document_data = {}
-
-            for component_name, component_value in zip(app.get_all_components().keys(), app.get_all_components().values()):
-                if ("break" in component_name):
-                    pass
-
-                elif ("payment" in component_name):
-                    pay_amount = component_value.get()['amount']
-
-                    if (pay_amount != "$" and len(pay_amount) != 0):
-                        document_data[component_name] = component_value.get()
-
-                elif component_name == "application fee":
-                    document_data['total_amount'] = float(component_value.get()['amount'].replace("$", ""))
-                    document_data['total_months'] = int(component_value.get()['months'])
-
-                elif component_name == "add taxes":
-                    document_data['add taxes'] = True if component_value.get().lower() == "yes" else False
-
-                else:
-                    document_data[component_name] = component_value.get()
-
             doc = Document(resource_path("assets\\templates\\auth.docx"))
-
-            write_auth(doc, document_data)
+            write_auth(doc, app.get_all_components())
 
         except Exception as e:
-            print(e)
-            ErrorPopup(msg=f'Exception while initializing data:\n\n{str(e)}')
+            ErrorPopup(msg=f'Exception while writing payment authorization:\n\n{str(e)}')
             return False
 
         return True

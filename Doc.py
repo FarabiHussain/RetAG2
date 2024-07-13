@@ -106,7 +106,7 @@ def set_cell_border(cell: _Cell, **kwargs):
 
 
 # set up folders and save files, print if needed
-def save_doc(doc, data):
+def save_doc(doc, data, doctype):
     try:
         # set up the output directory
         output_dir = os.getcwd() + "\\output\\"
@@ -114,7 +114,7 @@ def save_doc(doc, data):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        output_filename = f"Payment Authorization - {re.sub(r' \((.*?)\)', '', data['client 1 first name']).strip()} {re.sub(r' \((.*?)\)', '', data['client 1 last name']).strip()}.docx"
+        output_filename = f"{doctype} - {re.sub(r' \((.*?)\)', '', data['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', data['client 1 last name'].get()).strip()}.docx"
 
         # save the file to the output folder
         doc.save(output_dir + output_filename)
@@ -123,8 +123,8 @@ def save_doc(doc, data):
         os.startfile(output_dir + output_filename)
 
     except Exception as e:
-        # ErrorPopup(msg=f"Exception when saving and opening document:\n\n{str(e)}")
-        print(e)
+        # ErrorPopup(f"Exception when saving and opening document:\n\n{str(e)}")
+        print(f"Exception when saving document: {e}")
         return False
 
 

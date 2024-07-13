@@ -28,9 +28,9 @@ class Subapp():
 
     def render_app(self, frame, blueprint, app, imgs):
         self.auth_columns = [
-            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=0),
-            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=0),
-            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=0),
+            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=4),
+            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=4),
+            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=4),
         ]
 
         self.auth_columns[0].place(x=25, y=25)
@@ -64,10 +64,10 @@ class Subapp():
         btn_frame.place(x=25, y=800)
 
         ActionButton(master=btn_frame, action="reset", app=app, image=imgs.get("reset.png"), btn_color="red", row=0, col=0)
-        ActionButton(master=btn_frame, action="retainer", app=app, image=imgs.get("retainer.png"), btn_color="dark blue", row=0, col=1)
+        ActionButton(master=btn_frame, action="retainer", app=app, image=imgs.get("retainer.png"), btn_color="#383FBC", row=0, col=1)
         ActionButton(master=btn_frame, action="payments", app=app, image=imgs.get("payments.png"), btn_color="dark blue", row=0, col=2)
-        ActionButton(master=btn_frame, action="conduct", app=app, image=imgs.get("conduct.png"), btn_color="dark green", row=0, col=3)
+        ActionButton(master=btn_frame, action="conduct", app=app, image=imgs.get("conduct.png"), btn_color="#1A8405", row=0, col=3)
         ActionButton(master=btn_frame, action="decrypt", app=app, image=imgs.get("decrypt.png"), btn_color="gray", row=0, col=4)
         ActionButton(master=btn_frame, action="output", app=app, image=imgs.get("output.png"), btn_color="gray", row=0, col=5)
-        ActionButton(master=btn_frame, action="test", app=app, image=imgs.get("test.png"), btn_color="lightgray", row=0, col=6)
+        ActionButton(master=btn_frame, action="test", app=app, image=imgs.get("test.png"), btn_color="light gray", row=0, col=6)
 
