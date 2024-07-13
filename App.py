@@ -3,6 +3,8 @@ import os
 import json
 import GUI
 from Path import *
+from icecream import ic
+from pprint import pprint
 
 
 
@@ -70,7 +72,15 @@ class App():
         return self.blueprint
 
 
-    def get_size(self) -> tuple:
+    def get_size(self, orientation=None) -> int|tuple[int,int]:
+        w = self.root.winfo_screenwidth()
+        h = self.root.winfo_screenheight()
+
+        if orientation == 'w':
+            return w
+        elif orientation == 'h':
+            return h
+
         return (self.root.winfo_screenwidth(), self.root.winfo_screenheight())
 
 
@@ -93,7 +103,9 @@ class App():
 
 
     def add_window(self, label, obj) -> None:
+        # pprint(vars(obj))
         self.windows[label] = obj
+        ic(self.windows)
 
 
     def get_window(self, label) -> GUI.WindowView | None:
@@ -112,6 +124,11 @@ class App():
             print(e)
 
         return None
+
+
+    def reset_all_components(self) -> None:
+        for component in self.components.values():
+            component.reset()
 
 
     def start(self) -> None:

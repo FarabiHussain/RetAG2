@@ -3,13 +3,14 @@ import datetime
 import os
 import random
 import names
+from pprint import pprint
 from Path import *
 from docx import Document
 from CTkMessagebox import CTkMessagebox
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from writer import obscure, unobscure, write_auth, write_retainer
+from writer import obscure, unobscure, write_auth, write_to_placeholders
 from dotenv import load_dotenv
 from dateutil import relativedelta as rd
 
@@ -39,7 +40,7 @@ class GUI:
 
 class RowBreak(GUI):
     def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
-        self.breakline = ctk.CTkLabel(master, text=heading, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family="Roboto Bold"))
+        self.breakline = ctk.CTkLabel(master, text=heading, height=32, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family="Roboto Bold"))
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
 
     def reset(self) -> None:
@@ -316,8 +317,8 @@ class PaymentSplitter(GUI):
 
         if part == "amount":
             return payment['amount']
-        if part == "month":
-            return payment['month']
+        if part == "months":
+            return payment['months']
 
         return payment
 
@@ -337,12 +338,23 @@ class PaymentSplitter(GUI):
         amount_per_month = float(amount/months)
         self.pay_amount.set("${:.2f}".format(float(self.pay_amount.get().replace("$", ""))))
 
+
+        # if there is nothing to pay each month, simply reset each payment widget
+        if (amount_per_month == 0):
+            components = self.app.get_all_components()
+
+            for i in range(12):
+                components.get(f'payment {i+1}').reset()
+
+            return
+
+        # set the amount to be paid each month and change up the colors a bit
         curr_month = 0
         start_point = ""
         for component_name, component_obj in zip(self.app.components.keys(), self.app.components.values()):
 
             if "payment 1" in component_name:
-                start_point = component_obj.get()['date']
+                start_point = component_obj.get('date')
 
             if "payment" in component_name:
                 dt_object = datetime.datetime.strptime(start_point, "%b %d, %Y")
@@ -364,12 +376,12 @@ class PaymentSplitter(GUI):
                 curr_month += 1
 
             if curr_month > months:
+                component_obj.reset()
                 component_obj.label.configure(text_color="#bbb")
                 component_obj.pay_amount.component.configure(fg_color="#ddd", text_color="#aaa")
                 component_obj.pay_date.component_day.configure(fg_color="#ddd", text_color="#aaa")
                 component_obj.pay_date.component_month.configure(fg_color="#ddd", text_color="#aaa")
                 component_obj.pay_date.component_year.configure(fg_color="#ddd", text_color="#aaa")
-                component_obj.reset()
 
 
 class PaymentInfo(GUI):
@@ -396,6 +408,11 @@ class PaymentInfo(GUI):
 
 
     def reset(self) -> None:
+        self.label.configure(text_color="black")
+        self.pay_amount.component.configure(fg_color="#ddd", text_color="#000")
+        self.pay_date.component_day.configure(fg_color="#ddd", text_color="#000")
+        self.pay_date.component_month.configure(fg_color="#ddd", text_color="#000")
+        self.pay_date.component_year.configure(fg_color="#ddd", text_color="#000")
         self.pay_amount.stringvar.set("$")
         self.pay_date.reset()
 
@@ -510,18 +527,31 @@ class ActionButton():
 
     def assign_action(self, app, action) -> None:
         if ("reset" == action):
-            for component in app.get_all_components().values():
-                component.reset()
-
-        elif ("retainer" == action):
-            self.retainer_button(app)
+            app.reset_all_components()
 
         elif ("payments" == action):
-            self.payments_button(app)
+            try:
+                doc = Document(resource_path("assets\\templates\\payments.docx"))
+                write_auth(doc, app.get_all_components())
+            except Exception as e:
+                ErrorPopup(msg=f'Exception while writing payment authorization:\n\n{str(e)}')
+
+        elif ("retainer" == action):
+            try:
+                doc = Document(resource_path("assets\\templates\\retainer.docx"))
+                write_to_placeholders(doc, app.get_all_components(), "Retainer")
+            except Exception as e:
+                ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
 
         elif ("conduct" == action):
-            # self.conduct_button(app)
-            pass
+            try:
+                doc = Document(resource_path("assets\\templates\\conduct.docx"))
+                write_to_placeholders(doc, app.get_all_components(), "Conduct")
+            except Exception as e:
+                ErrorPopup(msg=f'Exception while writing code of conduct:\n\n{str(e)}')
+
+        elif ("history" == action):
+            self.history_button(app)
 
         elif ("test" == action):
             self.test_button(app)
@@ -538,85 +568,61 @@ class ActionButton():
 
     def decrypt_button(self, app):
         # retrieve object from app.components
-        decrypt_tool = app.get_window("decrypt tool")
+        history_window = app.get_window("history window")
 
         # check whether the object contains a window
-        if (decrypt_tool is not None) and (not decrypt_tool.body.winfo_exists()):
-            decrypt_tool = None
+        if (history_window is not None) and (not history_window.body.winfo_exists()):
+            history_window = None
 
         # create a new object if None was found
-        if decrypt_tool is None:
-            decrypt_tool = WindowView(ws=app.root.winfo_screenwidth(), hs=app.root.winfo_screenheight())
-            app.add_window("decrypt tool", decrypt_tool)
+        if history_window is None:
+            history_window = WindowView(app=app, window_name="history window", width=300, height=260)
+            app.add_window("history window", history_window)
 
-            decrypt_tool.__password_strvar = ctk.StringVar(value="")
-            decrypt_tool.__encrypted_strvar = ctk.StringVar(value="")
-            decrypt_tool.__decrypted_strvar = ctk.StringVar(value="")
+            history_window.__password_strvar = ctk.StringVar(value="")
+            history_window.__encrypted_strvar = ctk.StringVar(value="")
+            history_window.__decrypted_strvar = ctk.StringVar(value="")
 
-            decrypt_tool.body.title("Decrypt CVV")
+            history_window.body.title("Decrypt CVV")
 
-            ctk.CTkLabel(decrypt_tool.body, text="Encrypted CVV", bg_color='transparent').place(x=20, y=5)
-            decrypt_tool.doc_id_search = ctk.CTkEntry(decrypt_tool.body, width=260, border_width=1, corner_radius=2, textvariable=decrypt_tool.__encrypted_strvar)
-            decrypt_tool.doc_id_search.place(x=20, y=28)
+            ctk.CTkLabel(history_window.body, text="Encrypted CVV", bg_color='transparent').place(x=20, y=5)
+            history_window.doc_id_search = ctk.CTkEntry(history_window.body, width=260, border_width=1, corner_radius=2, textvariable=history_window.__encrypted_strvar)
+            history_window.doc_id_search.place(x=20, y=28)
 
-            ctk.CTkLabel(decrypt_tool.body, text="Password", bg_color='transparent').place(x=20, y=70)
-            decrypt_tool.client_name_search = ctk.CTkEntry(decrypt_tool.body, width=260, border_width=1, corner_radius=2, textvariable=decrypt_tool.__password_strvar, show="*")
-            decrypt_tool.client_name_search.place(x=20, y=93)
+            ctk.CTkLabel(history_window.body, text="Password", bg_color='transparent').place(x=20, y=70)
+            history_window.client_name_search = ctk.CTkEntry(history_window.body, width=260, border_width=1, corner_radius=2, textvariable=history_window.__password_strvar, show="*")
+            history_window.client_name_search.place(x=20, y=93)
 
-            ctk.CTkLabel(decrypt_tool.body, text="Decrypted CVV", bg_color='transparent').place(x=20, y=135)
-            decrypt_tool.client_name_search = ctk.CTkEntry(decrypt_tool.body, width=260, border_width=1, corner_radius=2, textvariable=decrypt_tool.__decrypted_strvar)
-            decrypt_tool.client_name_search.place(x=20, y=158)
+            ctk.CTkLabel(history_window.body, text="Decrypted CVV", bg_color='transparent').place(x=20, y=135)
+            history_window.client_name_search = ctk.CTkEntry(history_window.body, width=260, border_width=1, corner_radius=2, textvariable=history_window.__decrypted_strvar)
+            history_window.client_name_search.place(x=20, y=158)
 
-            ctk.CTkButton(decrypt_tool.body, text="Run", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:self.run_decryptor(decrypt_tool), width=72, height=36).place(x=20, y=205)
+            ctk.CTkButton(history_window.body, text="Run", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:self.run_decryptor(history_window), width=72, height=36).place(x=20, y=205)
 
-            decrypt_tool.body.after(202, lambda: decrypt_tool.body.focus())
+            history_window.body.after(202, lambda: history_window.body.focus())
 
         # bring the window forward if found
         else:
-            decrypt_tool.focus()
+            history_window.show()
 
 
-    def run_decryptor(self, decrypt_tool) -> str:
+    def run_decryptor(self, history_window) -> str:
         load_dotenv()
 
-        cipher_text=decrypt_tool.__encrypted_strvar.get()
-        input_password=decrypt_tool.__password_strvar.get()
+        cipher_text=history_window.__encrypted_strvar.get()
+        input_password=history_window.__password_strvar.get()
         # input_password="viewp0rt"
 
         if os.getenv('PW') == obscure(input_password):
             plain_text = unobscure(cipher_text)
-            decrypt_tool.__decrypted_strvar.set(plain_text)
+            history_window.__decrypted_strvar.set(plain_text)
         else:
             ErrorPopup(msg=f'Wrong password')
 
 
-    def retainer_button(self, app) -> bool:
-        try:
-            doc = Document(resource_path("assets\\templates\\retainer.docx"))
-            write_retainer(doc, app.get_all_components())
-        except Exception as e:
-            ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
-            return False
-
-        return True
-
-
-    def payments_button(self, app) -> bool:
-        try:
-            doc = Document(resource_path("assets\\templates\\auth.docx"))
-            write_auth(doc, app.get_all_components())
-
-        except Exception as e:
-            ErrorPopup(msg=f'Exception while writing payment authorization:\n\n{str(e)}')
-            return False
-
-        return True
-
-
     def test_button(self, app):
 
-        for component in app.get_all_components().values():
-            component.reset()
+        app.reset_all_components()
 
         legal_name = names.get_full_name(gender=random.choice(['male', 'female']))
         legal_name_2 = names.get_full_name(gender=random.choice(['male', 'female']))
@@ -652,6 +658,25 @@ class ActionButton():
         app.components['application fee'].set(f"${total_amount}", total_months)
 
 
+    def history_button(self, app):
+        # retrieve object from app.components
+        history_window = app.get_window("history window")
+
+        # check whether the object contains a window
+        if (history_window is not None) and (not history_window.body.winfo_exists()):
+            history_window = None
+
+        # create a new object if None was found
+        if history_window is None:
+            history_window = WindowView(app=app, window_name="history window", width=1640*0.9, height=900*0.9)
+            app.add_window("history window", history_window)
+
+            history_window.body.after(202, lambda: history_window.body.focus())
+
+        # bring the window forward if found
+        else:
+            history_window.show()
+
 class Tabview:
     def __init__(self, master, new_tabs=[]) -> None:
 
@@ -677,18 +702,20 @@ class Tabview:
 
 
 class WindowView:
-    def __init__(self, ws, hs) -> None:
+    def __init__(self, window_name="_window_", app=None, width=0, height=0) -> None:
         self.body = ctk.CTkToplevel()
 
-        w = 300
-        h = 260
-        x = (ws/2) - (w/2)
-        y = (hs/2) - (h/2)
+        w = app.get_size('w')*0.5 if width == 0 else width
+        h = app.get_size('h')*0.5 if height == 0 else height
+        x = (app.get_size('w')/2) - (w/2)
+        y = (app.get_size('h')/2) - (h/2)
 
         self.body.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.body.resizable(False, False)
         self.body.configure(fg_color='white')
+        self.body.after(300, lambda:self.show())
 
-    def focus(self) -> None:
+
+    def show(self) -> None:
         self.body.focus()
 

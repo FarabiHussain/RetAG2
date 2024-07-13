@@ -85,9 +85,9 @@ def write_auth(doc, components):
 
     payment_summary = [
         {
-            "label_l": "Total of",
+            "label_l": "Total of".rjust(10),
             "info_l": "${:.2f}".format(components['application fee'].get('amount') * tax_multiplier),
-            "label_r": "           paid over",
+            "label_r": "paid over".rjust(20),
             "info_r": f"{components['application fee'].get('months')} {"month" if components['application fee'].get('months') == 1 else "months"}",
         }
     ]
@@ -104,9 +104,9 @@ def write_auth(doc, components):
 
         payment_info.append(
             {
-                "label_l": f"payment {i+1}",
+                "label_l": f"payment {i+1}".rjust(10),
                 "info_l": curr_amount,
-                "label_r": "           on date",
+                "label_r": "on date".rjust(20),
                 "info_r": curr_date,
             }
         )
@@ -130,7 +130,7 @@ def unobscure(obscured: str) -> str:
     return zlib.decompress(b64d(str.encode(obscured))).decode()
 
 
-def write_retainer(doc, components):
+def write_to_placeholders(doc, components, doctype):
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
 
@@ -155,7 +155,7 @@ def write_retainer(doc, components):
                     for run in paragraph.runs:
                         run.text = run.text.replace(key, value)
 
-        save_doc(doc, components, "Retainer")
+        save_doc(doc, components, doctype)
 
     except Exception as e:
         print(e)

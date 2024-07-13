@@ -41,8 +41,7 @@ for i, subapp_name in enumerate(blueprint):
 
 
 def test_fill():
-    for component in app.get_all_components().values():
-                component.reset()
+    app.reset_all_components()
 
     legal_name = names.get_full_name(gender=random.choice(['male', 'female']))
     legal_name_2 = names.get_full_name(gender=random.choice(['male', 'female']))

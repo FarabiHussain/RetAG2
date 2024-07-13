@@ -46,7 +46,18 @@
         "payment 9": {"column": 2, "type": "paymentinfo"},
         "payment 10": {"column": 2, "type": "paymentinfo"},
         "payment 11": {"column": 2, "type": "paymentinfo"},
-        "payment 12": {"column": 2, "type": "paymentinfo"}
+        "payment 12": {"column": 2, "type": "paymentinfo"},
+
+        "buttons": {
+            "reset": "red",
+            "retainer": "#383FBC",
+            "payments": "dark blue",
+            "conduct": "#1A8405",
+            "history": "gray",
+            "decrypt": "gray",
+            "output": "gray",
+            "test": "light gray"
+        }
     },
 
     "Receipt": {

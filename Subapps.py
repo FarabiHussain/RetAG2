@@ -43,7 +43,9 @@ class Subapp():
 
             new_component = None
 
-            if specs['type'] == "entry":
+            if 'type' not in specs:
+                continue
+            elif specs['type'] == "entry":
                 new_component = Entry(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset)
             elif specs['type'] == "datepicker":
                 new_component = DatePicker(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset, show_day=True if specs['show_day'].lower() == "true" else False)
@@ -63,11 +65,7 @@ class Subapp():
         btn_frame = ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=50, width=480)
         btn_frame.place(x=25, y=800)
 
-        ActionButton(master=btn_frame, action="reset", app=app, image=imgs.get("reset.png"), btn_color="red", row=0, col=0)
-        ActionButton(master=btn_frame, action="retainer", app=app, image=imgs.get("retainer.png"), btn_color="#383FBC", row=0, col=1)
-        ActionButton(master=btn_frame, action="payments", app=app, image=imgs.get("payments.png"), btn_color="dark blue", row=0, col=2)
-        ActionButton(master=btn_frame, action="conduct", app=app, image=imgs.get("conduct.png"), btn_color="#1A8405", row=0, col=3)
-        ActionButton(master=btn_frame, action="decrypt", app=app, image=imgs.get("decrypt.png"), btn_color="gray", row=0, col=4)
-        ActionButton(master=btn_frame, action="output", app=app, image=imgs.get("output.png"), btn_color="gray", row=0, col=5)
-        ActionButton(master=btn_frame, action="test", app=app, image=imgs.get("test.png"), btn_color="light gray", row=0, col=6)
+        if "buttons" in blueprint.keys():
+            for index, btn in enumerate(blueprint.get("buttons")):
+                ActionButton(master=btn_frame, action=btn, app=app, image=imgs.get(f"{btn}.png"), btn_color=blueprint['buttons'][btn], row=0, col=index)
 
