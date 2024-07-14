@@ -1,3 +1,4 @@
+import math
 import customtkinter as ctk
 import datetime
 import os
@@ -710,10 +711,6 @@ class ActionButton():
 
             self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
 
-            # self.header_frame.pack(pady=[20,0])
-            # self.table_frame.pack(pady=[0,5])
-            # self.tools_frame.pack(pady=[0,5])
-
             self.header_frame.grid(row=0, column=1, pady=[5,0])
             self.table_frame.grid(row=1, column=1)
             self.tools_frame.grid(row=2, column=1)
@@ -763,22 +760,17 @@ class ActionButton():
 
     def history_table_nav(self, app=None, page_number=0, entries=[]):
 
-        is_first_page = False
-        is_last_page = False
-
-        if (page_number < 0):
+        if (page_number == 0):
             self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
-            is_first_page = True
+            self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
-        if (page_number*19 > len(entries)):
+        elif (page_number == math.ceil(len(entries)/18)-1):
+            self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
             self.tools_frame_widgets.buttons[1].configure(fg_color="light gray", state="disabled")
-            is_last_page = True
 
-        if is_first_page or is_last_page:
-            return
-
-        self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
-        self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
+        else:
+            self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
+            self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
         for table_row in self.table_rows:
             table_row.cleanup()
@@ -791,8 +783,6 @@ class ActionButton():
         self.header_frame.grid(row=0, column=1)
         self.table_frame.grid(row=1, column=1)
         self.tools_frame.grid(row=2, column=1)
-
-        print(f"{(page_number*19)}:{((page_number+1)*18)}")
 
 
 class TabView():
@@ -862,7 +852,7 @@ class RowWidget():
                     text=row_contents[i],
                     text_color="white", 
                     border_width=0,
-                    corner_radius=2,
+                    corner_radius=0,
                     fg_color="black" if row_contents[i] != "" else "white",
                     width=(parent_width-61)/5,
                     height=38,

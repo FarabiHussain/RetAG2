@@ -61,5 +61,9 @@
     },
 
     "Receipt": {
+        "break 0": {"column": 0, "type": "break", "heading": "CLIENT"},
+        "client name": {"column": 0, "type": "entry"},
+        "break 1": {"column": 0, "type": "break", "heading": "PURCHASE"},
+        "item": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"]}
     }
 }
