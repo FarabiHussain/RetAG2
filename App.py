@@ -103,9 +103,7 @@ class App():
 
 
     def add_window(self, label, obj) -> None:
-        # pprint(vars(obj))
         self.windows[label] = obj
-        ic(self.windows)
 
 
     def get_window(self, label) -> GUI.WindowView | None:

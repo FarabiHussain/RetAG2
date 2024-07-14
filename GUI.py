@@ -13,6 +13,8 @@ from subprocess import DEVNULL, STDOUT, check_call
 from writer import obscure, unobscure, write_auth, write_to_placeholders
 from dotenv import load_dotenv
 from dateutil import relativedelta as rd
+from typing import Literal
+from reader import import_history
 
 
 class GUI:
@@ -576,14 +578,12 @@ class ActionButton():
 
         # create a new object if None was found
         if history_window is None:
-            history_window = WindowView(app=app, window_name="history window", width=300, height=260)
+            history_window = WindowView(app=app, window_name="", width=300, height=260)
             app.add_window("history window", history_window)
 
             history_window.__password_strvar = ctk.StringVar(value="")
             history_window.__encrypted_strvar = ctk.StringVar(value="")
             history_window.__decrypted_strvar = ctk.StringVar(value="")
-
-            history_window.body.title("Decrypt CVV")
 
             ctk.CTkLabel(history_window.body, text="Encrypted CVV", bg_color='transparent').place(x=20, y=5)
             history_window.doc_id_search = ctk.CTkEntry(history_window.body, width=260, border_width=1, corner_radius=2, textvariable=history_window.__encrypted_strvar)
@@ -658,9 +658,11 @@ class ActionButton():
         app.components['application fee'].set(f"${total_amount}", total_months)
 
 
-    def history_button(self, app):
+    def history_button(self, app=None, page_number=0, entries=[]):
+
         # retrieve object from app.components
         history_window = app.get_window("history window")
+        self.page_number = 0
 
         # check whether the object contains a window
         if (history_window is not None) and (not history_window.body.winfo_exists()):
@@ -668,20 +670,136 @@ class ActionButton():
 
         # create a new object if None was found
         if history_window is None:
-            history_window = WindowView(app=app, window_name="history window", width=1640*0.9, height=900*0.9)
+
+            self.window_width = 1640*0.9
+            self.window_height = 800
+            history_window = WindowView(app=app, window_name="", width=self.window_width, height=self.window_height)
             app.add_window("history window", history_window)
+
+            for i in range(3):
+                history_window.body.columnconfigure(index=i, weight=1)
+
+            if entries == []:
+                entries=import_history()
+
+            self.header_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
+            RowWidget(parent_frame=self.header_frame, parent_width=self.window_width*0.99, mode="header", row_contents=['client name', 'created by', 'created date', 'application type', 'application fee'])
+
+            self.table_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
+            self.history_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
+
+            self.tools_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
+            self.tools_frame_widgets = RowWidget(
+                parent_frame=self.tools_frame, 
+                parent_width=self.window_width*0.99, 
+                mode="tools", 
+                row_contents=[
+                    "previous page", 
+                    "next page", 
+                    "", 
+                    "", 
+                    ""
+                ], 
+                row_content_methods=[
+                    lambda:self.history_table_nav(app=app, page_number=self.page_number-1, entries=entries),
+                    lambda:self.history_table_nav(app=app, page_number=self.page_number+1, entries=entries),
+                    lambda:(),
+                    lambda:(),
+                    lambda:(),
+                ])
+
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
+
+            # self.header_frame.pack(pady=[20,0])
+            # self.table_frame.pack(pady=[0,5])
+            # self.tools_frame.pack(pady=[0,5])
+
+            self.header_frame.grid(row=0, column=1, pady=[5,0])
+            self.table_frame.grid(row=1, column=1)
+            self.tools_frame.grid(row=2, column=1)
 
             history_window.body.after(202, lambda: history_window.body.focus())
 
         # bring the window forward if found
         else:
+            ic("showing existing window")
             history_window.show()
 
-class Tabview:
+
+    def history_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0):
+        self.table_rows = []
+
+        # pad the list with empty entries if less than 18 rows in order to keep a constant table size on the UI
+        current_page_rows = entries[(page_number*18):((page_number+1)*18)]
+        for i in range(18 - len(current_page_rows)):
+            current_page_rows.append(
+                {
+                    'client_name': '',
+                    'created_by': '',
+                    'created_date': '',
+                    'application_type': '',
+                    'application_fee': '',
+                }
+            )
+
+        for index, entry in enumerate(current_page_rows):
+            self.table_rows.append(
+                RowWidget(
+                    parent_frame=parent_frame, 
+                    parent_width=parent_width, 
+                    row_number=index, 
+                    mode="table", 
+                    row_contents=[
+                        f"{entry.get('client_name').title().split(";")[0][0:32]}{"..." if len(entry.get('client_name').split(";")[0]) > 32 else ""}",
+                        entry.get('created_by'),
+                        entry.get('created_date'),
+                        f"{entry.get('application_type')[0:32]}{"..." if len(entry.get('application_type')) > 32 else ""}",
+                        f"{"${:,.2f}".format(float(entry.get('application_fee')))}" if entry.get('application_fee') != "" else entry.get('application_fee'),
+                    ],
+                    row_color="#ddd" if index%2==0 else "#eee",
+                )
+            )
+
+
+    def history_table_nav(self, app=None, page_number=0, entries=[]):
+
+        is_first_page = False
+        is_last_page = False
+
+        if (page_number < 0):
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
+            is_first_page = True
+
+        if (page_number*19 > len(entries)):
+            self.tools_frame_widgets.buttons[1].configure(fg_color="light gray", state="disabled")
+            is_last_page = True
+
+        if is_first_page or is_last_page:
+            return
+
+        self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
+        self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
+
+        for table_row in self.table_rows:
+            table_row.cleanup()
+
+        self.page_number=page_number
+        self.table_frame.destroy()
+        self.table_frame = ctk.CTkFrame(master=app.get_window("history window").body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
+        self.history_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
+
+        self.header_frame.grid(row=0, column=1)
+        self.table_frame.grid(row=1, column=1)
+        self.tools_frame.grid(row=2, column=1)
+
+        print(f"{(page_number*19)}:{((page_number+1)*18)}")
+
+
+class TabView():
     def __init__(self, master, new_tabs=[]) -> None:
 
-        self.tabview = ctk.CTkTabview(master, corner_radius=2, fg_color="#fff")
-        self.tabview.pack(expand=True, fill="both", padx=10, pady=10)
+        self.TabView = ctk.CTkTabView(master, corner_radius=2, fg_color="#fff")
+        self.TabView.pack(expand=True, fill="both", padx=10, pady=10)
 
         if len(new_tabs) > 0:
             self.tabs = {}
@@ -689,19 +807,19 @@ class Tabview:
 
     def set_tabs(self, new_tabs):
         for tab in new_tabs:
-            tab_obj = self.tabview.add(tab)
+            tab_obj = self.TabView.add(tab)
             self.tabs[tab] = tab_obj
 
     def get_tabs(self):
         tabs = {}
 
         for tab_name in self.tabs:
-            tabs[tab_name] = self.tabview.tab(name=tab_name) 
+            tabs[tab_name] = self.TabView.tab(name=tab_name) 
 
         return tabs
 
 
-class WindowView:
+class WindowView():
     def __init__(self, window_name="_window_", app=None, width=0, height=0) -> None:
         self.body = ctk.CTkToplevel()
 
@@ -710,12 +828,83 @@ class WindowView:
         x = (app.get_size('w')/2) - (w/2)
         y = (app.get_size('h')/2) - (h/2)
 
+        self.body.title(window_name)
         self.body.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.body.resizable(False, False)
         self.body.configure(fg_color='white')
         self.body.after(300, lambda:self.show())
 
-
     def show(self) -> None:
         self.body.focus()
+
+
+class RowWidget():
+    def __init__(self, parent_frame=None, row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"], row_color="#eee", row_content_methods=[], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table"):
+
+        # no parent, nowhere to put this
+        if parent_frame is None:
+            return
+
+        self.container = ctk.CTkFrame(master=parent_frame, fg_color="white", border_width=0, width=parent_width, height=30)
+        self.buttons = []
+        self.contents = []
+
+        # setup the grid system
+        for i in range(len(row_contents)+1):
+            parent_frame.columnconfigure(index=i, weight=1)
+
+        # set the number of buttons based on the mode
+        # 5 in a tools row where all 5 cols are buttons
+        for i in range(5 if mode=="tools" else 0):
+            self.buttons.append(
+                ctk.CTkButton(
+                    master=self.container,
+                    text=row_contents[i],
+                    text_color="white", 
+                    border_width=0,
+                    corner_radius=2,
+                    fg_color="black" if row_contents[i] != "" else "white",
+                    width=(parent_width-61)/5,
+                    height=38,
+                    font=ctk.CTkFont(family="Roboto Bold", size=12),
+                    state="disabled" if row_contents[i] == "" else "normal",
+                    command=row_content_methods[i],
+                )
+            )
+
+            self.buttons[i].grid(row=0, column=i, pady=0, padx=0)
+
+        # row_contents are placed as CTkLabel widgets only in table and header modes
+        # tools mode does not place any CTkLabel widgets
+        if mode != "tools":
+            for i, content in enumerate(row_contents):
+                self.contents.append(
+                    ctk.CTkLabel(
+                        self.container, 
+                        width=(parent_width-61)/5, 
+                        height=38, 
+                        text=content, 
+                        text_color="white" if mode is "header" else "black", 
+                        fg_color="#000" if mode is "header" else row_color, 
+                        font=ctk.CTkFont(family="Roboto Bold", size=12)
+                    )
+                )
+
+                self.contents[i].grid(row=0, column=i + (0 if mode=="header" else 1), pady=0, padx=0)
+
+        # place the entire container with all the stuff above
+        self.container.grid(row=row_number, column=0, pady=0, padx=0)
+
+
+    def cleanup(self):
+        for widget in self.buttons:
+            widget.destroy()
+
+        for widget in self.contents:
+            widget.destroy()
+
+        self.container.destroy()
+
+
+
 

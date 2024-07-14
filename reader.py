@@ -1,6 +1,5 @@
 import os, csv
 from icecream import ic
-from GUI import InfoPopup
 
 ## read the csv and return as a list
 def get_recent() -> dict:
@@ -78,7 +77,20 @@ def import_recent(app=None) -> bool:
                 date=f"0{curr_day}" if len(curr_day)==0 else curr_day
             )
 
-    InfoPopup(msg="Successfully imported most recent RetAG entry.\n\nPlease fill in address and card information.")
     return True
 
+def import_history() -> list:
+    history_dir = os.getcwd() + "\\write\\"
+    history = []
 
+    if not os.path.exists(history_dir):
+        print("path does not exist")
+    elif not os.path.exists(history_dir + "\\history.csv"):
+        print("file does not exist")
+    else:
+        with open(history_dir + "\\history.csv", mode='r') as infile:
+            temp = list(csv.DictReader(infile))
+            temp.reverse()
+            history = temp
+
+    return history
