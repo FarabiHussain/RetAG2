@@ -28,10 +28,12 @@ class Subapp():
 
 
     def render_app(self, frame, blueprint, app, imgs, columns_weights):
+        column_widths = [0, 460, 990, 1380]
+
         self.page_columns = [
-            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460),
-            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460),
-            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460),
+            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
+            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
+            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
         ]
 
         if columns_weights == [1,1,1]:
@@ -43,6 +45,12 @@ class Subapp():
             self.page_columns[1].configure(width=940)
             self.page_columns[0].place(x=25, y=25)
             self.page_columns[1].place(x=505, y=25)
+
+        elif columns_weights == [2,1,0] or columns_weights == [2,0,1]:
+            self.page_columns[0].configure(width=940)
+            self.page_columns[0].place(x=25, y=25)
+            self.page_columns[1].place(x=965, y=25)
+
 
         offset = 0
 
@@ -106,6 +114,14 @@ class Subapp():
                     left_offset=10, 
                     top_offset=offset, 
                     heading=specs['heading'],
+                )
+
+            elif specs['type'] == "table":
+                new_component = TableWidget(
+                    master=self.page_columns[specs['column']], 
+                    app=app,
+                    headers=specs['headers'],
+                    parent_width=column_widths[blueprint['column_weights'][specs['column']]]
                 )
 
             app.add_component(label, new_component)

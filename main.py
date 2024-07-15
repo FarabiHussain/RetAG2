@@ -67,6 +67,8 @@ def test_fill():
     app.components['postal code'].set(f"X1X Y2Y")
     app.components['province'].set(f"Manitoba")
     app.components['security code'].set(f"{str(random.randint(100, 999))}")
+    app.components['client name'].set(legal_name)
+
 
     total_amount = 0
     total_months = random.randint(1,12)
@@ -77,9 +79,10 @@ def test_fill():
     app.components['application fee'].set(f"${total_amount}", total_months)
 
 
-for s in subapp_components:
-    if s.get("name") == "Receipt":
-        s['subapp_obj'].lift_app(subapp_components)
+# for s in subapp_components:
+#     if s.get("name") == "Receipt":
+#         s['subapp_obj'].lift_app(subapp_components)
 
-test_fill()
+# test_fill()
+
 app.start()

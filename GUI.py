@@ -109,7 +109,6 @@ class ComboBox(GUI):
         self.callback = callback
         self.component.configure(command=self.dropdown_callback)
 
-        print(f"added callback to {component_name}")
 
 class Entry(GUI):
     def __init__(self, master=None, app=None, label_text="", left_offset=0, top_offset=0, placeholder="", default_text=None) -> None:
@@ -149,8 +148,6 @@ class Entry(GUI):
         self.app_components = app.get_all_components()
         self.callback = callback
         self.stringvar.trace_add('write', self.stringvar_callback)
-
-        print(f"added callback to {component_name}")
 
 
 class DatePicker(GUI):
@@ -739,9 +736,9 @@ class ActionButton():
                 row_content_methods=[
                     lambda:self.history_table_nav(app=app, page_number=self.page_number-1, entries=entries),
                     lambda:self.history_table_nav(app=app, page_number=self.page_number+1, entries=entries),
-                    lambda:(),
-                    lambda:(),
-                    lambda:(),
+                    lambda:None,
+                    lambda:None,
+                    lambda:None,
                 ])
 
             self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
@@ -931,5 +928,63 @@ class RowWidget():
         self.container.destroy()
 
 
+class TableWidget():
+    def __init__(self, master=None, app=None, headers=[], rows=[], parent_width=0, parent_height=0):
+
+        self.parent_frame = master
+        self.parent_width = parent_width
+        self.rows = rows
+
+        for i in range(3):
+            master.columnconfigure(index=i, weight=1)
+
+        self.header_frame = ctk.CTkFrame(
+            master=master, 
+            fg_color="white", 
+            border_width=0, 
+            width=parent_width, 
+            height=parent_height*0.05, 
+        )
+
+        self.header_frame.grid(row=0, column=1, pady=[9,0])
+
+        self.header = RowWidget(
+            parent_frame=self.header_frame, 
+            parent_width=parent_width, 
+            mode="header", 
+            row_contents=headers, 
+        )
+
+        self.table_frame = ctk.CTkFrame(
+            master=master, 
+            fg_color="white", 
+            border_width=1, 
+            width=parent_width, 
+            height=parent_height*0.90, 
+        )
+
+        self.table_frame.grid(row=1, column=1)
+
+        self.reset()
+
+
+    def reset(self):
+        for row in self.rows:
+            row.cleanup()
+
+        self.rows = []
+
+        if len(self.rows) == 0:
+            for i in range(18):
+                self.rows.append(
+                    RowWidget(
+                        parent_frame=self.table_frame,
+                        parent_width=self.parent_width,
+                        row_contents=["", "", "", "", ""],
+                        row_color="#ddd" if i%2==0 else "#eee",
+                        row_number=i,
+                        mode="table",
+                    )
+                )
 
 

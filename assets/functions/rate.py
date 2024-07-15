@@ -10,9 +10,7 @@ def callback(app_components=None):
         tax_multuplier += float(app_components.get("PST percentage").get())
         tax_multuplier = float(tax_multuplier/100)
 
-        price = float(app_components.get("quantity").get()) * float(app_components.get("rate").get().replace("$","")) * tax_multuplier
-
-        print(price)
+        price = float(app_components.get("quantity").get()) * float(app_components.get("rate").get().strip().replace("$","")) * tax_multuplier
 
         app_components.get("price").set(
             f"{"${:,.2f}".format(price)}"

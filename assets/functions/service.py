@@ -21,9 +21,7 @@ def callback(app_components=None):
     price = float(app_components.get("quantity").get()) * service_rates.get(service_name) * tax_multuplier
 
     app_components.get("rate").set(
-        f"{"${:,.2f}".format(
-            service_rates.get(service_name)
-        )}"
+        f"{"${:,.2f}".format(service_rates.get(service_name))}"
     )
 
     app_components.get("price").set(

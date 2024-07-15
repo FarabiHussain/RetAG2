@@ -50,6 +50,11 @@
         "payment 11": {"column": 2, "type": "paymentinfo"},
         "payment 12": {"column": 2, "type": "paymentinfo"},
 
+        "callbacks": {
+            "client 1 first name": "/assets/functions/client_name.py",
+            "client 1 last name": "/assets/functions/client_name.py"
+        },
+
         "buttons": {
             "reset": "red",
             "retainer": "#383FBC",
@@ -66,7 +71,7 @@
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT"},
-        "client": {"column": 0, "type": "entry", "autofill": ["client 1 first name", "client 1 last name"]},
+        "client name": {"column": 0, "type": "entry"},
         "break 1": {"column": 0, "type": "break", "heading": "PURCHASE"},
         "service": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
         "rate": {"column": 0, "type": "entry", "default": "$500.00"},
@@ -74,18 +79,21 @@
         "GST percentage": {"column": 0, "type": "entry", "default": "5.0"},
         "PST percentage": {"column": 0, "type": "entry", "default": "7.0"},
         "price": {"column": 0, "type": "entry", "default": "$560.00"},
+        "cart": {"column": 1, "type": "table", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
+
 
         "callbacks": {
             "service": "/assets/functions/service.py",
-            "rate": "/assets/functions/entry.py",
-            "quantity": "/assets/functions/entry.py",
-            "GST percentage": "/assets/functions/entry.py",
-            "PST percentage": "/assets/functions/entry.py"
+            "rate": "/assets/functions/rate.py",
+            "quantity": "/assets/functions/rate.py",
+            "GST percentage": "/assets/functions/rate.py",
+            "PST percentage": "/assets/functions/rate.py"
         },
 
         "buttons": {
             "reset": "red",
-            "receipt": "dark blue",
+            "add item": "#1A8405",
+            "create receipt": "dark blue",
             "history": "gray",
             "output": "gray"
         }
