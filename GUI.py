@@ -51,7 +51,7 @@ class RowBreak(GUI):
 
 
 class ComboBox(GUI):
-    def __init__(self, master=None, label_text="", options=None, left_offset=0, top_offset=0, default_string='click to select', default_option=None) -> None:
+    def __init__(self, master=None, app=None, label_text="", options=None, left_offset=0, top_offset=0, default_string='click to select', default_option=None) -> None:
         """create a new GUI ComboBox object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
@@ -59,6 +59,7 @@ class ComboBox(GUI):
         self.options = options
         self.default_string = default_string
         self.stringvar = StringVar(value="no options added" if options is None else self.default_string)
+        self.default_option = None
 
         self.component = ctk.CTkComboBox(
             master,
@@ -71,13 +72,18 @@ class ComboBox(GUI):
             values=options,
             variable=self.stringvar,
             font=ctk.CTkFont(family="Roboto Bold"),
+            dropdown_font=ctk.CTkFont(family="Roboto Bold"),
         )
 
         if default_option is not None:
-            self.stringvar.set(default_option)
+            self.default_option = default_option
+            self.set(default_option)
 
         # self.component.place(x=left_offset + 210, y=top_offset + 8)
         self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
+
+    def dropdown_callback(self, choice):
+        self.callback(self.app_components)
 
     def get(self) -> str:
         """returns the first option if nothing was selected"""
@@ -90,17 +96,29 @@ class ComboBox(GUI):
         self.stringvar.set(opt)
 
     def reset(self) -> None:
-        textvar = self.component
-        textvar.set('click to select')
+        if self.default_option is None:
+            self.component.set(self.default_string)
+        else:
+            self.component.set(self.default_option)
 
+    def add_callback(self, component_name="", app=None, callback=None):
+        if callback is None or app is None:
+            return
+
+        self.app_components = app.get_all_components()
+        self.callback = callback
+        self.component.configure(command=self.dropdown_callback)
+
+        print(f"added callback to {component_name}")
 
 class Entry(GUI):
-    def __init__(self, master=None, label_text="", left_offset=0, top_offset=0, placeholder = "") -> None:
+    def __init__(self, master=None, app=None, label_text="", left_offset=0, top_offset=0, placeholder="", default_text=None) -> None:
         """create a new GUI Entry object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
 
         self.stringvar = StringVar(value="")
+        self.default_text=default_text
 
         self.component = ctk.CTkEntry(
             master,
@@ -114,7 +132,25 @@ class Entry(GUI):
             font=ctk.CTkFont(family="Roboto Bold"),
         )
 
+        self.reset()
         self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
+
+    def reset(self) -> None:
+        if self.default_text is not None:
+            self.stringvar.set(self.default_text)
+
+    def stringvar_callback(self, *args):
+        self.callback(self.app_components)
+
+    def add_callback(self, component_name="", app=None, callback=None):
+        if callback is None or app is None:
+            return
+
+        self.app_components = app.get_all_components()
+        self.callback = callback
+        self.stringvar.trace_add('write', self.stringvar_callback)
+
+        print(f"added callback to {component_name}")
 
 
 class DatePicker(GUI):
@@ -148,7 +184,6 @@ class DatePicker(GUI):
             self.component_day.grid(row=top_offset, column=1, pady=10, padx=5)
         else:
             ctk.CTkLabel(master, height=32, width=70, text="").grid(row=top_offset, column=1, pady=10, padx=5)
-
 
         self.component_month = ctk.CTkComboBox(
             master,

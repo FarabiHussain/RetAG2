@@ -1,8 +1,9 @@
 import customtkinter as ctk
 from GUI import *
+from reader import import_function
 
 class Subapp():
-    def __init__(self, subapp_components=None, blueprint=None, app=None, imgs=None, subapp_name="Subapp", button_position=0) -> None:
+    def __init__(self, subapp_components=None, blueprint=None, app=None, imgs=None, subapp_name="Subapp", button_position=0, columns_weights=[1,1,1]) -> None:
 
         self.frame = subapp_components[button_position]['frame']
         self.button = subapp_components[button_position]['button']
@@ -12,7 +13,7 @@ class Subapp():
         self.button.place(x=0, y=(50*button_position)+10)
         self.blueprint = blueprint
 
-        self.render_app(self.frame, blueprint, app, imgs)
+        self.render_app(self.frame, blueprint, app, imgs, columns_weights)
 
         if button_position == 0:
             self.lift_app(subapp_components)
@@ -26,16 +27,22 @@ class Subapp():
         self.frame.lift()
 
 
-    def render_app(self, frame, blueprint, app, imgs):
-        self.auth_columns = [
-            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=4),
-            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=4),
-            ctk.CTkFrame(master=frame, fg_color="white", border_width=0, height=850, width=460, corner_radius=4),
+    def render_app(self, frame, blueprint, app, imgs, columns_weights):
+        self.page_columns = [
+            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460),
+            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460),
+            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460),
         ]
 
-        self.auth_columns[0].place(x=25, y=25)
-        self.auth_columns[1].place(x=505, y=25)
-        self.auth_columns[2].place(x=985, y=25)
+        if columns_weights == [1,1,1]:
+            self.page_columns[0].place(x=25, y=25)
+            self.page_columns[1].place(x=505, y=25)
+            self.page_columns[2].place(x=985, y=25)
+
+        elif columns_weights == [1,2,0] or columns_weights == [1,0,2]:
+            self.page_columns[1].configure(width=940)
+            self.page_columns[0].place(x=25, y=25)
+            self.page_columns[1].place(x=505, y=25)
 
         offset = 0
 
@@ -45,18 +52,61 @@ class Subapp():
 
             if 'type' not in specs:
                 continue
+
             elif specs['type'] == "entry":
-                new_component = Entry(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset)
+                new_component = Entry(
+                    master=self.page_columns[specs['column']], 
+                    app=app, 
+                    label_text=label, 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    default_text=(None if 'default' not in specs else specs['default']),
+                )
+
             elif specs['type'] == "datepicker":
-                new_component = DatePicker(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset, show_day=True if specs['show_day'].lower() == "true" else False)
+                new_component = DatePicker(
+                    master=self.page_columns[specs['column']], 
+                    label_text=label, 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    show_day=True if specs['show_day'].lower() == "true" else False,
+                )
+
             elif specs['type'] == "paymentsplitter":
-                new_component = PaymentSplitter(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset, app=app)
+                new_component = PaymentSplitter(
+                    master=self.page_columns[specs['column']], 
+                    label_text=label, 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    app=app,
+                )
+
             elif specs['type'] == "paymentinfo":
-                new_component = PaymentInfo(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset)
+                new_component = PaymentInfo(
+                    master=self.page_columns[specs['column']], 
+                    label_text=label, 
+                    left_offset=10, 
+                    top_offset=offset,
+                )
+
             elif specs['type'] == "combo":
-                new_component = ComboBox(master=self.auth_columns[specs['column']], label_text=label, left_offset=10, top_offset=offset, options=specs['options'], default_option=(None if 'default' not in specs else specs['default']))
+                new_component = ComboBox(
+                    master=self.page_columns[specs['column']], 
+                    app=app, 
+                    label_text=label, 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    options=specs['options'], 
+                    default_option=(None if 'default' not in specs else specs['default']),
+                )
+
             elif specs['type'] == "break":
-                new_component = RowBreak(master=self.auth_columns[specs['column']], left_offset=10, top_offset=offset, heading=specs['heading'])
+                new_component = RowBreak(
+                    master=self.page_columns[specs['column']], 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    heading=specs['heading'],
+                )
 
             app.add_component(label, new_component)
 
@@ -68,4 +118,11 @@ class Subapp():
         if "buttons" in blueprint.keys():
             for index, btn in enumerate(blueprint.get("buttons")):
                 ActionButton(master=btn_frame, action=btn, app=app, image=imgs.get(f"{btn}.png"), btn_color=blueprint['buttons'][btn], row=0, col=index)
+
+        if "callbacks" in blueprint.keys():
+            for index, component_name in enumerate(blueprint.get("callbacks")):
+                current_component = app.get_all_components().get(component_name)
+                current_callback = import_function(blueprint['callbacks'][component_name], "callback")
+
+                current_component.add_callback(component_name=component_name, app=app, callback=current_callback)
 

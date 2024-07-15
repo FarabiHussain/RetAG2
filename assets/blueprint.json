@@ -1,5 +1,7 @@
 {
     "Agreements": {
+        "column_weights": [1,1,1],
+
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT 1 INFORMATION"},
         "client 1 first name": {"column": 0, "type": "entry"},
         "client 1 last name": {"column": 0, "type": "entry"},
@@ -61,9 +63,31 @@
     },
 
     "Receipt": {
+        "column_weights": [1,2,0],
+
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT"},
-        "client name": {"column": 0, "type": "entry"},
+        "client": {"column": 0, "type": "entry", "autofill": ["client 1 first name", "client 1 last name"]},
         "break 1": {"column": 0, "type": "break", "heading": "PURCHASE"},
-        "item": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"]}
+        "service": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
+        "rate": {"column": 0, "type": "entry", "default": "$500.00"},
+        "quantity": {"column": 0, "type": "entry", "default": "1"},
+        "GST percentage": {"column": 0, "type": "entry", "default": "5.0"},
+        "PST percentage": {"column": 0, "type": "entry", "default": "7.0"},
+        "price": {"column": 0, "type": "entry", "default": "$560.00"},
+
+        "callbacks": {
+            "service": "/assets/functions/service.py",
+            "rate": "/assets/functions/entry.py",
+            "quantity": "/assets/functions/entry.py",
+            "GST percentage": "/assets/functions/entry.py",
+            "PST percentage": "/assets/functions/entry.py"
+        },
+
+        "buttons": {
+            "reset": "red",
+            "receipt": "dark blue",
+            "history": "gray",
+            "output": "gray"
+        }
     }
 }

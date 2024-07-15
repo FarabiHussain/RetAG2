@@ -16,7 +16,7 @@ subapp_components = []
 # first initialize the subapp frames and buttons so that we can control their visibilty and active status
 for subapp_name in blueprint:
 
-    new_subapp = {"frame": None, "button": None}
+    new_subapp = {"name": subapp_name, "frame": None, "button": None}
 
     new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="white", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
     new_subapp['frame'].place(x=170, y=0)
@@ -37,7 +37,7 @@ for subapp_name in blueprint:
 
 # use the above components and render each subapp
 for i, subapp_name in enumerate(blueprint):
-    Subapp(subapp_components=subapp_components, blueprint=blueprint[subapp_name], subapp_name=subapp_name, app=app, imgs=imgs, button_position=i)
+    subapp_components[i]['subapp_obj'] = Subapp(subapp_components=subapp_components, blueprint=blueprint[subapp_name], subapp_name=subapp_name, app=app, imgs=imgs, button_position=i, columns_weights=blueprint[subapp_name]['column_weights'])
 
 
 def test_fill():
@@ -76,6 +76,10 @@ def test_fill():
 
     app.components['application fee'].set(f"${total_amount}", total_months)
 
+
+for s in subapp_components:
+    if s.get("name") == "Receipt":
+        s['subapp_obj'].lift_app(subapp_components)
 
 test_fill()
 app.start()

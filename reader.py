@@ -1,5 +1,7 @@
-import os, csv
+import importlib.util
+import os, csv, sys
 from icecream import ic
+from Path import resource_path
 
 ## read the csv and return as a list
 def get_recent() -> dict:
@@ -94,3 +96,16 @@ def import_history() -> list:
             history = temp
 
     return history
+
+def import_function(function_path=None, function_name=None) -> str:
+    if function_path is None or function_name is None:
+        return
+
+    file_path = (f"{os.getcwd()}{function_path}").replace('\\', '/')
+    module_name = file_path.split('/')[-1].replace(".py", "")
+
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module_name = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module_name)
+
+    return getattr(module_name, function_name, lambda: None)
