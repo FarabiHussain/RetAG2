@@ -17,8 +17,10 @@ from dateutil import relativedelta as rd
 from typing import Literal
 from reader import import_history
 
-family_medium="Poppins Medium"
-family_bold="Poppins Bold"
+
+family_medium="Roboto"
+family_bold="Roboto Bold"
+
 
 class GUI:
     def __init__(self, master=None, label_text="", left_offset=0, top_offset=0) -> None:
@@ -29,7 +31,7 @@ class GUI:
         self.stringvar = StringVar(value="")
         self.component = None
 
-        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_medium))
+        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_bold))
         self.label.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=1)
 
     def get(self) -> str:
@@ -45,7 +47,7 @@ class GUI:
 
 class RowBreak(GUI):
     def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
-        self.breakline = ctk.CTkLabel(master, text=heading, height=32, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family=family_bold))
+        self.breakline = ctk.CTkLabel(master, text=heading.upper(), height=32, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family=family_bold, weight='bold'))
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
 
     def reset(self) -> None:
@@ -538,7 +540,7 @@ class AppButton():
 
         self.desc_frame.grid(row=row, column=1, pady=10, padx=5)
 
-        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=app_name, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_bold)).place(x=10, y=8)
+        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=app_name, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_bold, weight='bold')).place(x=10, y=8)
         self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=desc, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_medium), text_color="#777777").place(x=10, y=32)
 
 
@@ -907,7 +909,7 @@ class RowWidget():
                     fg_color="black" if row_contents[i] != "" else "white",
                     width=(parent_width-61)/5,
                     height=38,
-                    font=ctk.CTkFont(family=family_bold, size=12),
+                    font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
                     state="disabled" if row_contents[i] == "" else "normal",
                     command=row_content_methods[i],
                 )
@@ -927,7 +929,7 @@ class RowWidget():
                         text=content, 
                         text_color="white" if mode is "header" else "black", 
                         fg_color="#000" if mode is "header" else row_color, 
-                        font=ctk.CTkFont(family=family_bold, size=12) if mode is "header" else ctk.CTkFont(family=family_medium, size=12),
+                        font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode is "header" else ctk.CTkFont(family=family_medium, size=12),
                     )
                 )
 

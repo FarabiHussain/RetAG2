@@ -67,7 +67,6 @@ def install_dependencies():
         'customtkinter', 
         'CTkMessagebox', 
         'names', 
-        'fonttools',
         'dotenv',
         'python-dotenv',
         'icecream',

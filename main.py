@@ -24,7 +24,7 @@ for subapp_name in blueprint:
     new_subapp['button'] = ctk.CTkButton(
         master=app.root,
         text_color="black",
-        text=subapp_name,
+        text=subapp_name.upper(),
         border_width=0,
         corner_radius=0,
         fg_color="lightgray",

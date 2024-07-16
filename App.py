@@ -2,12 +2,10 @@ import customtkinter as ctk
 import os
 import json
 import GUI
-
 from Path import *
 from icecream import ic
 from pprint import pprint
 from tkinter import font
-from fontTools.ttLib import TTFont
 
 
 
@@ -26,29 +24,7 @@ class App():
         self.blueprint = self.__read_blueprint()
         self.components = {}
         self.windows = {}
-        
         self.app_icon_passed = self.__check_app_ico()
-        self.fonts_passed = self.__check_fonts()
-
-
-    def __check_fonts(self) -> bool:
-        missing_fonts = []
-        for font_family in ['Poppins Medium', 'Poppins']:
-            if font_family not in list(font.families()):
-                missing_fonts.append(font_family)
-
-        def open_missing_fonts(missing_fonts):
-            for curr_font in missing_fonts:
-                os.startfile(resource_path(f"{os.getcwd()}\\assets\\fonts\\{curr_font.replace(" ", "-")}.ttf"))
-
-        if len(missing_fonts) > 0:
-            GUI.PromptPopup(
-                msg="Font packs needed for the program are not installed.\n\nOpen the files to install them?",
-                func=lambda:open_missing_fonts(missing_fonts)
-            )
-            return False
-        
-        return True
 
 
     def __check_app_ico(self) -> bool:
@@ -147,8 +123,7 @@ class App():
 
 
     def start(self) -> None:
-        if self.fonts_passed:
-            self.root.mainloop()
+        self.root.mainloop()
 
 
     def hide(self) -> None:
