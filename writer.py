@@ -7,8 +7,6 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from Path import *
 from Doc import *
 from icecream import ic
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
 from dotenv import load_dotenv
 from base64 import urlsafe_b64encode as b64e, urlsafe_b64decode as b64d
 
@@ -134,6 +132,20 @@ def write_to_placeholders(doc, components, doctype):
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
 
+    # formats the list of data so that it can be displayed on the output document
+    def format_payments():
+        payments_string = []
+        payments_string.append(f"Payment of CAN {'${:.2f}'.format(components[f"payment 1"].get('amount') * tax_multiplier)} to be paid in {components[f"payment 1"].get('date')}, after signing the retainer, is non-refundable.")
+
+        for i in range(2, 13):
+            current_amount = components[f"payment {i}"].get('amount')
+            current_date = components[f"payment {i}"].get('date')
+
+            if components[f"payment {i}"].get('amount') > 0:
+                payments_string.append(f"Payment of CAN {'${:.2f}'.format(current_amount * tax_multiplier)} to be made within {current_date}.")
+
+        return ("\n").join(payments_string)
+
     document_data = {
         '[DAY]': date_on_document.strftime("%d"),
         '[MONTH]': date_on_document.strftime("%b"),
@@ -146,6 +158,7 @@ def write_to_placeholders(doc, components, doctype):
         '[PHONE2]': components["client 2 phone"].get(),
         '[APP_TYPE]': components["application type"].get(),
         '[APP_FEE]': "${:.2f}".format(components["application fee"].get('amount') * tax_multiplier),
+        '[PAY_PLAN]': format_payments(),
     }
 
     try:
@@ -155,6 +168,19 @@ def write_to_placeholders(doc, components, doctype):
                     for run in paragraph.runs:
                         run.text = run.text.replace(key, value)
 
+        client_signatures = []
+
+        if len(document_data['[CLIENT2]'].strip()) == 0:
+            client_signatures = [
+                {
+                    "label_l": document_data['[CLIENT1]'].strip(),
+                    "info_l": "",
+                    "label_r": document_data['[CLIENT2]'].strip(),
+                    "info_r": "",
+                },
+            ]
+
+        insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
         save_doc(doc, components, doctype)
 
     except Exception as e:

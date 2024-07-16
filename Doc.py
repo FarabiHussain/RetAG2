@@ -212,6 +212,7 @@ def insert_4col_table(document, table_heading=None, table_items=[], table_props=
             )
     except Exception as e:
         ErrorPopup(f'Exception when adding table heading: {table_heading}\n\n{e}')
+        print(e)
         return False
 
     # add the table contents

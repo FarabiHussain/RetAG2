@@ -17,6 +17,8 @@ from dateutil import relativedelta as rd
 from typing import Literal
 from reader import import_history
 
+family_medium="Poppins Medium"
+family_bold="Poppins Bold"
 
 class GUI:
     def __init__(self, master=None, label_text="", left_offset=0, top_offset=0) -> None:
@@ -27,7 +29,7 @@ class GUI:
         self.stringvar = StringVar(value="")
         self.component = None
 
-        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family="Roboto Bold"))
+        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_medium))
         self.label.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=1)
 
     def get(self) -> str:
@@ -43,7 +45,7 @@ class GUI:
 
 class RowBreak(GUI):
     def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
-        self.breakline = ctk.CTkLabel(master, text=heading, height=32, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family="Roboto Bold"))
+        self.breakline = ctk.CTkLabel(master, text=heading, height=32, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family=family_bold))
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
 
     def reset(self) -> None:
@@ -71,8 +73,8 @@ class ComboBox(GUI):
             fg_color="#ddd",
             values=options,
             variable=self.stringvar,
-            font=ctk.CTkFont(family="Roboto Bold"),
-            dropdown_font=ctk.CTkFont(family="Roboto Bold"),
+            font=ctk.CTkFont(family=family_medium),
+            dropdown_font=ctk.CTkFont(family=family_medium),
         )
 
         if default_option is not None:
@@ -128,7 +130,7 @@ class Entry(GUI):
             bg_color="#fff",
             fg_color="#ddd",
             textvariable=self.stringvar,
-            font=ctk.CTkFont(family="Roboto Bold"),
+            font=ctk.CTkFont(family=family_medium),
         )
 
         self.reset()
@@ -151,7 +153,7 @@ class Entry(GUI):
 
 
 class DatePicker(GUI):
-    def __init__(self, master=None, label_text="", left_offset=0, top_offset=0, show_day=True) -> None:
+    def __init__(self, master=None, label_text="", left_offset=0, top_offset=0, show_day=True, populate_years_with=[]) -> None:
         """create a new GUI DatePicker object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
@@ -173,7 +175,7 @@ class DatePicker(GUI):
             fg_color="#ddd",
             values=self.populate_days(),
             variable=self.stringvar_day,
-            font=ctk.CTkFont(family="Roboto Bold")
+            font=ctk.CTkFont(family=family_medium)
         )
 
         # in some cases, like credit card expirations, the day is not needed
@@ -193,7 +195,7 @@ class DatePicker(GUI):
             values=self.populate_months(),
             variable=self.stringvar_month,
             command=self.repopulate_days,
-            font=ctk.CTkFont(family="Roboto Bold"),
+            font=ctk.CTkFont(family=family_medium),
         )
 
         self.component_month.grid(row=top_offset, column=2, pady=10, padx=5)
@@ -206,10 +208,10 @@ class DatePicker(GUI):
             corner_radius=2,
             bg_color="#fff",
             fg_color="#ddd",
-            values=self.populate_years(),
+            values=self.populate_years(populate_years_with),
             variable=self.stringvar_year,
             command=self.repopulate_days,
-            font=ctk.CTkFont(family="Roboto Bold"),
+            font=ctk.CTkFont(family=family_medium),
         )
 
         self.component_year.grid(row=top_offset, column=3, pady=10, padx=5)
@@ -248,7 +250,10 @@ class DatePicker(GUI):
 
 
     # returns a list of years
-    def populate_years(self) -> list:
+    def populate_years(self, populate_years_with) -> list:
+        if len(populate_years_with) > 0:
+            return populate_years_with
+
         years = []
 
         for i in range(10):
@@ -316,7 +321,7 @@ class PaymentSplitter(GUI):
 
         self.pay_amount = Entry(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
         self.pay_amount.component.configure(width=152)
-        self.pay_amount.stringvar.set(value="$1000")
+        self.pay_amount.stringvar.set(value="$")
         self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=2)
 
         self.split_quantity = ComboBox(
@@ -410,13 +415,16 @@ class PaymentSplitter(GUI):
 
                 curr_month += 1
 
-            if curr_month > months:
+            if months < curr_month:
                 component_obj.reset()
                 component_obj.label.configure(text_color="#bbb")
                 component_obj.pay_amount.component.configure(fg_color="#ddd", text_color="#aaa")
                 component_obj.pay_date.component_day.configure(fg_color="#ddd", text_color="#aaa")
                 component_obj.pay_date.component_month.configure(fg_color="#ddd", text_color="#aaa")
                 component_obj.pay_date.component_year.configure(fg_color="#ddd", text_color="#aaa")
+
+            if curr_month == 12:
+                break
 
 
 class PaymentInfo(GUI):
@@ -429,7 +437,10 @@ class PaymentInfo(GUI):
         self.pay_amount.stringvar.set(value="$")
         self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=1)
 
-        self.pay_date = DatePicker(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
+        dt_object_now = datetime.datetime.strftime(datetime.datetime.now(), "%Y")
+        dt_object_max = datetime.datetime.strftime(datetime.datetime.now() + rd.relativedelta(months=12), "%Y")
+
+        self.pay_date = DatePicker(master=master, label_text=label_text, left_offset=10, top_offset=top_offset, populate_years_with=[dt_object_now, dt_object_max])
         self.pay_date.component_day.grid(row=top_offset, column=2, pady=10, padx=5)
         self.pay_date.component_month.grid(row=top_offset, column=3, pady=10, padx=5)
         self.pay_date.component_year.grid(row=top_offset, column=4, pady=10, padx=5)
@@ -486,11 +497,14 @@ class PromptPopup():
         self.prompt = CTkMessagebox(title="Confirm", message=f"\n{msg}\n", icon="question", option_1="Yes", option_2="Cancel", height=250)
         self.func = func
 
+        ic(self.prompt.get())
+
         if (self.prompt.get() == "Yes"):
-            func()
+            self.execute()
 
 
     def execute(self):
+        print(self.func)
         self.func()
 
 
@@ -521,13 +535,11 @@ class AppButton():
             height=68, 
             fg_color="#ffffff",
         )
-        
+
         self.desc_frame.grid(row=row, column=1, pady=10, padx=5)
 
-        bold_font = ctk.CTkFont(family="Roboto Bold", weight="bold")
-        normal_font = ctk.CTkFont(family="Roboto")
-        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=app_name, width=240, wraplength=256, anchor="w", font=bold_font).place(x=10, y=8)
-        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=desc, width=240, wraplength=256, anchor="w", font=normal_font, text_color="#777777").place(x=10, y=32)
+        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=app_name, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_bold)).place(x=10, y=8)
+        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=desc, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_medium), text_color="#777777").place(x=10, y=32)
 
 
     def __open_app(self, app_name, app):
@@ -697,6 +709,16 @@ class ActionButton():
         history_window = app.get_window("history window")
         self.page_number = 0
 
+        # check whether history entries exist
+        if entries == []:
+            imported_history = import_history()
+
+            if len(imported_history) == 0:
+                ErrorPopup(msg="No entries in history.")
+                return
+
+            entries = imported_history
+
         # check whether the object contains a window
         if (history_window is not None) and (not history_window.body.winfo_exists()):
             history_window = None
@@ -711,9 +733,6 @@ class ActionButton():
 
             for i in range(3):
                 history_window.body.columnconfigure(index=i, weight=1)
-
-            if entries == []:
-                entries=import_history()
 
             self.header_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
             RowWidget(parent_frame=self.header_frame, parent_width=self.window_width*0.99, mode="header", row_contents=['client name', 'created by', 'created date', 'application type', 'application fee'])
@@ -888,7 +907,7 @@ class RowWidget():
                     fg_color="black" if row_contents[i] != "" else "white",
                     width=(parent_width-61)/5,
                     height=38,
-                    font=ctk.CTkFont(family="Roboto Bold", size=12),
+                    font=ctk.CTkFont(family=family_bold, size=12),
                     state="disabled" if row_contents[i] == "" else "normal",
                     command=row_content_methods[i],
                 )
@@ -908,7 +927,7 @@ class RowWidget():
                         text=content, 
                         text_color="white" if mode is "header" else "black", 
                         fg_color="#000" if mode is "header" else row_color, 
-                        font=ctk.CTkFont(family="Roboto Bold", size=12)
+                        font=ctk.CTkFont(family=family_bold, size=12) if mode is "header" else ctk.CTkFont(family=family_medium, size=12),
                     )
                 )
 

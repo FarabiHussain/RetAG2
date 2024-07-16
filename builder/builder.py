@@ -18,7 +18,7 @@ if '--deps' in sys.argv:
     install_dependencies()
 
 # skip the interface if not in args
-if '--no-selector' in sys.argv:
+if '--selector' not in sys.argv:
     for i in range(len(ver)):
         ver[i] = unformat(ver[i])
 

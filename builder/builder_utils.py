@@ -58,7 +58,22 @@ def cleanup(cwd, isInitial = False):
 # pip install libs needed to build the app 
 def install_dependencies():
     os.system('cls')
-    for library in ['pyinstaller', 'python-dateutil', 'python-docx', 'docx2pdf', 'customtkinter', 'CTkTable', 'CTkMessagebox', 'pandas']:
+
+    libraries = [
+        'pyinstaller', 
+        'python-dateutil', 
+        'python-docx', 
+        'docx2pdf', 
+        'customtkinter', 
+        'CTkMessagebox', 
+        'names', 
+        'fonttools',
+        'dotenv',
+        'python-dotenv',
+        'icecream',
+    ]
+
+    for library in libraries:
         print("installing dependency: " + library)
         check_call(['pip', 'install', library], stdout=DEVNULL, stderr=STDOUT)
     print("done")

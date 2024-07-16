@@ -2,9 +2,12 @@ import customtkinter as ctk
 import os
 import json
 import GUI
+
 from Path import *
 from icecream import ic
 from pprint import pprint
+from tkinter import font
+from fontTools.ttLib import TTFont
 
 
 
@@ -18,24 +21,44 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='lightgray')
-        self.version = "v1.0.0"
+        self.version = "v0.0.1"
         self.root.title(f"AMCAIM Toolbox {self.version}")
         self.blueprint = self.__read_blueprint()
         self.components = {}
         self.windows = {}
+        
+        self.app_icon_passed = self.__check_app_ico()
+        self.fonts_passed = self.__check_fonts()
 
 
-    def __read_subapps(self) -> dict:
+    def __check_fonts(self) -> bool:
+        missing_fonts = []
+        for font_family in ['Poppins Medium', 'Poppins']:
+            if font_family not in list(font.families()):
+                missing_fonts.append(font_family)
+
+        def open_missing_fonts(missing_fonts):
+            for curr_font in missing_fonts:
+                os.startfile(resource_path(f"{os.getcwd()}\\assets\\fonts\\{curr_font.replace(" ", "-")}.ttf"))
+
+        if len(missing_fonts) > 0:
+            GUI.PromptPopup(
+                msg="Font packs needed for the program are not installed.\n\nOpen the files to install them?",
+                func=lambda:open_missing_fonts(missing_fonts)
+            )
+            return False
+        
+        return True
+
+
+    def __check_app_ico(self) -> bool:
         try:
-            f = open('subapps.json')
-            loaded = json.load(f)
-            f.close()
-
-            return loaded["subapps"]
+            self.root.iconbitmap(f"{os.getcwd()}\\assets\\icons\\app.ico")
+            return True
         except Exception as e:
             print(e)
 
-        return {}
+        return False
 
 
     def __read_blueprint(self) -> dict:
@@ -124,7 +147,8 @@ class App():
 
 
     def start(self) -> None:
-        self.root.mainloop()
+        if self.fonts_passed:
+            self.root.mainloop()
 
 
     def hide(self) -> None:

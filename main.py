@@ -83,6 +83,6 @@ def test_fill():
 #     if s.get("name") == "Receipt":
 #         s['subapp_obj'].lift_app(subapp_components)
 
-# test_fill()
+test_fill()
 
 app.start()
