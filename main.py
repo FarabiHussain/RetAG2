@@ -1,4 +1,6 @@
 import customtkinter as ctk
+import names
+import random
 from Path import *
 from Img import *
 from GUI import *
@@ -78,11 +80,10 @@ def test_fill():
 
     app.components['application fee'].set(f"${total_amount}", total_months)
 
+for s in subapp_components:
+    if s.get("name") == "Receipt":
+        s['subapp_obj'].lift_app(subapp_components)
 
-# for s in subapp_components:
-#     if s.get("name") == "Receipt":
-#         s['subapp_obj'].lift_app(subapp_components)
-
-# test_fill()
+test_fill()
 
 app.start()

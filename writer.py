@@ -179,7 +179,7 @@ def write_to_placeholders(doc, components, doctype):
 
         insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
         insert_to_history(components)
-        # save_doc(doc, components, doctype)
+        save_doc(doc, components, doctype)
 
     except Exception as e:
         print(e)
@@ -191,23 +191,7 @@ def insert_to_history(app_components=None):
     if app_components is None:
         return
 
-    csv_columns = ['case_id', 'created_by', 'created_date', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
-
-    # set up csv_columns
-    for i in range(1,13):
-        csv_columns.append(f"amount_{str(i)}")
-        csv_columns.append(f"date_{str(i)}")
-
-    # set up write directory
-    if not os.path.exists(f"{os.getcwd()}\\write"):
-        os.makedirs(f"{os.getcwd()}\\write")
-
-    if not os.path.exists(f"{os.getcwd()}\\write\\history.csv"):
-        # write the header csv_columns to file
-        f = open(f"{os.getcwd()}\\write\\history.csv", "x")
-        f.write(",".join(csv_columns))
-        f.close()
-
+    check_history_dir_and_file()
 
     # things to enter into the new entry
     history_entry = ['', os.environ['COMPUTERNAME']]
@@ -222,7 +206,6 @@ def insert_to_history(app_components=None):
     history_entry.append(app_components.get('application type').get())
     history_entry.append(app_components.get('application fee').get('amount'))
     history_entry.append(app_components.get('add taxes').get())
-
 
     for i in range(1,13):
         current_amount = (app_components.get(f'payment {i}').get('amount'))
@@ -241,9 +224,26 @@ def insert_to_history(app_components=None):
     for index, col in enumerate(history_entry):
         history_entry[index] = re.sub("[,]\\s*", "_", str(col))
 
-    print(history_entry)
-
     with open(f"{os.getcwd()}\\write\\history.csv", "a") as history:
         history_entry = (',').join(history_entry)
         history.write("\n" + history_entry)
-        print(history_entry)
+
+
+def check_history_dir_and_file():
+    # set up write directory
+    if not os.path.exists(f"{os.getcwd()}\\write"):
+        os.makedirs(f"{os.getcwd()}\\write")
+
+    if not os.path.exists(f"{os.getcwd()}\\write\\history.csv"):
+        csv_columns = ['case_id', 'created_by', 'created_date', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
+
+        # set up csv_columns
+        for i in range(1,13):
+            csv_columns.append(f"amount_{str(i)}")
+            csv_columns.append(f"date_{str(i)}")
+
+        # write the header csv_columns to file
+        with open(f"{os.getcwd()}\\write\\history.csv", "x") as history:
+            history.write(",".join(csv_columns))
+            history.close()
+

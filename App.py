@@ -53,7 +53,7 @@ class App():
     def __get_position(self, w, h) -> tuple:
         return (
             (self.root.winfo_screenwidth()/2) - (w/2),
-            (self.root.winfo_screenheight()/2) - (h/2) - (self.root.winfo_screenheight()*0.05),
+            (self.root.winfo_screenheight()/2) - (h/2),
         )
 
 
@@ -86,22 +86,9 @@ class App():
         self.components[label] = obj
 
 
-    def get_component(self, label) -> GUI.Entry | GUI.DatePicker | GUI.ComboBox | GUI.DatePicker | GUI.WindowView | None:
+    def get_component(self, label) -> GUI.Entry | GUI.DatePicker | GUI.ComboBox | GUI.DatePicker | GUI.WindowView | GUI.TableWidget | None:
         try:
             return self.components[label]
-        except Exception as e:
-            print(e)
-
-        return None
-
-
-    def add_window(self, label, obj) -> None:
-        self.windows[label] = obj
-
-
-    def get_window(self, label) -> GUI.WindowView | None:
-        try:
-            return self.windows[label]
         except Exception as e:
             print(e)
 
@@ -120,6 +107,19 @@ class App():
     def reset_all_components(self) -> None:
         for component in self.components.values():
             component.reset()
+
+
+    def add_window(self, label, obj) -> None:
+        self.windows[label] = obj
+
+
+    def get_window(self, label) -> GUI.WindowView | None:
+        try:
+            return self.windows[label]
+        except Exception as e:
+            print(e)
+
+        return None
 
 
     def start(self) -> None:
