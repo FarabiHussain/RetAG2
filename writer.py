@@ -178,10 +178,12 @@ def write_to_placeholders(doc, components, doctype):
         ]
 
         insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
-        save_doc(doc, components, doctype)
+        insert_to_history(components)
+        # save_doc(doc, components, doctype)
 
     except Exception as e:
         print(e)
+
 
 # write a newly created retainer information into the history
 def insert_to_history(app_components=None):
@@ -189,75 +191,59 @@ def insert_to_history(app_components=None):
     if app_components is None:
         return
 
-    client_names = [
-        f"{app_components.get('client 1 first name').get()} {app_components.get('client 1 last name').get()}".strip(),
-        f"{app_components.get('client 2 first name').get()} {app_components.get('client 2 last name').get()}".strip(),
-    ]
-
-    client_emails = [
-        f"{app_components.get('client 1 email').get()}".strip(),
-        f"{app_components.get('client 2 email').get()}".strip(),
-    ]
-
-    client_phones = [
-        f"{app_components.get('client 1 phone').get()}".strip(),
-        f"{app_components.get('client 2 phone').get()}".strip(),
-    ]
-
+    csv_columns = ['case_id', 'created_by', 'created_date', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
 
     # set up csv_columns
-    csv_columns = ['created_by', 'created_date', 'date_on_document', 'client_name', 'application_type', 'application_fee', 'email', 'phone', 'add_taxes', 'is_active']
-
     for i in range(1,13):
         csv_columns.append(f"amount_{str(i)}")
         csv_columns.append(f"date_{str(i)}")
 
+    # set up write directory
+    if not os.path.exists(f"{os.getcwd()}\\write"):
+        os.makedirs(f"{os.getcwd()}\\write")
 
-    # setup output folder and heading
-    try:
-        history_dir = f"{os.getcwd()}\\write\\"
-
-        # set up write directory
-        if not os.path.exists(history_dir):
-            os.makedirs(history_dir)
-
+    if not os.path.exists(f"{os.getcwd()}\\write\\history.csv"):
         # write the header csv_columns to file
-        f = open(history_dir + "\\history.csv", "x")
+        f = open(f"{os.getcwd()}\\write\\history.csv", "x")
         f.write(",".join(csv_columns))
         f.close()
 
-    except Exception as e:
-        print(e)
-
 
     # things to enter into the new entry
-    history_entry = [os.environ['COMPUTERNAME']]
+    history_entry = ['', os.environ['COMPUTERNAME']]
     history_entry.append(str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")))
     history_entry.append(app_components.get('date on document').get())
-    history_entry.append((";").join(client_names))
+    history_entry.append(f"{app_components.get('client 1 first name').get().strip()} {app_components.get('client 1 last name').get().strip()}".strip())
+    history_entry.append(app_components.get('client 1 email').get().strip())
+    history_entry.append(app_components.get('client 1 phone').get().strip())
+    history_entry.append(f"{app_components.get('client 2 first name').get().strip()} {app_components.get('client 2 last name').get().strip()}".strip())
+    history_entry.append(app_components.get('client 2 email').get().strip())
+    history_entry.append(app_components.get('client 2 phone').get().strip())
     history_entry.append(app_components.get('application type').get())
-    history_entry.append(app_components.get('application_fee').get())
-    history_entry.append((";").join(client_emails))
-    history_entry.append((";").join(client_phones))
+    history_entry.append(app_components.get('application fee').get('amount'))
     history_entry.append(app_components.get('add taxes').get())
 
 
-    # for i in range(12):
-    #     if (i < len(form['payment_list'])): 
-    #         current_payment = form['payment_list'][i]
-    #         history_entry.append(str(float(current_payment['amount'])))
-    #         history_entry.append(str(current_payment['date']))
-    #     else:
-    #         history_entry.append("")
-    #         history_entry.append("")
+    for i in range(1,13):
+        current_amount = (app_components.get(f'payment {i}').get('amount'))
+        current_date = (app_components.get(f'payment {i}').get('date'))
+
+        if int(current_amount) == 0:
+            history_entry.append("")
+            history_entry.append("")
+            continue
+
+        history_entry.append(str(current_amount))
+        history_entry.append(str(current_date))
 
 
     # remove commas from strings as it interferes with the csv
-    for index, _ in enumerate(history_entry):
-        history_entry[index] = re.sub("[,]\\s*", "_", history_entry[index])
+    for index, col in enumerate(history_entry):
+        history_entry[index] = re.sub("[,]\\s*", "_", str(col))
 
-    with open(history_dir + "\\history.csv", "a") as history:
+    print(history_entry)
+
+    with open(f"{os.getcwd()}\\write\\history.csv", "a") as history:
         history_entry = (',').join(history_entry)
-        print(history_entry)
         history.write("\n" + history_entry)
-
+        print(history_entry)

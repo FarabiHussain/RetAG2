@@ -19,7 +19,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='lightgray')
-        self.version = "v0.0.1"
+        self.version = "v0.0.3"
         self.root.title(f"AMCAIM Toolbox {self.version}")
         self.blueprint = self.__read_blueprint()
         self.components = {}
@@ -53,7 +53,7 @@ class App():
     def __get_position(self, w, h) -> tuple:
         return (
             (self.root.winfo_screenwidth()/2) - (w/2),
-            (self.root.winfo_screenheight()/2) - (h/2)
+            (self.root.winfo_screenheight()/2) - (h/2) - (self.root.winfo_screenheight()*0.05),
         )
 
 

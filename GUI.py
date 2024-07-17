@@ -784,7 +784,7 @@ class ActionButton():
         for i in range(18 - len(current_page_rows)):
             current_page_rows.append(
                 {
-                    'client_name': '',
+                    'client_1_name': '',
                     'created_by': '',
                     'created_date': '',
                     'application_type': '',
@@ -800,7 +800,7 @@ class ActionButton():
                     row_number=index, 
                     mode="table", 
                     row_contents=[
-                        f"{entry.get('client_name').title().split(";")[0][0:32]}{"..." if len(entry.get('client_name').split(";")[0]) > 32 else ""}",
+                        f"{entry.get('client_1_name').title().split(";")[0][0:32]}{"..." if len(entry.get('client_1_name').split(";")[0]) > 32 else ""}",
                         entry.get('created_by'),
                         entry.get('created_date'),
                         f"{entry.get('application_type')[0:32]}{"..." if len(entry.get('application_type')) > 32 else ""}",
@@ -815,7 +815,9 @@ class ActionButton():
 
         if (page_number == 0):
             self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
-            self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
+
+            if len(entries) < 18:
+                self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
         elif (page_number == math.ceil(len(entries)/18)-1):
             self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
@@ -1007,5 +1009,4 @@ class TableWidget():
                         mode="table",
                     )
                 )
-
 

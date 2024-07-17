@@ -216,51 +216,49 @@ def insert_4col_table(document, table_heading=None, table_items=[], table_props=
         return False
 
     # add the table contents
-    # try:
+    try:
         # Creating a table object
-    table_obj = document.add_table(rows=len(table_items), cols=len(table_items[0]))
+        table_obj = document.add_table(rows=len(table_items), cols=len(table_items[0]))
 
-    # add rows
-    for idx, row in enumerate(table_obj.rows):
-        curr_row = row.cells
-        row.height = CM(0.50)
-        curr_row[0].text = table_items[idx]['label_l']
-        curr_row[0].paragraphs[0].alignment = table_props['cell_alignment'][0]
-        curr_row[1].text = table_items[idx]['info_l']
-        curr_row[1].paragraphs[0].alignment = table_props['cell_alignment'][0]
-        curr_row[2].text = table_items[idx]['label_r']
-        curr_row[2].paragraphs[0].alignment = table_props['cell_alignment'][0]
-        curr_row[3].text = table_items[idx]['info_r']
-        curr_row[3].paragraphs[0].alignment = table_props['cell_alignment'][0]
+        # add rows
+        for idx, row in enumerate(table_obj.rows):
+            curr_row = row.cells
+            row.height = CM(0.50)
+            curr_row[0].text = table_items[idx]['label_l']
+            curr_row[0].paragraphs[0].alignment = table_props['cell_alignment'][0]
+            curr_row[1].text = table_items[idx]['info_l']
+            curr_row[1].paragraphs[0].alignment = table_props['cell_alignment'][0]
+            curr_row[2].text = table_items[idx]['label_r']
+            curr_row[2].paragraphs[0].alignment = table_props['cell_alignment'][0]
+            curr_row[3].text = table_items[idx]['info_r']
+            curr_row[3].paragraphs[0].alignment = table_props['cell_alignment'][0]
 
-    print("add rows for loop passed")
+        # set column widths and borders
+        for idx, _ in enumerate(table_items[0]):
 
-    # set column widths and borders
-    for idx, _ in enumerate(table_items[0]):
+            for cell in (table_obj.columns[0].cells):
+                cell = table_obj.columns[0].cells[0]
+                cell.width = CM(8)
 
-        for cell in (table_obj.columns[0].cells):
-            cell = table_obj.columns[0].cells[0]
-            cell.width = CM(8)
+            for cell in (table_obj.columns[1].cells):
+                cell.width = CM(14)
+                set_cell_border(cell, top={"sz": 1, "color": "#ffffff", "val": "single", "space": "8"})
+                if len(cell.text) > 0:
+                    set_cell_border(cell, bottom={"sz": 1, "color": "#888888", "val": "single", "space": "0"})
 
-        for cell in (table_obj.columns[1].cells):
-            cell.width = CM(14)
-            set_cell_border(cell, top={"sz": 1, "color": "#ffffff", "val": "single", "space": "8"})
-            if len(cell.text) > 0:
-                set_cell_border(cell, bottom={"sz": 1, "color": "#888888", "val": "single", "space": "0"})
+            for cell in (table_obj.columns[2].cells):
+                cell.width = CM(8)
 
-        for cell in (table_obj.columns[2].cells):
-            cell.width = CM(8)
+            for cell in (table_obj.columns[3].cells):
+                cell.width = CM(14)
+                set_cell_border(cell, top={"sz": 1, "color": "#ffffff", "val": "single", "space": "4"})
+                if len(cell.text) > 0:
+                    set_cell_border(cell, bottom={"sz": 1, "color": "#888888", "val": "single", "space": "0"})
 
-        for cell in (table_obj.columns[3].cells):
-            cell.width = CM(14)
-            set_cell_border(cell, top={"sz": 1, "color": "#ffffff", "val": "single", "space": "4"})
-            if len(cell.text) > 0:
-                set_cell_border(cell, bottom={"sz": 1, "color": "#888888", "val": "single", "space": "0"})
-
-    # except Exception as e:
-    #     # ErrorPopup(f'Exception when adding table contents\n\n{e}')
-    #     print(f'Exception when adding table contents\n\n{e}')
-    #     return False
+    except Exception as e:
+        # ErrorPopup(f'Exception when adding table contents\n\n{e}')
+        print(f'Exception when adding table contents\n\n{e}')
+        return False
 
 
 # insert a new paragraph
