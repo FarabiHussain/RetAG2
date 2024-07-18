@@ -119,7 +119,6 @@ class Subapp():
             elif specs['type'] == "table":
                 new_component = TableWidget(
                     master=self.page_columns[specs['column']], 
-                    app=app,
                     headers=specs['headers'],
                     parent_width=column_widths[blueprint['column_weights'][specs['column']]]
                 )

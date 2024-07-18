@@ -44,6 +44,6 @@ for s in subapp_components:
     if s.get("name") == "Receipt":
         s['subapp_obj'].lift_app(subapp_components)
 
-test_button(app)
+# test_button(app)
 
 app.start()

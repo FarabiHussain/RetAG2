@@ -126,10 +126,10 @@ def write_receipt(doc, components):
     cart_items = []
 
     current_serial = 1
-    for item in cart.get():
-        if item.get_info():
-            item.get_info()['serial'] = current_serial
-            cart_items.append(item.get_info())
+    for current_item in cart.get():
+        if current_item:
+            current_item['info']['serial'] = current_serial
+            cart_items.append(current_item['info'])
             current_serial += 1
 
     if len(cart_items) <= 0:
@@ -265,7 +265,7 @@ def insert_retainer_to_history(app_components=None):
         history_entry = (',').join(history_entry)
         history.write(f'{history_entry}\n')
 
-# write the passed doc_id to records.csv
+
 def insert_receipt_to_history(doc_id, client_name):
     client_name = client_name.strip().lower().replace(" ", "_").replace(", ",";").replace(",",";")
 

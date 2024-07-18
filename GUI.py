@@ -539,6 +539,7 @@ class ActionButton():
             command=lambda:self.assign_action(app, action),
             width=width,
             height=height,
+            state='disabled' if 'spacer' in action else 'normal'
         ).grid(row=row, column=col, pady=10, padx=5)
 
 
@@ -659,13 +660,6 @@ class CellWidget():
     def get_info(self):
         return self.info
 
-    def equals(self, other_info=[], partial_matches=False):
-        if all(x in self.get_info() for x in other_info):
-            if (len(other_info) != len(self.get_info())) and partial_matches:
-                return True
-
-        return False
-
     def destroy(self):
         self.cell.destroy()
 
@@ -762,25 +756,26 @@ class RowWidget():
 
 
 class TableWidget():
-    def __init__(self, master=None, app=None, headers:list=[], rows:list=[], parent_width=0, parent_height=0, rows_per_page=15, page=0, next_empty_row=0):
+    def __init__(self, master=None, headers:list=[], rows:list=[], parent_width=0, parent_height=0, rows_per_page=15, active_row=0):
 
         self.rows = rows
         self.parent_frame = master
         self.parent_width = parent_width
         self.parent_height = parent_height
         self.rows_per_page = rows_per_page
-        self.next_empty_row = next_empty_row
-        self.page = page
+        self.rows_rendered = []
+        self.active_row = active_row
+        self.page = 1
 
         for i in range(3):
             master.columnconfigure(index=i, weight=1)
 
         self.header_frame = ctk.CTkFrame(
-            master=master, 
+            master=self.parent_frame, 
             fg_color="white", 
             border_width=0, 
-            width=parent_width, 
-            height=parent_height*0.05, 
+            width=self.parent_width, 
+            height=self.parent_height*0.05, 
         )
 
         self.header = RowWidget(
@@ -791,20 +786,19 @@ class TableWidget():
         )
 
         self.table_frame = ctk.CTkFrame(
-            master=master, 
+            master=self.parent_frame, 
             fg_color="white", 
             border_width=1, 
-            width=parent_width, 
-            height=parent_height*0.90, 
+            width=self.parent_width, 
+            height=self.parent_height*0.90, 
         )
-        self.set_table()
 
         self.tools_frame = ctk.CTkFrame(
-            master=master, 
+            master=self.parent_frame, 
             fg_color="white", 
             border_width=0, 
             width=self.parent_width, 
-            height=parent_height*0.05
+            height=self.parent_height*0.05
         )
 
         self.tools = RowWidget(
@@ -819,8 +813,8 @@ class TableWidget():
                 ""
             ], 
             row_content_methods=[
-                lambda:None, #self.navigate(app=app, page=self.page-1, rows=self.rows),
-                lambda:None, #self.navigate(app=app, page=self.page+1, rows=self.rows),
+                lambda:self.navigate(page=self.page-1),
+                lambda:self.navigate(page=self.page+1),
                 lambda:None,
                 lambda:None,
                 lambda:None,
@@ -832,13 +826,17 @@ class TableWidget():
 
         self.reset()
 
-    def navigate(self, app=None, page=0, rows=[]):
-        if (page == 0):
-            ic(len(rows))
+
+    def set_custom_method(self, index, func):
+        self.tools.buttons[index+2].configure(command=func)
+
+
+    def navigate(self, page=0):
+        if (page == 1):
             self.tools.buttons[0].configure(fg_color="light gray", state="disabled")
             self.tools.buttons[1].configure(fg_color="black", state="normal")
 
-        elif (page == math.ceil(len(rows)/18)-1):
+        elif (page == math.ceil(len(self.rows)/self.rows_per_page)-1):
             self.tools.buttons[0].configure(fg_color="black", state="normal")
             self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
 
@@ -846,97 +844,150 @@ class TableWidget():
             self.tools.buttons[0].configure(fg_color="black", state="normal")
             self.tools.buttons[1].configure(fg_color="black", state="normal")
 
-        for table_row in self.rows:
-            table_row.cleanup()
-
-        self.page=page
-        self.table_frame.destroy()
-        self.table_frame = ctk.CTkFrame(master=self.parent_frame, fg_color="white", border_width=0, width=self.parent_width, height=self.parent_height*0.9)
-        self.set_table(master=self.table_frame, rows=self.rows, page=page)
-
-        self.header_frame.grid(row=0, column=1, pady=[9,0])
-        self.table_frame.grid(row=1, column=1, pady=[2,0])
-        self.tools_frame.grid(row=2, column=1, pady=[2,0])
-
-    def set_table(self, master=None, rows=[], page=0, cols=[]):
-
-        # pad the list with empty entries if less than 18 rows in order to keep a constant table size on the UI
-        current_page_rows = self.rows[(self.page*self.rows_per_page):((self.page+1)*self.rows_per_page)]
-        for i in range(self.rows_per_page - len(current_page_rows)):
-            new_blank_row = {}
-            for col in cols:
-                new_blank_row[col] = ''
-            current_page_rows.append(new_blank_row)
-
-        for index, entry in enumerate(current_page_rows):
-            self.rows.append(
-                RowWidget(
-                    parent_frame=self.parent_frame, 
-                    parent_width=self.parent_width, 
-                    row_number=index, 
-                    mode="table", 
-                    row_contents=current_page_rows[index],
-                    row_color="#ddd" if index%2==0 else "#eee",
-                )
-            )
-
-    def reset(self) -> None:
-        for row in self.rows:
+        for row in self.rows_rendered:
             row.cleanup()
 
-        self.rows = []
-        self.next_empty_row = 0
-        self.page = 0
+        self.page=page
+        self.refresh()
+        self.update(page=page)
 
-        if len(self.rows) == 0:
-            for i in range(self.rows_per_page):
-                self.rows.append(
+
+    def refresh(self):
+
+        for r in self.rows_rendered:
+            r.cleanup()
+
+        self.table_frame.destroy()
+        self.table_frame = ctk.CTkFrame(
+            master=self.parent_frame, 
+            fg_color="white", 
+            border_width=1, 
+            width=self.parent_width, 
+            height=self.parent_height*0.90, 
+        )
+
+        self.table_frame.grid(row=1, column=1, pady=[2,0])
+
+
+    def update(self, page=1):
+
+        self.refresh()
+        page_offset = self.rows_per_page * (page-1)
+
+        for index in range(self.rows_per_page):
+            if (index + page_offset) < len(self.rows):
+                self.rows_rendered.append(
                     RowWidget(
-                        parent_frame=self.table_frame,
-                        parent_width=self.parent_width,
-                        row_contents=["", "", "", "", ""],
-                        row_color="#ddd" if i%2==0 else "#eee",
-                        row_number=i,
-                        mode="table",
+                        parent_frame=self.table_frame, 
+                        parent_width=self.rows[index + page_offset].get('parent_width'), 
+                        row_number=self.rows[index + page_offset].get('row_number'), 
+                        mode=self.rows[index + page_offset].get('mode'), 
+                        row_contents=self.rows[index + page_offset].get('row_contents'),
+                        row_color=self.rows[index + page_offset].get('row_color'),
                     )
                 )
+
+                # set the next button to be active if the next row is not a blank
+                if (index + page_offset) == len(self.rows) - 1:
+                    self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
+                else:
+                    self.tools.buttons[1].configure(fg_color="black", state="normal")
+
+            else:
+                RowWidget(
+                    parent_frame=self.table_frame, 
+                    parent_width=self.parent_width, 
+                    row_number=index + page_offset, 
+                    mode='table', 
+                    row_contents=['','','','',''],
+                    row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
+                )
+
+                # set the next button to be active if the last row was blank
+                self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
+
+
+    def reset(self) -> None:
+        for row in self.rows_rendered:
+            row.cleanup()
+
+        self.table_frame.destroy()
+        self.table_frame = ctk.CTkFrame(
+            master=self.parent_frame, 
+            fg_color="white", 
+            border_width=1, 
+            width=self.parent_width, 
+            height=self.parent_height*0.90, 
+        )
+
+        self.table_frame.grid(row=1, column=1, pady=[2,0])
+
+        self.rows = []
+        self.rows_rendered = []
+        self.active_row = 0
+        self.page = 1
+
+        for i in range(self.rows_per_page):
+            RowWidget(
+                parent_frame=self.table_frame,
+                parent_width=self.parent_width,
+                row_contents=["", "", "", "", ""],
+                row_color="#ddd" if i%2==0 else "#eee",
+                row_number=i,
+                mode="table",
+            )
 
         self.tools.buttons[0].configure(fg_color="light gray", state="disabled")
 
         if len(self.rows) <= self.rows_per_page:
             self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
 
-    def update(self, row_index=None, row_info=[], row_contents:list=["col_0", "col_1", "col_2", "col_3", "col_4"]) -> None:
-        if self.next_empty_row > self.rows_per_page and row_index is None:
-            ErrorPopup('Max number of items reached. Please delete items or create a separate receipt')
-            return 
 
-        if row_index is None:
-            row_index = self.next_empty_row
+    def add(self, row_info=None, row_contents=None, row_index=None) -> None:
+        for row_info, row_contents in zip(row_info, row_contents):
 
-        self.rows[row_index].set(row_contents=row_contents, row_info=row_info)
+            row_to_update = row_index if row_index is not None else self.active_row
 
-        if row_index == self.next_empty_row:
-            self.next_empty_row += 1
+            new_row = (
+                {
+                    'parent_frame': self.table_frame, 
+                    'parent_width': self.parent_width, 
+                    'row_number': row_to_update, 
+                    'mode': "table", 
+                    'row_contents': row_contents if not None else ['','','','',''],
+                    'row_color': "#ddd" if (row_to_update % 2 == 0) else "#eee",
+                    'info': row_info,
+                }
+            )
+
+            if row_index is None:
+                self.rows.append(new_row)
+                self.active_row += 1
+            else:
+                self.rows[row_index] = new_row
+
+        self.update()
+        self.update(page=self.page)
+
 
     def contains(self, row_info=[], compare_keys=[]):
-        for row_index in range(self.next_empty_row):
+        for row_index in range(self.active_row):
 
             current_row_match = False
 
             for k in compare_keys:
-                if self.rows[row_index].get_info()[k] != row_info[k]:
-                    # ic(self.rows[row_index].get_info()[k], row_info[k])
+                if self.rows[row_index].get('info').get(k) != row_info[k]:
                     current_row_match = False
                     break
                 else:
                     current_row_match = True
 
             if (current_row_match):
-                return (row_index, self.rows[row_index].get_info())
+                return (row_index, self.rows[row_index].get('info'))
 
-        return (self.next_empty_row, None)
+        return (None, None)
 
-    def get(self) -> list[RowWidget]:
+
+    def get(self) -> list:
         return self.rows
 

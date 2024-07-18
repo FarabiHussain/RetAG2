@@ -59,6 +59,7 @@
             "reset": "red",
             "output": "gray",
             "test": "light gray",
+            "spacer": "white",
             "retainer": "#383FBC",
             "payments": "dark blue",
             "conduct": "#1A8405",
@@ -81,7 +82,6 @@
         "price": {"column": 0, "type": "entry", "default": "$560.00"},
         "cart": {"column": 1, "type": "table", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
 
-
         "callbacks": {
             "service": "/assets/functions/service.py",
             "rate": "/assets/functions/rate.py",
@@ -94,6 +94,7 @@
             "reset": "red",
             "output": "gray",
             "test": "light gray",
+            "spacer": "white",
             "add item": "#1A8405",
             "create receipt": "dark blue"
         }
