@@ -10,11 +10,10 @@ from CTkMessagebox import CTkMessagebox
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from writer import write_auth, write_to_placeholders
+from writer import write_auth, replace_placeholders, write_receipt
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import HistoryViewer, add_item_button, test_button, decrypt_button
-
 
 
 family_medium="Roboto Bold"
@@ -544,43 +543,50 @@ class ActionButton():
 
 
     def assign_action(self, app, action) -> None:
-        if ("reset" == action):
+        if (action == "reset"):
             app.reset_all_components()
 
-        elif ("payments" == action):
+        elif (action == "payments"):
             try:
                 doc = Document(resource_path("assets\\templates\\payments.docx"))
                 write_auth(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing payment authorization:\n\n{str(e)}')
 
-        elif ("retainer" == action):
+        elif (action == "retainer"):
             try:
                 doc = Document(resource_path("assets\\templates\\retainer.docx"))
-                write_to_placeholders(doc, app.get_all_components(), "Retainer")
+                replace_placeholders(doc, app.get_all_components(), "Retainer")
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
 
-        elif ("conduct" == action):
+        elif (action == "conduct"):
             try:
                 doc = Document(resource_path("assets\\templates\\conduct.docx"))
-                write_to_placeholders(doc, app.get_all_components(), "Conduct")
+                replace_placeholders(doc, app.get_all_components(), "Conduct")
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing code of conduct:\n\n{str(e)}')
 
-        elif ("history" == action):
+        elif (action == "create receipt"):
+            try:
+                doc = Document(resource_path("assets\\templates\\receipt.docx"))
+                write_receipt(doc, app.get_all_components())
+            except Exception as e:
+                ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
+
+        elif (action == "history"):
             HistoryViewer(app)
 
-        elif ("test" == action):
+        elif (action == "test"):
             test_button(app)
 
-        elif ("decrypt" == action):
+        elif (action == "decrypt"):
             decrypt_button(app)
 
-        elif ("add item" == action):
+        elif (action == "add item"):
             add_item_button(app)
 
-        elif ("output" == action):
+        elif (action == "output"):
             try:
                 os.startfile(os.getcwd() + "\\output")
             except Exception as e:
@@ -630,8 +636,42 @@ class WindowView():
         self.body.focus()
 
 
+class CellWidget():
+    def __init__(self, master=None, width=0, height=0, text="", text_color="black", fg_color="#fff", info=[], font=None) -> None:
+        self.info = info
+        self.width = width
+        self.height = height
+        self.text = text
+
+        self.cell = ctk.CTkLabel(
+            master=master, 
+            width=width, 
+            height=height, 
+            text=text, 
+            text_color=text_color, 
+            fg_color=fg_color, 
+            font=font,
+        )
+
+    def get_cell(self):
+        return self.cell
+
+    def get_info(self):
+        return self.info
+
+    def equals(self, other_info=[], partial_matches=False):
+        if all(x in self.get_info() for x in other_info):
+            if (len(other_info) != len(self.get_info())) and partial_matches:
+                return True
+
+        return False
+
+    def destroy(self):
+        self.cell.destroy()
+
+
 class RowWidget():
-    def __init__(self, parent_frame=None, row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"], row_color="#eee", row_content_methods=[], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table"):
+    def __init__(self, parent_frame=None, row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"], row_color="#eee", row_content_methods=[], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", info=[]):
 
         # no parent, nowhere to put this
         if parent_frame is None:
@@ -640,6 +680,7 @@ class RowWidget():
         self.container = ctk.CTkFrame(master=parent_frame, fg_color="white", border_width=0, width=parent_width, height=30)
         self.buttons = []
         self.contents = []
+        self.info = {}
 
         # setup the grid system
         for i in range(len(row_contents)+1):
@@ -671,7 +712,7 @@ class RowWidget():
         if mode != "tools":
             for i, content in enumerate(row_contents):
                 self.contents.append(
-                    ctk.CTkLabel(
+                    CellWidget(
                         self.container, 
                         width=(parent_width-61)/5, 
                         height=38, 
@@ -682,23 +723,33 @@ class RowWidget():
                     )
                 )
 
-                self.contents[i].grid(row=0, column=i + (0 if mode=="header" else 1), pady=0, padx=0)
+                self.contents[i].get_cell().grid(row=0, column=i + (0 if mode=="header" else 1), pady=0, padx=0)
 
         # place the entire container with all the stuff above
         self.container.grid(row=row_number, column=0, pady=0, padx=0)
 
-
-    def set(self, row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"]):
+    def set(self, row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"], row_info=None):
         for index, col in enumerate(self.contents):
-            col.configure(text=row_contents[index])
+            col.get_cell().configure(text=row_contents[index])
 
-    def get(self) -> list:
+        if row_info is None:
+            return
+
+        elif len(row_info) <= 0:
+            self.info = {}
+        else:
+            self.info = row_info
+
+    def get_cells(self) -> list:
         row_contents = []
 
         for col in self.contents:
-            row_contents.append(col.cget("text"))
+            row_contents.append(col)
 
         return row_contents
+
+    def get_info(self) -> list:
+        return self.info
 
     def cleanup(self):
         for widget in self.buttons:
@@ -776,11 +827,10 @@ class TableWidget():
             ])
 
         self.header_frame.grid(row=0, column=1, pady=[9,0])
-        self.table_frame.grid(row=1, column=1)
-        self.tools_frame.grid(row=2, column=1)
+        self.table_frame.grid(row=1, column=1, pady=[2,0])
+        self.tools_frame.grid(row=2, column=1, pady=[2,0])
 
         self.reset()
-
 
     def navigate(self, app=None, page=0, rows=[]):
         if (page == 0):
@@ -805,9 +855,8 @@ class TableWidget():
         self.set_table(master=self.table_frame, rows=self.rows, page=page)
 
         self.header_frame.grid(row=0, column=1, pady=[9,0])
-        self.table_frame.grid(row=1, column=1)
-        self.tools_frame.grid(row=2, column=1)
-
+        self.table_frame.grid(row=1, column=1, pady=[2,0])
+        self.tools_frame.grid(row=2, column=1, pady=[2,0])
 
     def set_table(self, master=None, rows=[], page=0, cols=[]):
 
@@ -830,7 +879,6 @@ class TableWidget():
                     row_color="#ddd" if index%2==0 else "#eee",
                 )
             )
-
 
     def reset(self) -> None:
         for row in self.rows:
@@ -858,32 +906,36 @@ class TableWidget():
         if len(self.rows) <= self.rows_per_page:
             self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
 
+    def update(self, row_index=None, row_info=[], row_contents:list=["col_0", "col_1", "col_2", "col_3", "col_4"]) -> None:
+        if self.next_empty_row > self.rows_per_page and row_index is None:
+            ErrorPopup('Max number of items reached. Please delete items or create a separate receipt')
+            return 
 
-    def update(self, row_number=None, row_contents:list=["col_0", "col_1", "col_2", "col_3", "col_4"]) -> None:
-        if row_number is None:
-            row_number = self.next_empty_row
+        if row_index is None:
+            row_index = self.next_empty_row
 
-        self.rows[row_number].set(row_contents)
+        self.rows[row_index].set(row_contents=row_contents, row_info=row_info)
 
-        if row_number == self.next_empty_row:
+        if row_index == self.next_empty_row:
             self.next_empty_row += 1
 
+    def contains(self, row_info=[], compare_keys=[]):
+        for row_index in range(self.next_empty_row):
 
-    def contains(self, row_contents=[], indices_to_compare=[]):
-        # for row_index in range(self.next_empty_row):
+            current_row_match = False
 
-        #     if len(indices_to_compare) > 0:
-        #         for idx in indices_to_compare:
-        #             if (self.rows[row_index].get()[idx] != row_contents[idx]):
-        #                 continue
-        #             print(f'{self.rows[row_index].get()} == {row_contents}')
-        #             return True
-        #     else:
-        #         if (self.rows[row_index].get() == row_contents):
-        #             return True
+            for k in compare_keys:
+                if self.rows[row_index].get_info()[k] != row_info[k]:
+                    # ic(self.rows[row_index].get_info()[k], row_info[k])
+                    current_row_match = False
+                    break
+                else:
+                    current_row_match = True
 
-        return False
+            if (current_row_match):
+                return (row_index, self.rows[row_index].get_info())
 
+        return (self.next_empty_row, None)
 
     def get(self) -> list[RowWidget]:
         return self.rows

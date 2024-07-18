@@ -9,6 +9,7 @@ from Doc import *
 from icecream import ic
 from dotenv import load_dotenv
 from base64 import urlsafe_b64encode as b64e, urlsafe_b64decode as b64d
+from reader import read_receipt_id
 
 
 def write_auth(doc, components):
@@ -120,6 +121,37 @@ def write_auth(doc, components):
     save_doc(doc, components, "Payments")
 
 
+def write_receipt(doc, components):
+    cart = components.get('cart')
+    cart_items = []
+
+    current_serial = 1
+    for item in cart.get():
+        if item.get_info():
+            item.get_info()['serial'] = current_serial
+            cart_items.append(item.get_info())
+            current_serial += 1
+
+    if len(cart_items) <= 0:
+        ErrorPopup('Add at least one item to create a document.')
+        return False
+
+    doc_id = "{:010}".format((read_receipt_id() + 1))
+    client_name = components.get('client name').get()
+    filename = f"{doc_id} - {components.get('client name').get().strip().lower().replace(" ", "_")}.docx"
+
+    insert_invoice_info(doc, doc_id, client_name)
+    insert_items_table(doc, cart_items[0:9])
+    insert_paragraph_after(doc.add_paragraph(), "\n")
+
+    if len(cart_items) >= 10:
+        insert_items_table(doc, cart_items[9:])
+
+    insert_totals_table(doc, cart_items)
+    save_doc(doc, components, filename)
+    insert_receipt_to_history(doc_id, client_name)
+
+
 def obscure(unobscured: str) -> str:
     return b64e(zlib.compress(str.encode(unobscured), 9)).decode()
 
@@ -128,7 +160,7 @@ def unobscure(obscured: str) -> str:
     return zlib.decompress(b64d(str.encode(obscured))).decode()
 
 
-def write_to_placeholders(doc, components, doctype):
+def replace_placeholders(doc, components, doctype):
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
 
@@ -178,20 +210,26 @@ def write_to_placeholders(doc, components, doctype):
         ]
 
         insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
-        insert_to_history(components)
+        insert_retainer_to_history(components)
         save_doc(doc, components, doctype)
 
     except Exception as e:
         print(e)
 
 
-# write a newly created retainer information into the history
-def insert_to_history(app_components=None):
+def insert_retainer_to_history(app_components=None):
 
     if app_components is None:
         return
 
-    check_history_dir_and_file()
+    csv_columns = ['case_id', 'created_by', 'created_date', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
+
+    # set up csv_columns
+    for i in range(1,13):
+        csv_columns.append(f"amount_{str(i)}")
+        csv_columns.append(f"date_{str(i)}")
+
+    check_history_dir_and_file(f"{os.getcwd()}\\write", "history.csv", csv_columns)
 
     # things to enter into the new entry
     history_entry = ['', os.environ['COMPUTERNAME']]
@@ -219,31 +257,42 @@ def insert_to_history(app_components=None):
         history_entry.append(str(current_amount))
         history_entry.append(str(current_date))
 
-
     # remove commas from strings as it interferes with the csv
     for index, col in enumerate(history_entry):
         history_entry[index] = re.sub("[,]\\s*", "_", str(col))
 
     with open(f"{os.getcwd()}\\write\\history.csv", "a") as history:
         history_entry = (',').join(history_entry)
-        history.write("\n" + history_entry)
+        history.write(f'{history_entry}\n')
+
+# write the passed doc_id to records.csv
+def insert_receipt_to_history(doc_id, client_name):
+    client_name = client_name.strip().lower().replace(" ", "_").replace(", ",";").replace(",",";")
+
+    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'receipts.csv', (['created_date', 'document_id', 'client_name', 'created_by']))
+
+    records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\records')
+    doc_id = str('[{:010}]'.format(doc_id))
+    timestamp = datetime.datetime.now().strftime("[%d/%m/%Y-%H:%M:%I]")
+
+    try:
+        with open(records_file, 'a') as log_file:
+            log_file.write((",").join([timestamp, doc_id, client_name, os.environ['COMPUTERNAME']]))
+            log_file.write("\n")
+
+    except Exception as e:
+        print(e)
 
 
-def check_history_dir_and_file():
+def check_history_dir_and_file(check_dir, check_file, csv_columns):
     # set up write directory
-    if not os.path.exists(f"{os.getcwd()}\\write"):
-        os.makedirs(f"{os.getcwd()}\\write")
+    if not os.path.exists(check_dir):
+        os.makedirs(check_dir)
 
-    if not os.path.exists(f"{os.getcwd()}\\write\\history.csv"):
-        csv_columns = ['case_id', 'created_by', 'created_date', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
-
-        # set up csv_columns
-        for i in range(1,13):
-            csv_columns.append(f"amount_{str(i)}")
-            csv_columns.append(f"date_{str(i)}")
-
+    if not os.path.exists(f"{check_dir}\\{check_file}"):
         # write the header csv_columns to file
-        with open(f"{os.getcwd()}\\write\\history.csv", "x") as history:
+        with open(f"{check_dir}\\{check_file}", "x") as history:
             history.write(",".join(csv_columns))
+            history.write("\n")
             history.close()
 

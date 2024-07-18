@@ -57,13 +57,13 @@
 
         "buttons": {
             "reset": "red",
+            "output": "gray",
+            "test": "light gray",
             "retainer": "#383FBC",
             "payments": "dark blue",
             "conduct": "#1A8405",
             "history": "gray",
-            "decrypt": "gray",
-            "output": "gray",
-            "test": "light gray"
+            "decrypt": "gray"
         }
     },
 
@@ -92,10 +92,10 @@
 
         "buttons": {
             "reset": "red",
+            "output": "gray",
+            "test": "light gray",
             "add item": "#1A8405",
-            "create receipt": "dark blue",
-            "history": "gray",
-            "output": "gray"
+            "create receipt": "dark blue"
         }
     }
 }

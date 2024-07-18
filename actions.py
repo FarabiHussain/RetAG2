@@ -7,7 +7,7 @@ from icecream import ic
 from Popups import ErrorPopup
 from dotenv import load_dotenv
 from writer import obscure, unobscure
-from reader import import_history
+from reader import read_retainer_history
 
 
 def decrypt_button(app):
@@ -100,32 +100,106 @@ def test_button(app):
 
     app.components['application fee'].set(f"${total_amount}", total_months)
 
+    for i in range(1,14):
+        new_row, new_row_info = generate_row_contents(
+            app_components=app.components, 
+            override_row_content={
+                'service': random.choice(["Immigration", "Affidavit", "Invitation Letter", "Notary", "EOI", "MPNP", "PR", "Sousal Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]),
+                'quantity': f"{str(random.randint(1, 10))}",
+                'rate': str(random.choice([100,200,300,400,500])),
+                'tax_rate': 12.0,
+                'gst': 7.0,
+                'pst': 5.0,
+            }
+        )
+
+    app.components.get('cart').update(
+            row_info=new_row,
+            row_contents=new_row_info,
+    )
+
+
+def generate_row_contents(quantity_offset=None, app_components=None, override_row_content={}):
+    if quantity_offset is None:
+        quantity_offset = 0
+
+    if override_row_content:
+        service = override_row_content.get("service")
+        quantity = float(override_row_content.get("quantity"))
+        rate = float(override_row_content.get("rate"))
+        tax_rate = float(override_row_content.get("tax_rate"))
+
+        return (
+            [
+                f'{service[0:22]}...' if len(service) > 22 else service,
+                quantity,
+                rate,
+                "${:,.2f}".format((rate * quantity * (tax_rate/100))),
+                "${:,.2f}".format((rate * quantity * (1+(tax_rate/100)))),
+            ], 
+            {
+                'service': service,
+                'quantity': quantity,
+                'rate': rate,
+                'gst': override_row_content.get("gst"),
+                'pst': override_row_content.get("pst"),
+                'taxes': str(rate * quantity * (tax_rate/100)),
+                'price': str(rate * quantity * (1+(tax_rate/100)))
+            }
+        )
+
+
+    service = app_components.get("service").get()
+    quantity = float(app_components.get("quantity").get()) + quantity_offset
+    rate = float(app_components.get("rate").get().replace("$",""))
+    tax_rate = float(app_components.get("GST percentage").get()) + float(app_components.get("PST percentage").get())
+
+    return (
+        [
+            f'{service[0:22]}...' if len(service) > 22 else service,
+            quantity,
+            rate,
+            "${:,.2f}".format((rate * quantity * (tax_rate/100))),
+            "${:,.2f}".format((rate * quantity * (1+(tax_rate/100)))),
+        ], 
+        {
+            'service': service,
+            'quantity': quantity,
+            'rate': rate,
+            'gst': app_components.get("GST percentage").get(),
+            'pst': app_components.get("PST percentage").get(),
+            'taxes': str(rate * quantity * (tax_rate/100)),
+            'price': str(rate * quantity * (1+(tax_rate/100)))
+        }
+    )
+
 
 def add_item_button(app):
     app_components = app.get_all_components()
     cart = app_components.get('cart')
 
-    # def generate_row_contents(quantity_offset=0):
-    #     service = app_components.get("service").get()
-    #     quantity = float(app_components.get("quantity").get()) + quantity_offset
-    #     rate = float(app_components.get("rate").get().replace("$",""))
-    #     tax_rate = float(app_components.get("GST percentage").get()) + float(app_components.get("PST percentage").get())
+    new_row, new_row_info = generate_row_contents(app_components=app_components)
 
-    #     return [
-    #         service,
-    #         quantity,
-    #         rate,
-    #         "${:,.2f}".format((rate * quantity * (tax_rate/100))),
-    #         "${:,.2f}".format((rate * quantity * (1+(tax_rate/100)))),
-    #     ]
-    
-    # new_row = generate_row_contents()
+    update_index, existing_item_info = cart.contains(
+        row_info=new_row_info, 
+        compare_keys = [
+            'service',
+            'rate',
+            'gst',
+            'pst',
+        ]
+    )
 
-    # if not (cart.contains(row_contents=new_row, indices_to_compare=[0,2,3,4])):
-    #     cart.update(row_contents=new_row)
-    # else:
-    #     cart.update(row_number=(cart.next_empty_row-1), row_contents=generate_row_contents(quantity_offset=1))
+    # print(new_row_info, existing_item_info)
 
+    if existing_item_info is not None:
+        new_row, new_row_info = generate_row_contents(float(existing_item_info.get('quantity')))
+
+    cart.update(
+        row_index=update_index, 
+        row_info=new_row_info, 
+        row_contents=new_row,
+    )
 
 
 class HistoryViewer():
@@ -143,7 +217,7 @@ class HistoryViewer():
 
         # check whether history entries exist
         if entries == []:
-            imported_history = import_history()
+            imported_history = read_retainer_history()
 
             if len(imported_history) == 0:
                 ErrorPopup(msg="No entries in history.")
@@ -160,7 +234,7 @@ class HistoryViewer():
 
             self.window_width = 1640*0.9
             self.window_height = 800
-            history_window = WindowView(app=app, window_name="", width=self.window_width, height=self.window_height)
+            history_window = WindowView(app=app, window_name="history window", width=self.window_width, height=self.window_height)
             app.add_window("history window", history_window)
 
             for i in range(3):

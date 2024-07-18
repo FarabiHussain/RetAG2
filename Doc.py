@@ -105,8 +105,23 @@ def set_cell_border(cell: _Cell, **kwargs):
                     element.set(qn("w:{}".format(key)), str(edge_data[key]))
 
 
+#
+def insert_paragraph_after(paragraph, text=None, style=None):
+    new_p = OxmlElement("w:p")
+    paragraph._p.addnext(new_p)
+    new_para = Paragraph(new_p, paragraph._parent)
+    if text:
+        new_para.add_run(text)
+    if style is not None:
+        new_para.style = style
+    return new_para
+
+
 # set up folders and save files, print if needed
-def save_doc(doc, data, doctype):
+def save_doc(doc=None, components=None, doctype="", override_output_filename=""):
+    if doc is None or components is None:
+        return False
+
     try:
         # set up the output directory
         output_dir = os.getcwd() + "\\output\\"
@@ -114,7 +129,10 @@ def save_doc(doc, data, doctype):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        output_filename = f"{doctype} - {re.sub(r' \((.*?)\)', '', data['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', data['client 1 last name'].get()).strip()}.docx"
+        output_filename = f"{doctype} - {re.sub(r' \((.*?)\)', '', components['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', components['client 1 last name'].get()).strip()}.docx"
+
+        if (override_output_filename.strip() != ""):
+            output_filename = override_output_filename
 
         # save the file to the output folder
         doc.save(output_dir + output_filename)
@@ -126,6 +144,101 @@ def save_doc(doc, data, doctype):
         # ErrorPopup(f"Exception when saving and opening document:\n\n{str(e)}")
         print(f"Exception when saving document: {e}")
         return False
+
+
+# write the invoice number and date on the top
+def insert_invoice_info(document, doc_id, billed_to):
+
+    timestamp = str(datetime.datetime.now().strftime("%d %B %Y, %H:%M"))
+
+    if (len(billed_to.strip()) == 0):
+        insert_paragraph_after(
+            document.add_paragraph(),
+            (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\n\n"),
+        )
+    else:
+        insert_paragraph_after(
+            document.add_paragraph(),
+            (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\nBilled to\t{billed_to}\n"),
+        )
+
+
+# itemized table
+def insert_items_table(doc=None, cart_items=[]):
+
+    # Table data in a form of list
+    headings = [
+        {"heading": "SL.", "width": 1.0},
+        {"heading": "DESCRIPTION", "width": 20.0},
+        {"heading": "QTY", "width": 1.0},
+        {"heading": "RATE", "width": 1.0},
+        {"heading": "AMOUNT", "width": 1.0},
+    ]
+
+    # Creating a table object
+    items_table = doc.add_table(rows=1, cols=5)
+
+    # add heading in the 1st row of the table
+    row = items_table.rows[0].cells
+    for idx, col in enumerate(headings):
+        row[idx].text = col["heading"]
+
+    # add data from the list to the table
+    for index, entry in enumerate(cart_items):
+
+        # Adding a row and then adding data in it.
+        row = items_table.add_row().cells
+
+        row[0].text = str(entry["serial"])
+        row[1].text = str(entry["service"])
+        row[2].text = str(entry["quantity"])
+        row[3].text = "{:,.2f}".format(entry["rate"])
+        row[4].text = "{:,.2f}".format(int(entry["quantity"]) * float(entry["rate"]))
+
+    # set the table borders
+    for cell in items_table.rows[0].cells:
+        set_cell_border(cell, bottom={"sz": 6, "color": "#EEE", "val": "single", "space": "10"})
+        set_cell_border(cell, top={"sz": 6, "color": "#EEE", "val": "single", "space": "15"})
+
+    # set column widths
+    for idx, col in enumerate(headings):
+        for index, cell in enumerate(items_table.columns[idx].cells):
+            cell.width = CM(col["width"])
+
+            if index > 0:
+                set_cell_border(cell, bottom={"sz": 6, "color": "#EEE", "val": "single", "space": "15"},)
+
+        set_cell_border(cell, bottom={"sz": 6, "color": "#EEE", "val": "single", "space": "0"})
+
+    # set row heights
+    for index, row in enumerate(items_table.rows):
+        row.height = CM(1)
+
+    make_rows_bold(items_table.rows[0])
+
+
+# table containing taxes and total
+def insert_totals_table(doc, cart_items): 
+    total_table = doc.add_table(rows=1, cols=5)
+
+    taxes = 0
+    total = 0
+    for item in cart_items:
+        taxes += float(item.get('taxes'))
+        total += float(item.get('price'))
+
+    total_table_data = [
+        [str("TAXES"), "", "", "", "${:,.2f}".format(taxes)],
+        [str("TOTAL"), "", "", "", "${:,.2f}".format(total)],
+    ]
+
+    for total_row in total_table_data:
+        row = total_table.add_row().cells
+
+        for i, col in enumerate(total_row):
+            row[i].text = col
+
+        make_rows_bold(total_table.rows[-1])
 
 
 # insert table with the passed data
