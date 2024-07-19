@@ -5,10 +5,12 @@ from GUI import *
 from App import *
 from Subapps import *
 from reader import *
+from RenderFont import RenderFont
 
 imgs = Img("md")
 app = App()
 app.set_size(w=1640, h=900)
+rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
 
 blueprint = app.get_blueprint()
 subapp_components = []
@@ -24,13 +26,14 @@ for subapp_name in blueprint:
     new_subapp['button'] = ctk.CTkButton(
         master=app.root,
         text_color="black",
-        text=subapp_name.upper(),
+        text='',#subapp_name.upper(),
         border_width=0,
         corner_radius=0,
         fg_color="lightgray",
         width=170,
         height=50,
-        font=ctk.CTkFont(family="Roboto Bold")
+        # font=ctk.CTkFont(family="Roboto Bold")
+        image=rf.get_render(15, subapp_name.upper()),
     )
 
     subapp_components.append(new_subapp)

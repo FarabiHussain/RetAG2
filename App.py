@@ -23,6 +23,7 @@ class App():
         self.root.title(f"AMCAIM Toolbox {self.version}")
         self.blueprint = self.__read_blueprint()
         self.components = {}
+        self.buttons = {}
         self.windows = {}
         self.app_icon_passed = self.__check_app_ico()
 

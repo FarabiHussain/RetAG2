@@ -3,10 +3,9 @@ import customtkinter as ctk
 import datetime
 import os
 from Popups import ErrorPopup
-import actions
+from RenderFont import RenderFont
 from Path import *
 from docx import Document
-from CTkMessagebox import CTkMessagebox
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
@@ -45,7 +44,21 @@ class GUI:
 
 class RowBreak(GUI):
     def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
-        self.breakline = ctk.CTkLabel(master, text=heading.upper(), height=32, width=450, fg_color="#808080", text_color="white", corner_radius=2, font=ctk.CTkFont(family=family_bold, weight='bold'))
+        rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#fff')
+
+        self.breakline = ctk.CTkLabel(
+            master, 
+            # text=heading.upper(), 
+            text='', 
+            height=32, 
+            width=450, 
+            fg_color="#808080", 
+            text_color="white", 
+            corner_radius=2, 
+            image=rf.get_render(15, heading.upper())
+            # font=ctk.CTkFont(family=family_bold, weight='bold')
+        )
+
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
 
     def reset(self) -> None:
@@ -527,7 +540,7 @@ class AppButton():
 
 
 class ActionButton():
-    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=91, height=40, row=0, col=0, blueprint={}) -> None:
+    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=150, height=40, row=0, col=0, blueprint={}) -> None:
 
         self.component = ctk.CTkButton(
             master=master,
@@ -540,7 +553,9 @@ class ActionButton():
             width=width,
             height=height,
             state='disabled' if 'spacer' in action else 'normal'
-        ).grid(row=row, column=col, pady=10, padx=5)
+        )
+        
+        self.component.grid(row=row, column=col, pady=10, padx=2)
 
 
     def assign_action(self, app=None, action="", blueprint={}) -> None:
@@ -704,7 +719,7 @@ class CellWidget():
 
 
 class RowWidget():
-    def __init__(self, parent_frame=None, row_contents=[], row_color="#eee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
+    def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_color="#eee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
 
         # no parent, nowhere to put this
         if parent_frame is None:
@@ -719,7 +734,8 @@ class RowWidget():
         self.container = ctk.CTkFrame(master=parent_frame, fg_color="white", border_width=0, width=parent_width, height=30)
         self.buttons = []
         self.contents = []
-        self.info = {'selected': False}
+        self.info = {}
+        self.selected = False
 
         def highlight_row():
             for c in self.contents:
@@ -729,9 +745,9 @@ class RowWidget():
             for c in self.contents:
                 c.cell.configure(fg_color=row_color)
 
-        def select_row():
-            self.info['selected'] = True
-            ic(self.info)
+        def select_row(self):
+            table_obj.selected_row = row_contents
+            app.buttons['Receipt']['remove item'].component.configure(fg_color="#BA0600", state='normal')
 
         # setup the grid system
         for i in range(len(row_contents)+1):
@@ -772,7 +788,7 @@ class RowWidget():
                         text_color="white" if mode is "header" else "black", 
                         fg_color="#000" if mode is "header" else row_color, 
                         font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode is "header" else ctk.CTkFont(family=family_medium, size=12),
-                        command=lambda: select_row(),
+                        command=lambda: select_row(self),
                         on_enter=lambda *args: highlight_row(),
                         on_leave=lambda *args: unhighlight_row(),
                     )
@@ -782,6 +798,7 @@ class RowWidget():
 
         # place the entire container with all the stuff above
         self.container.grid(row=row_number, column=0, pady=0, padx=0)
+
 
     def set(self, row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"], row_info=None):
         for index, col in enumerate(self.contents):
@@ -795,6 +812,7 @@ class RowWidget():
         else:
             self.info = row_info
 
+
     def get_cells(self) -> list:
         row_contents = []
 
@@ -803,8 +821,10 @@ class RowWidget():
 
         return row_contents
 
+
     def get_info(self) -> list:
         return self.info
+
 
     def cleanup(self):
         for widget in self.buttons:
@@ -817,15 +837,17 @@ class RowWidget():
 
 
 class TableWidget():
-    def __init__(self, master=None, headers:list=[], rows:list=[], parent_width=0, parent_height=0, rows_per_page=15, active_row=0):
+    def __init__(self, master=None, app=None, headers:list=[], rows:list=[], parent_width=0, parent_height=0, rows_per_page=15):
 
+        self.app = app
         self.rows = rows
         self.parent_frame = master
         self.parent_width = parent_width
         self.parent_height = parent_height
         self.rows_per_page = rows_per_page
         self.rows_rendered = []
-        self.active_row = active_row
+        self.next_empty_index = 0
+        self.selected_row = None
         self.page = 1
 
         for i in range(3):
@@ -844,6 +866,7 @@ class TableWidget():
             parent_width=parent_width, 
             mode="header", 
             row_contents=headers, 
+            app=self.app, 
         )
 
         self.table_frame = ctk.CTkFrame(
@@ -866,6 +889,7 @@ class TableWidget():
             parent_frame=self.tools_frame, 
             parent_width=self.parent_width, 
             mode="tools", 
+            app=self.app, 
             row_contents=[
                 "previous page", 
                 "next page", 
@@ -879,7 +903,9 @@ class TableWidget():
                 lambda:None,
                 lambda:None,
                 lambda:None,
-            ])
+            ],
+            table_obj=self
+        )
 
         self.header_frame.grid(row=0, column=1, pady=[9,0])
         self.table_frame.grid(row=1, column=1, pady=[0,0])
@@ -893,17 +919,18 @@ class TableWidget():
 
 
     def navigate(self, page=0):
+
         if (page == 1):
-            self.tools.buttons[0].configure(fg_color="light gray", state="disabled")
-            self.tools.buttons[1].configure(fg_color="black", state="normal")
+            self.tools.buttons[0].configure(fg_color="white", state="disabled", text="")
+            self.tools.buttons[1].configure(fg_color="black", state="normal", text=f"page {page+1} ▶")
 
         elif (page == math.ceil(len(self.rows)/self.rows_per_page)-1):
-            self.tools.buttons[0].configure(fg_color="black", state="normal")
-            self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
+            self.tools.buttons[0].configure(fg_color="black", state="normal", text=f"◀ page {page-1}")
+            self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
 
         else:
-            self.tools.buttons[0].configure(fg_color="black", state="normal")
-            self.tools.buttons[1].configure(fg_color="black", state="normal")
+            self.tools.buttons[0].configure(fg_color="black", state="normal", text=f"◀ page {page-1}")
+            self.tools.buttons[1].configure(fg_color="black", state="normal", text=f"page {page+1} ▶")
 
         for row in self.rows_rendered:
             row.cleanup()
@@ -941,18 +968,20 @@ class TableWidget():
                     RowWidget(
                         parent_frame=self.table_frame, 
                         parent_width=self.rows[index + page_offset].get('parent_width'), 
-                        row_number=self.rows[index + page_offset].get('row_number'), 
+                        row_number=index, 
                         mode=self.rows[index + page_offset].get('mode'), 
                         row_contents=self.rows[index + page_offset].get('row_contents'),
-                        row_color=self.rows[index + page_offset].get('row_color'),
+                        row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
+                        table_obj=self,
+                        app=self.app, 
                     )
                 )
 
                 # set the next button to be active if the next row is not a blank
                 if (index + page_offset) == len(self.rows) - 1:
-                    self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
+                    self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
                 else:
-                    self.tools.buttons[1].configure(fg_color="black", state="normal")
+                    self.tools.buttons[1].configure(fg_color="black", state="normal", text=f"page {page+1} ▶")
 
             else:
                 RowWidget(
@@ -962,10 +991,11 @@ class TableWidget():
                     row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
                     is_blank = True,
                     mode='table', 
+                    app=self.app, 
                 )
 
                 # set the next button to be active if the last row was blank
-                self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
+                self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
 
 
     def reset(self) -> None:
@@ -985,7 +1015,7 @@ class TableWidget():
 
         self.rows = []
         self.rows_rendered = []
-        self.active_row = 0
+        self.next_empty_index = 0
         self.page = 1
 
         for i in range(self.rows_per_page):
@@ -996,18 +1026,20 @@ class TableWidget():
                 row_color="#ddd" if i % 2==0 else "#eee",
                 row_number=i,
                 mode="table",
+                table_obj=self,
+                app=self.app, 
             )
 
-        self.tools.buttons[0].configure(fg_color="light gray", state="disabled")
+        self.tools.buttons[0].configure(fg_color="white", state="disabled", text="")
 
         if len(self.rows) <= self.rows_per_page:
-            self.tools.buttons[1].configure(fg_color="light gray", state="disabled")
+            self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
 
 
     def add(self, row_info=None, row_contents=None, row_index=None) -> None:
         for row_info, row_contents in zip(row_info, row_contents):
 
-            row_to_update = row_index if row_index is not None else self.active_row
+            row_to_update = row_index if row_index is not None else self.next_empty_index
 
             new_row = (
                 {
@@ -1023,7 +1055,7 @@ class TableWidget():
 
             if row_index is None:
                 self.rows.append(new_row)
-                self.active_row += 1
+                self.next_empty_index += 1
             else:
                 self.rows[row_index] = new_row
 
@@ -1031,23 +1063,25 @@ class TableWidget():
         self.update(page=self.page)
 
 
-    def remove(self) -> dict:
+    def remove(self) -> None:
         rows_after_removal = []
-        ic(self.rows[0])
+        self.app.buttons['Receipt']['remove item'].component.configure(fg_color='light gray', state='disabled')
 
-        # for row in self.rows[0]:
-        #     if 'selected' in row.info:
-        #         ic(row)
+        for row in self.rows:
+            if (row['row_contents'] != self.selected_row):
+                rows_after_removal.append(row)
 
-        #     if row.get('selected') is False:
-        #         rows_after_removal.append(row)
+        self.rows = rows_after_removal
+        self.next_empty_index -= 1
+        self.selected_row = None
+        self.tools.buttons[0].configure(fg_color="white", state="disabled", text="")
+        self.navigate(page=1)
+        self.update()
 
-        # self.rows = rows_after_removal
-        # ic(self.rows)
 
 
     def contains(self, row_info=[], compare_keys=[]):
-        for row_index in range(self.active_row):
+        for row_index in range(self.next_empty_index):
 
             current_row_match = False
 
@@ -1066,4 +1100,3 @@ class TableWidget():
 
     def get(self) -> list:
         return self.rows
-

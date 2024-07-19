@@ -56,26 +56,20 @@
         },
 
         "buttons": {
-            "output": "gray",
+            "output": "#545454",
             "retainer": "#383FBC",
-            "payments": "dark blue",
+            "payments": "#000042",
             "conduct": "#1A8405",
-            "history": "gray",
-            "decrypt": "gray",
-            "spacer 0": "white",
-            "spacer 1": "white",
-            "spacer 2": "white",
-            "spacer 3": "white",
-            "spacer 4": "white",
-            "spacer 5": "white",
-            "test": "light gray",
-            "reset agreement": "red"
+            "history": "#545454",
+            "decrypt": "#545454",
+            "spacer 0": "#ffffff",
+            "test": "#d3d3d3",
+            "reset agreement": "#BA0600"
         }
     },
 
     "Receipt": {
         "column_weights": [1,2,0],
-        "init_app": "/assets/functions/Receipt.py",
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT"},
         "client name": {"column": 0, "type": "entry"},
@@ -99,20 +93,17 @@
         },
 
         "buttons": {
-            "output": "gray",
+            "output": "#545454",
             "add item": "#1A8405",
-            "remove item": "red",
-            "create receipt": "dark blue",
-            "find receipt": "gray",
-            "spacer 0": "white",
-            "spacer 1": "white",
-            "spacer 2": "white",
-            "spacer 3": "white",
-            "spacer 4": "white",
-            "spacer 5": "white",
-            "spacer 6": "white",
-            "test": "light gray",
-            "reset receipt": "red"
-        }
+            "remove item": "#BA0600",
+            "create receipt": "#000042",
+            "find receipt": "#545454",
+            "spacer 0": "#ffffff",
+            "spacer 1": "#ffffff",
+            "test": "#d3d3d3",
+            "reset receipt": "#BA0600"
+        },
+
+        "init_app": "/assets/functions/Receipt.py"
     }
 }

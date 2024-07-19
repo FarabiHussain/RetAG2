@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from GUI import *
+from RenderFont import RenderFont
 from reader import import_function
 
 class Subapp():
@@ -13,8 +14,7 @@ class Subapp():
         self.button.place(x=0, y=(50*button_position)+10)
         self.blueprint = blueprint
 
-        self.render_app(self.frame, blueprint, app, imgs, columns_weights)
-        self.init_app(app, subapp_components)
+        self.render_app(self.frame, blueprint, app, imgs, columns_weights, subapp_components)
 
         if button_position == 0:
             self.lift_app(subapp_components)
@@ -22,12 +22,11 @@ class Subapp():
 
     def init_app(self, app, subapp_components):
         if 'init_app' in self.blueprint:
-            ic(self.subapp_name)
             function_path = self.blueprint['init_app']
 
             if not os.path.exists(function_path):
                 setup_function = import_function(function_path, "callback")
-                setup_function(self, app.get_all_components(), subapp_components)
+                setup_function(self, app, subapp_components)
 
 
     def lift_app(self, subapp_components):
@@ -38,7 +37,7 @@ class Subapp():
         self.frame.lift()
 
 
-    def render_app(self, frame, blueprint, app, imgs, columns_weights):
+    def render_app(self, frame, blueprint, app, imgs, columns_weights, subapp_components):
         column_widths = [0, 460, 990, 1380]
 
         self.page_columns = [
@@ -131,7 +130,8 @@ class Subapp():
                 new_component = TableWidget(
                     master=self.page_columns[specs['column']], 
                     headers=specs['headers'],
-                    parent_width=column_widths[blueprint['column_weights'][specs['column']]]
+                    parent_width=column_widths[blueprint['column_weights'][specs['column']]],
+                    app=app, 
                 )
 
             app.add_component(label, new_component)
@@ -142,8 +142,22 @@ class Subapp():
         btn_frame.place(x=25, y=800)
 
         if "buttons" in blueprint.keys():
+            app.buttons[self.subapp_name] = {}
+            rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#ffffff')
+
             for index, btn in enumerate(blueprint.get("buttons")):
-                ActionButton(master=btn_frame, action=btn, app=app, blueprint=blueprint, image=imgs.get(f"{btn}.png"), btn_color=blueprint['buttons'][btn], row=0, col=index)
+                btn_img = rf.get_render(13, btn.upper())
+
+                app.buttons[self.subapp_name][btn] = ActionButton(
+                    master=btn_frame, 
+                    action=btn, 
+                    app=app, 
+                    blueprint=blueprint, 
+                    image=btn_img, 
+                    btn_color=blueprint['buttons'][btn], 
+                    row=0, 
+                    col=index, 
+                )
 
         if "callbacks" in blueprint.keys():
             for index, component_name in enumerate(blueprint.get("callbacks")):
@@ -151,4 +165,7 @@ class Subapp():
                 current_callback = import_function(blueprint['callbacks'][component_name], "callback")
 
                 current_component.add_callback(component_name=component_name, app=app, callback=current_callback)
+
+        if "init_app" in blueprint.keys():
+            self.init_app(app, subapp_components)
 

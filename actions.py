@@ -104,7 +104,7 @@ def test_button(app):
     random_row_contents = []
     random_row_infos = []
 
-    for i in range(random.randint(25,30)):
+    for i in range(random.randint(1,5)):
         new_row, new_row_info = generate_row_contents(
             app_components=app.components, 
             override_row_content={
@@ -166,7 +166,6 @@ def generate_row_contents(quantity_offset=None, app_components=None, override_ro
             'pst': pst,
             'taxes': str(rate * quantity * (tax_rate/100)),
             'price': str(rate * quantity * (1+(tax_rate/100))),
-            'selected': False,
         }
     )
 

@@ -1,7 +1,6 @@
 from PIL import Image, ImageFont, ImageDraw, ImageTk
 
 
-
 class RenderFont:
     def __init__(self, filename, fill=(0, 0, 0)):
         """
@@ -27,7 +26,7 @@ class RenderFont:
         if type(font_size) is not int:
             raise TypeError("font_size must be a int")
 
-        width = len(txt)*font_size
+        width = len(txt)*(font_size-3)
         height = font_size+5
 
         font = ImageFont.truetype(font=self._file, size=font_size)
