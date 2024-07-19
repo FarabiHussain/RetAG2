@@ -3,6 +3,7 @@ import os
 import names
 import random
 import math
+from glob import glob
 from icecream import ic
 from Popups import ErrorPopup
 from dotenv import load_dotenv
@@ -14,7 +15,7 @@ def decrypt_button(app):
     from GUI import WindowView
 
     # retrieve object from app.components
-    decryptor_window = app.get_window("history window")
+    decryptor_window = app.get_window("cvv decryptor")
 
     # check whether the object contains a window
     if (decryptor_window is not None) and (not decryptor_window.body.winfo_exists()):
@@ -22,8 +23,8 @@ def decrypt_button(app):
 
     # create a new object if None was found
     if decryptor_window is None:
-        decryptor_window = WindowView(app=app, window_name="", width=300, height=260)
-        app.add_window("history window", decryptor_window)
+        decryptor_window = WindowView(app=app, window_name="CVV Decryptor", width=300, height=260)
+        app.add_window("cvv decryptor", decryptor_window)
 
         decryptor_window.__password_strvar = ctk.StringVar(value="")
         decryptor_window.__encrypted_strvar = ctk.StringVar(value="")
@@ -103,7 +104,7 @@ def test_button(app):
     random_row_contents = []
     random_row_infos = []
 
-    for i in range(30):
+    for i in range(random.randint(25,30)):
         new_row, new_row_info = generate_row_contents(
             app_components=app.components, 
             override_row_content={
@@ -123,6 +124,8 @@ def test_button(app):
         row_contents=random_row_contents,
         row_info=random_row_infos,
     )
+
+    update_total_row(cart=app.components.get('cart'))
 
 
 def generate_row_contents(quantity_offset=None, app_components=None, override_row_content={}):
@@ -162,7 +165,8 @@ def generate_row_contents(quantity_offset=None, app_components=None, override_ro
             'gst': gst,
             'pst': pst,
             'taxes': str(rate * quantity * (tax_rate/100)),
-            'price': str(rate * quantity * (1+(tax_rate/100)))
+            'price': str(rate * quantity * (1+(tax_rate/100))),
+            'selected': False,
         }
     )
 
@@ -192,6 +196,19 @@ def add_item_button(app):
         row_index=update_index
     )
 
+    update_total_row(cart=cart)
+
+
+def remove_item_button(app):
+    app_components = app.get_all_components()
+    cart = app_components.get('cart')
+
+    cart.remove()
+
+    update_total_row(cart=cart)
+
+
+def update_total_row(cart):
     cart_items = cart.get()
     font = ctk.CTkFont(family='Roboto Bold', size=12, weight='bold')
     total_taxes = 0
@@ -200,8 +217,8 @@ def add_item_button(app):
         total_taxes += float(item['info']['taxes'])
         total_price += float(item['info']['price'])
 
-    cart.tools.buttons[3].configure(fg_color='light gray', text_color="black", text="${:,.2f}".format(total_taxes), font=font, state='normal')
-    cart.tools.buttons[4].configure(fg_color='light gray', text_color="black", text="${:,.2f}".format(total_price), font=font, state='normal')
+    cart.tools.buttons[3].configure(fg_color='#325882', text_color="white", text="${:,.2f}".format(total_taxes), font=font, state='normal')
+    cart.tools.buttons[4].configure(fg_color='#325882', text_color="white", text="${:,.2f}".format(total_price), font=font, state='normal')
 
 
 class HistoryViewer():
@@ -325,7 +342,6 @@ class HistoryViewer():
     def history_table_nav(self, app=None, page_number=0, entries=[]):
 
         if (page_number == 0):
-            ic(len(entries))
             self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
             self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
@@ -348,3 +364,121 @@ class HistoryViewer():
         self.header_frame.grid(row=0, column=1)
         self.table_frame.grid(row=1, column=1)
         self.tools_frame.grid(row=2, column=1)
+
+
+class ReceiptFinder():
+
+    # display the popup which allows users to search for existing documents
+    def __init__(self, app):
+
+        receipt_finder = app.get_window("receipt finder")
+
+        if (receipt_finder is None or not receipt_finder.winfo_exists()): 
+            receipt_finder = ctk.CTkToplevel()
+
+            w = 300
+            h = 230
+            x = (app.get_size('w')/2) - (w/2)
+            y = (app.get_size('h')/2) - (w/2)
+            f = ctk.CTkFont(family='Roboto Bold', size=12, weight='bold')
+
+            ctk.CTkFrame(receipt_finder, corner_radius=2, border_width=1, width=260, height=70, fg_color='white').place(x=20, y=140)
+
+            ctk.CTkLabel(receipt_finder, text="Document ID", bg_color='#E5E5E5', font=f).place(x=20, y=5)
+            self.doc_id_search = ctk.CTkEntry(receipt_finder, width=260, border_width=1, corner_radius=2, placeholder_text="leading zeros are optional")
+            self.doc_id_search.place(x=20, y=30)
+
+            ctk.CTkLabel(receipt_finder, text="Client Name", bg_color='#E5E5E5', font=f).place(x=20, y=65)
+            self.client_name_search = ctk.CTkEntry(receipt_finder, width=260, border_width=1, corner_radius=2, placeholder_text="full or partial name")
+            self.client_name_search.place(x=20, y=90)
+
+            ctk.CTkLabel(receipt_finder, text="Documents to open", bg_color='#E5E5E5', font=f).place(x=40, y=145)
+            self.qty_of_docs_to_open = ctk.CTkLabel(receipt_finder, width=28, height=28, corner_radius=2, text="05", fg_color='#DDDDDD', font=f)
+            self.qty_of_docs_to_open.place(x=80, y=170)
+
+            self.minus_button = ctk.CTkButton(receipt_finder, text="-", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:self.change_doc_count(-1), height=28, width=30)
+            self.minus_button.place(x=40, y=170)
+
+            self.plus_button = ctk.CTkButton(receipt_finder, text="+", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:self.change_doc_count(+1), height=28, width=30)
+            self.plus_button.place(x=120, y=170)
+
+            ctk.CTkButton(receipt_finder, text='open', border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:self.open_doc_by_filter(), width=72, height=42).place(x=188, y=156)
+
+            ## render the popup
+            receipt_finder.geometry('%dx%d+%d+%d' % (w, h, x, y))
+            receipt_finder.resizable(False, False)
+            receipt_finder.configure(fg_color='white')
+
+            receipt_finder.title("Receipt Finder")
+            receipt_finder.after(202, lambda: receipt_finder.focus())
+
+        else:
+            receipt_finder.focus()
+
+
+    # open documents
+    def open_doc_by_filter(self):
+
+        file_found = False
+        doc_id = self.doc_id_search.get()
+        client_name = self.client_name_search.get()
+
+        if (len(doc_id) == 0 and len(client_name) == 0):
+            ErrorPopup('Nothing entered into search fields')
+            return False
+
+        search_filters = []
+
+        try:
+            # remove surrounding whitespace, and ensure it is 10-digits long
+            doc_id = "{:010}".format(int((self.doc_id_search.get()).strip()))
+            search_filters.append(doc_id)
+        except:
+            print("doc_id not entered")
+
+        try:
+            # remove surrounding whitespace, convert to lowercase, replace spaces with underscores 
+            client_name = (self.client_name_search.get()).strip().lower().replace(" ", "_")
+            search_filters.append(client_name)
+        except:
+            print("client_name not entered")
+
+        # try to find all matches and open them
+        try:
+            open_counter = 0
+            open_limit = int(self.qty_of_docs_to_open.cget('text'))
+            for f in sorted(glob(f"{os.getcwd()}\\output\\*.docx"), key=os.path.getmtime, reverse=True):
+                if all(keyword in f for keyword in search_filters):
+                    os.startfile(f)
+                    open_counter += 1
+                    file_found = True
+
+                if (open_counter == open_limit):
+                    return True
+
+        except Exception as e:
+            print(e)
+
+        # no match was found so display a popup message
+        if not file_found:
+            ErrorPopup('No match found')
+
+
+    # change the number of documents to be opened
+    def change_doc_count(self, amount):
+        new_qty = int(self.qty_of_docs_to_open.cget('text')) + amount
+
+        if (new_qty <= 1):
+            new_qty = 1
+            self.minus_button.configure(state='disabled', fg_color='#EEEEEE')
+        elif new_qty >= 10:
+            new_qty = 10
+            self.plus_button.configure(state='disabled', fg_color='#EEEEEE')
+        else:
+            self.minus_button.configure(state='normal', fg_color="#23265e")
+            self.plus_button.configure(state='normal', fg_color="#23265e")
+
+        new_qty = "{:02}".format(new_qty)
+
+        self.qty_of_docs_to_open.configure(text=new_qty)
+

@@ -137,18 +137,24 @@ def write_receipt(doc, components):
         return False
 
     doc_id = "{:010}".format((read_receipt_id() + 1))
-    client_name = components.get('client name').get()
-    filename = f"{doc_id} - {components.get('client name').get().strip().lower().replace(" ", "_")}.docx"
+    client_name = components.get('client name').get().strip()
+    payment_number = f"Payment {("{:02}").format(int(components['payment number'].get().strip()))}"
+    filename = f"Receipt {doc_id} - {client_name} - {payment_number}"
 
-    insert_invoice_info(doc, doc_id, client_name)
-    insert_items_table(doc, cart_items[0:9])
-    insert_paragraph_after(doc.add_paragraph(), "\n")
+    printed_rows = 0
+    rows_per_page = 7
+    timestamp = str(datetime.datetime.now().strftime("%d %B %Y, %H:%M"))
 
-    if len(cart_items) >= 10:
-        insert_items_table(doc, cart_items[9:])
+    while printed_rows < len(cart_items):
+        insert_invoice_info(doc, doc_id, client_name, timestamp)
+        insert_items_table(doc, cart_items[printed_rows : printed_rows + rows_per_page])
+        printed_rows += rows_per_page
+
+        if printed_rows < len(cart_items):
+            doc.add_page_break()
 
     insert_totals_table(doc, cart_items)
-    save_doc(doc, components, filename)
+    save_doc(doc=doc, components=components, override_output_filename=filename)
     insert_receipt_to_history(doc_id, client_name)
 
 

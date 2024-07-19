@@ -14,9 +14,20 @@ class Subapp():
         self.blueprint = blueprint
 
         self.render_app(self.frame, blueprint, app, imgs, columns_weights)
+        self.init_app(app, subapp_components)
 
         if button_position == 0:
             self.lift_app(subapp_components)
+
+
+    def init_app(self, app, subapp_components):
+        if 'init_app' in self.blueprint:
+            ic(self.subapp_name)
+            function_path = self.blueprint['init_app']
+
+            if not os.path.exists(function_path):
+                setup_function = import_function(function_path, "callback")
+                setup_function(self, app.get_all_components(), subapp_components)
 
 
     def lift_app(self, subapp_components):
@@ -132,7 +143,7 @@ class Subapp():
 
         if "buttons" in blueprint.keys():
             for index, btn in enumerate(blueprint.get("buttons")):
-                ActionButton(master=btn_frame, action=btn, app=app, image=imgs.get(f"{btn}.png"), btn_color=blueprint['buttons'][btn], row=0, col=index)
+                ActionButton(master=btn_frame, action=btn, app=app, blueprint=blueprint, image=imgs.get(f"{btn}.png"), btn_color=blueprint['buttons'][btn], row=0, col=index)
 
         if "callbacks" in blueprint.keys():
             for index, component_name in enumerate(blueprint.get("callbacks")):

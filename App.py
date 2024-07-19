@@ -19,7 +19,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='lightgray')
-        self.version = "v0.0.3"
+        self.version = "v2.0.1"
         self.root.title(f"AMCAIM Toolbox {self.version}")
         self.blueprint = self.__read_blueprint()
         self.components = {}
@@ -117,7 +117,7 @@ class App():
         try:
             return self.windows[label]
         except Exception as e:
-            print(e)
+            print(f'no window found with label {e}')
 
         return None
 

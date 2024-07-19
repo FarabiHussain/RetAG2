@@ -56,20 +56,26 @@
         },
 
         "buttons": {
-            "reset": "red",
             "output": "gray",
-            "test": "light gray",
-            "spacer": "white",
             "retainer": "#383FBC",
             "payments": "dark blue",
             "conduct": "#1A8405",
             "history": "gray",
-            "decrypt": "gray"
+            "decrypt": "gray",
+            "spacer 0": "white",
+            "spacer 1": "white",
+            "spacer 2": "white",
+            "spacer 3": "white",
+            "spacer 4": "white",
+            "spacer 5": "white",
+            "test": "light gray",
+            "reset agreement": "red"
         }
     },
 
     "Receipt": {
         "column_weights": [1,2,0],
+        "init_app": "/assets/functions/Receipt.py",
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT"},
         "client name": {"column": 0, "type": "entry"},
@@ -81,6 +87,8 @@
         "PST percentage": {"column": 0, "type": "entry", "default": "7.0"},
         "price": {"column": 0, "type": "entry", "default": "$560.00"},
         "cart": {"column": 1, "type": "table", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
+        "break 2": {"column": 0, "type": "break", "heading": "INSTALLMENT INFORMATION"},
+        "payment number": {"column": 0, "type": "combo", "options": ["1","2","3","4","5","6","7","8","9","10","11","12"], "default": "1"},
 
         "callbacks": {
             "service": "/assets/functions/service.py",
@@ -91,12 +99,20 @@
         },
 
         "buttons": {
-            "reset": "red",
             "output": "gray",
-            "test": "light gray",
-            "spacer": "white",
             "add item": "#1A8405",
-            "create receipt": "dark blue"
+            "remove item": "red",
+            "create receipt": "dark blue",
+            "find receipt": "gray",
+            "spacer 0": "white",
+            "spacer 1": "white",
+            "spacer 2": "white",
+            "spacer 3": "white",
+            "spacer 4": "white",
+            "spacer 5": "white",
+            "spacer 6": "white",
+            "test": "light gray",
+            "reset receipt": "red"
         }
     }
 }

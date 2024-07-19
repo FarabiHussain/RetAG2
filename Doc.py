@@ -117,9 +117,14 @@ def insert_paragraph_after(paragraph, text=None, style=None):
     return new_para
 
 
+#
+def insert_paragraph(paragraph, text=None):
+    paragraph.insert_paragraph_before(text)
+
+
 # set up folders and save files, print if needed
 def save_doc(doc=None, components=None, doctype="", override_output_filename=""):
-    if doc is None or components is None:
+    if doc is None or components is None and override_output_filename.strip() == "":
         return False
 
     try:
@@ -129,13 +134,15 @@ def save_doc(doc=None, components=None, doctype="", override_output_filename="")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        output_filename = f"{doctype} - {re.sub(r' \((.*?)\)', '', components['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', components['client 1 last name'].get()).strip()}.docx"
-
         if (override_output_filename.strip() != ""):
             output_filename = override_output_filename
+        else:
+            output_filename = f"{doctype} - {re.sub(r' \((.*?)\)', '', components['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', components['client 1 last name'].get()).strip()}"
+
+        output_filename = f"{output_filename}{'.docx' if '.docx' not in output_filename else ''}"
 
         # save the file to the output folder
-        doc.save(output_dir + output_filename)
+        doc.save(f"{output_dir}{output_filename}")
 
         # open the word file
         os.startfile(output_dir + output_filename)
@@ -147,17 +154,15 @@ def save_doc(doc=None, components=None, doctype="", override_output_filename="")
 
 
 # write the invoice number and date on the top
-def insert_invoice_info(document, doc_id, billed_to):
-
-    timestamp = str(datetime.datetime.now().strftime("%d %B %Y, %H:%M"))
+def insert_invoice_info(document=None, doc_id="", billed_to="", timestamp=""):
 
     if (len(billed_to.strip()) == 0):
-        insert_paragraph_after(
+        insert_paragraph(
             document.add_paragraph(),
             (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\n\n"),
         )
     else:
-        insert_paragraph_after(
+        insert_paragraph(
             document.add_paragraph(),
             (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\nBilled to\t{billed_to}\n"),
         )

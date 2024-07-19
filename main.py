@@ -39,11 +39,6 @@ for subapp_name in blueprint:
 for i, subapp_name in enumerate(blueprint):
     subapp_components[i]['subapp_obj'] = Subapp(subapp_components=subapp_components, blueprint=blueprint[subapp_name], subapp_name=subapp_name, app=app, imgs=imgs, button_position=i, columns_weights=blueprint[subapp_name]['column_weights'])
 
-
-for s in subapp_components:
-    if s.get("name") == "Receipt":
-        s['subapp_obj'].lift_app(subapp_components)
-
-# test_button(app)
+test_button(app)
 
 app.start()

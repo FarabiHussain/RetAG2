@@ -13,7 +13,7 @@ from subprocess import DEVNULL, STDOUT, check_call
 from writer import write_auth, replace_placeholders, write_receipt
 from dateutil import relativedelta as rd
 from typing import Literal
-from actions import HistoryViewer, add_item_button, test_button, decrypt_button
+from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, test_button, decrypt_button
 
 
 family_medium="Roboto Bold"
@@ -137,8 +137,8 @@ class Entry(GUI):
         self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
 
     def reset(self) -> None:
-        if self.default_text is not None:
-            self.stringvar.set(self.default_text)
+        self.stringvar.set(self.default_text if self.default_text is not None else '')
+
 
     def stringvar_callback(self, *args):
         self.callback(self.app_components)
@@ -527,7 +527,7 @@ class AppButton():
 
 
 class ActionButton():
-    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=87, height=40, row=0, col=0) -> None:
+    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=91, height=40, row=0, col=0, blueprint={}) -> None:
 
         self.component = ctk.CTkButton(
             master=master,
@@ -536,16 +536,23 @@ class ActionButton():
             border_width=0,
             corner_radius=2,
             fg_color=btn_color,
-            command=lambda:self.assign_action(app, action),
+            command=lambda:self.assign_action(app, action, blueprint),
             width=width,
             height=height,
             state='disabled' if 'spacer' in action else 'normal'
         ).grid(row=row, column=col, pady=10, padx=5)
 
 
-    def assign_action(self, app, action) -> None:
-        if (action == "reset"):
-            app.reset_all_components()
+    def assign_action(self, app=None, action="", blueprint={}) -> None:
+        if ("reset" in action):
+            app_components = app.get_all_components()
+            for component_name in blueprint.keys():
+                if (component_name in app_components):
+                    app_components.get(component_name).reset()
+
+            if ("receipt" in action):
+                app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
 
         elif (action == "payments"):
             try:
@@ -578,6 +585,9 @@ class ActionButton():
         elif (action == "history"):
             HistoryViewer(app)
 
+        elif (action == "find receipt"):
+            ReceiptFinder(app)
+
         elif (action == "test"):
             test_button(app)
 
@@ -586,6 +596,9 @@ class ActionButton():
 
         elif (action == "add item"):
             add_item_button(app)
+
+        elif (action == "remove item"):
+            remove_item_button(app)
 
         elif (action == "output"):
             try:
@@ -638,21 +651,47 @@ class WindowView():
 
 
 class CellWidget():
-    def __init__(self, master=None, width=0, height=0, text="", text_color="black", fg_color="#fff", info=[], font=None) -> None:
+    def __init__(self, master=None, width=0, height=0, text="", text_color="black", fg_color="#fff", info=[], font=None, type='label', command=None, hover_color=None, on_enter=None, on_leave=None) -> None:
         self.info = info
         self.width = width
         self.height = height
         self.text = text
 
-        self.cell = ctk.CTkLabel(
-            master=master, 
-            width=width, 
-            height=height, 
-            text=text, 
-            text_color=text_color, 
-            fg_color=fg_color, 
-            font=font,
-        )
+        if type == 'label':
+            self.cell = ctk.CTkLabel(
+                master=master, 
+                width=width, 
+                height=height, 
+                text=text, 
+                text_color=text_color, 
+                fg_color=fg_color, 
+                font=font,
+            )
+
+        elif type == 'button':
+            self.cell = ctk.CTkButton(
+                master=master, 
+                width=width, 
+                height=height, 
+                text=text, 
+                text_color=text_color, 
+                fg_color=fg_color, 
+                font=font,
+                corner_radius=0,
+                command=command,
+                hover_color=hover_color,
+            )
+
+            if on_enter is not None or on_leave is not None:
+                self.set_hover_methods(None, on_enter, on_leave)
+
+
+    def set_hover_methods(self, hover_color=None, on_enter=None, on_leave=None):
+        if hover_color is not None:
+            self.cell.configure(hover_color=hover_color)
+
+        self.cell.bind('<Enter>', on_enter, add='+')
+        self.cell.bind('<Leave>', on_leave, add='+')
 
     def get_cell(self):
         return self.cell
@@ -665,16 +704,34 @@ class CellWidget():
 
 
 class RowWidget():
-    def __init__(self, parent_frame=None, row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"], row_color="#eee", row_content_methods=[], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", info=[]):
+    def __init__(self, parent_frame=None, row_contents=[], row_color="#eee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
 
         # no parent, nowhere to put this
         if parent_frame is None:
             return
+        
+        if len(row_contents) == 0:
+            if is_blank:
+                row_contents=['','','','','']
+            else:
+                row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"]
 
         self.container = ctk.CTkFrame(master=parent_frame, fg_color="white", border_width=0, width=parent_width, height=30)
         self.buttons = []
         self.contents = []
-        self.info = {}
+        self.info = {'selected': False}
+
+        def highlight_row():
+            for c in self.contents:
+                c.cell.configure(fg_color='#7ac8ff')
+
+        def unhighlight_row():
+            for c in self.contents:
+                c.cell.configure(fg_color=row_color)
+
+        def select_row():
+            self.info['selected'] = True
+            ic(self.info)
 
         # setup the grid system
         for i in range(len(row_contents)+1):
@@ -690,7 +747,7 @@ class RowWidget():
                     text_color="white", 
                     border_width=0,
                     corner_radius=0,
-                    fg_color="black" if row_contents[i] != "" else "white",
+                    fg_color="black" if row_contents[i] != "" else "light gray",
                     width=(parent_width-61)/5,
                     height=38,
                     font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
@@ -707,13 +764,17 @@ class RowWidget():
             for i, content in enumerate(row_contents):
                 self.contents.append(
                     CellWidget(
-                        self.container, 
+                        master=self.container, 
+                        type='button' if (not is_blank and i == 0 and mode != 'header') else 'label',
                         width=(parent_width-61)/5, 
                         height=38, 
                         text=content, 
                         text_color="white" if mode is "header" else "black", 
                         fg_color="#000" if mode is "header" else row_color, 
                         font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode is "header" else ctk.CTkFont(family=family_medium, size=12),
+                        command=lambda: select_row(),
+                        on_enter=lambda *args: highlight_row(),
+                        on_leave=lambda *args: unhighlight_row(),
                     )
                 )
 
@@ -821,7 +882,7 @@ class TableWidget():
             ])
 
         self.header_frame.grid(row=0, column=1, pady=[9,0])
-        self.table_frame.grid(row=1, column=1, pady=[2,0])
+        self.table_frame.grid(row=1, column=1, pady=[0,0])
         self.tools_frame.grid(row=2, column=1, pady=[2,0])
 
         self.reset()
@@ -898,9 +959,9 @@ class TableWidget():
                     parent_frame=self.table_frame, 
                     parent_width=self.parent_width, 
                     row_number=index + page_offset, 
-                    mode='table', 
-                    row_contents=['','','','',''],
                     row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
+                    is_blank = True,
+                    mode='table', 
                 )
 
                 # set the next button to be active if the last row was blank
@@ -931,8 +992,8 @@ class TableWidget():
             RowWidget(
                 parent_frame=self.table_frame,
                 parent_width=self.parent_width,
-                row_contents=["", "", "", "", ""],
-                row_color="#ddd" if i%2==0 else "#eee",
+                is_blank=True,
+                row_color="#ddd" if i % 2==0 else "#eee",
                 row_number=i,
                 mode="table",
             )
@@ -968,6 +1029,21 @@ class TableWidget():
 
         self.update()
         self.update(page=self.page)
+
+
+    def remove(self) -> dict:
+        rows_after_removal = []
+        ic(self.rows[0])
+
+        # for row in self.rows[0]:
+        #     if 'selected' in row.info:
+        #         ic(row)
+
+        #     if row.get('selected') is False:
+        #         rows_after_removal.append(row)
+
+        # self.rows = rows_after_removal
+        # ic(self.rows)
 
 
     def contains(self, row_info=[], compare_keys=[]):
