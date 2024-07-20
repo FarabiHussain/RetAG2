@@ -8,7 +8,7 @@ from icecream import ic
 from Popups import ErrorPopup
 from dotenv import load_dotenv
 from writer import obscure, unobscure
-from reader import read_retainer_history
+from reader import read_retainer_history, read_case_id
 
 
 def decrypt_button(app):
@@ -92,6 +92,7 @@ def test_button(app):
     app.components['postal code'].set(f"X1X Y2Y")
     app.components['province'].set(f"Manitoba")
     app.components['security code'].set(f"{str(random.randint(100, 999))}")
+    app.components['case ID'].set(read_case_id())
 
     total_amount = 0
     total_months = random.randint(1,12)
@@ -408,7 +409,7 @@ class ReceiptFinder():
             receipt_finder.resizable(False, False)
             receipt_finder.configure(fg_color='white')
 
-            receipt_finder.title("Receipt Finder")
+            receipt_finder.title("Receipts Finder")
             receipt_finder.after(202, lambda: receipt_finder.focus())
 
         else:
@@ -446,7 +447,7 @@ class ReceiptFinder():
         try:
             open_counter = 0
             open_limit = int(self.qty_of_docs_to_open.cget('text'))
-            for f in sorted(glob(f"{os.getcwd()}\\output\\*.docx"), key=os.path.getmtime, reverse=True):
+            for f in sorted(glob(f"{os.getcwd()}\\output\\receipt\\*.docx"), key=os.path.getmtime, reverse=True):
                 if all(keyword in f for keyword in search_filters):
                     os.startfile(f)
                     open_counter += 1

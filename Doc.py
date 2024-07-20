@@ -123,23 +123,26 @@ def insert_paragraph(paragraph, text=None):
 
 
 # set up folders and save files, print if needed
-def save_doc(doc=None, components=None, doctype="", override_output_filename=""):
+def save_doc(doc=None, components=None, folder_name="", prefix="", override_output_filename=""):
     if doc is None or components is None and override_output_filename.strip() == "":
         return False
+    
+    ic(prefix)
 
     try:
         # set up the output directory
-        output_dir = os.getcwd() + "\\output\\"
+        output_dir = f'{os.getcwd()}\\output\\{folder_name.lower()}\\'.replace('\\\\', '\\')
 
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        if (override_output_filename.strip() != ""):
+        if len(override_output_filename.strip()) > 0:
             output_filename = override_output_filename
         else:
-            output_filename = f"{doctype} - {re.sub(r' \((.*?)\)', '', components['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', components['client 1 last name'].get()).strip()}"
+            output_filename = f"{prefix} - {re.sub(r' \((.*?)\)', '', components['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', components['client 1 last name'].get()).strip()}"
 
         output_filename = f"{output_filename}{'.docx' if '.docx' not in output_filename else ''}"
+        ic(output_filename)
 
         # save the file to the output folder
         doc.save(f"{output_dir}{output_filename}")

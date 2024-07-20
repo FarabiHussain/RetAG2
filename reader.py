@@ -1,5 +1,5 @@
 import importlib.util
-import os, csv, sys
+import os, csv, sys, datetime
 from icecream import ic
 from Path import resource_path
 
@@ -10,11 +10,11 @@ def get_recent() -> dict:
     if not os.path.exists(history_dir):
         print("path does not exist")
         return None
-    elif not os.path.exists(history_dir + "\\history.csv"):
+    elif not os.path.exists(history_dir + "\\agreements.csv"):
         print("file does not exist")
         return None
     else:
-        with open(history_dir + "\\history.csv", mode='r') as infile:
+        with open(history_dir + "\\agreements.csv", mode='r') as infile:
             last_row = list(csv.DictReader(infile))[-1]
             return last_row
 
@@ -25,10 +25,10 @@ def read_retainer_history() -> list:
 
     if not os.path.exists(history_dir):
         print("path does not exist")
-    elif not os.path.exists(history_dir + "\\history.csv"):
+    elif not os.path.exists(history_dir + "\\agreements.csv"):
         print("file does not exist")
     else:
-        with open(history_dir + "\\history.csv", mode='r') as infile:
+        with open(history_dir + "\\agreements.csv", mode='r') as infile:
             temp = list(csv.DictReader(infile))
             temp.reverse()
             history = temp
@@ -51,7 +51,7 @@ def import_function(function_path=None, function_name=None) -> str:
 
 # read records.csv to retrieve the last created receipt id
 def read_receipt_id():
-    records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\records')
+    records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\receipts')
 
     try:
         with open(records_file, 'r') as log_file:
@@ -65,3 +65,30 @@ def read_receipt_id():
         print("no existing IDs - starting with ID 1")
 
     return 0
+
+# read agreements.csv to retrieve the last created id
+def read_case_id():
+    records_file = (f'{os.getcwd()}\\write\\agreements.csv').replace('\\write\\write', '\\agreements')
+    curr_timestamp = str(datetime.datetime.now().strftime('%Y%m'))
+    doc_id = f'{curr_timestamp}-001'
+
+    try:
+
+        with open(records_file, 'r') as log_file:
+            prev_doc_id = log_file.readlines()[-1]
+
+        prev_doc_id = prev_doc_id.split(",")[0]
+        prev_timestamp = (prev_doc_id.split('-')[0])
+        prev_number = (prev_doc_id.split('-')[1])
+
+        if curr_timestamp == prev_timestamp:
+            curr_number = "{:03}".format(int(prev_number) + 1)
+        else:
+            curr_number = "001"
+
+        doc_id = f"{curr_timestamp}-{curr_number}"
+
+    except Exception as e:
+        print(f"Error when reading ID, returning {doc_id}\n\n{e}")
+
+    return doc_id

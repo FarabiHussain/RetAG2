@@ -9,7 +9,7 @@ from docx import Document
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from writer import write_auth, replace_placeholders, write_receipt
+from writer import write_payments, replace_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, test_button, decrypt_button
@@ -44,19 +44,19 @@ class GUI:
 
 class RowBreak(GUI):
     def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
-        rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#fff')
+        # rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#fff')
 
         self.breakline = ctk.CTkLabel(
             master, 
-            # text=heading.upper(), 
-            text='', 
+            text=heading.upper(), 
+            # text='', 
             height=32, 
             width=450, 
             fg_color="#808080", 
             text_color="white", 
             corner_radius=2, 
-            image=rf.get_render(15, heading.upper())
-            # font=ctk.CTkFont(family=family_bold, weight='bold')
+            # image=rf.get_render(15, heading.upper())
+            font=ctk.CTkFont(family=family_bold, weight='bold')
         )
 
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
@@ -540,7 +540,7 @@ class AppButton():
 
 
 class ActionButton():
-    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=150, height=40, row=0, col=0, blueprint={}) -> None:
+    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=120, height=40, row=0, col=0, blueprint={}) -> None:
 
         self.component = ctk.CTkButton(
             master=master,
@@ -555,7 +555,7 @@ class ActionButton():
             state='disabled' if 'spacer' in action else 'normal'
         )
         
-        self.component.grid(row=row, column=col, pady=10, padx=2)
+        self.component.grid(row=row, column=col, pady=[20,5], padx=4)
 
 
     def assign_action(self, app=None, action="", blueprint={}) -> None:
@@ -572,21 +572,21 @@ class ActionButton():
         elif (action == "payments"):
             try:
                 doc = Document(resource_path("assets\\templates\\payments.docx"))
-                write_auth(doc, app.get_all_components())
+                write_payments(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing payment authorization:\n\n{str(e)}')
 
         elif (action == "retainer"):
             try:
                 doc = Document(resource_path("assets\\templates\\retainer.docx"))
-                replace_placeholders(doc, app.get_all_components(), "Retainer")
+                write_retainer(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
 
         elif (action == "conduct"):
             try:
                 doc = Document(resource_path("assets\\templates\\conduct.docx"))
-                replace_placeholders(doc, app.get_all_components(), "Conduct")
+                write_conduct(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing code of conduct:\n\n{str(e)}')
 
@@ -615,9 +615,9 @@ class ActionButton():
         elif (action == "remove item"):
             remove_item_button(app)
 
-        elif (action == "output"):
+        elif ("output" in action):
             try:
-                os.startfile(os.getcwd() + "\\output")
+                os.startfile(f'{os.getcwd()}\\output\\{action.split(' ')[0]}\\')
             except Exception as e:
                 ErrorPopup(msg=f'Output folder not found')
 
@@ -747,7 +747,7 @@ class RowWidget():
 
         def select_row(self):
             table_obj.selected_row = row_contents
-            app.buttons['Receipt']['remove item'].component.configure(fg_color="#BA0600", state='normal')
+            app.buttons['Receipts']['remove item'].component.configure(fg_color="#BA0600", state='normal')
 
         # setup the grid system
         for i in range(len(row_contents)+1):
@@ -1065,7 +1065,7 @@ class TableWidget():
 
     def remove(self) -> None:
         rows_after_removal = []
-        self.app.buttons['Receipt']['remove item'].component.configure(fg_color='light gray', state='disabled')
+        self.app.buttons['Receipts']['remove item'].component.configure(fg_color='light gray', state='disabled')
 
         for row in self.rows:
             if (row['row_contents'] != self.selected_row):

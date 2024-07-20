@@ -26,14 +26,13 @@ for subapp_name in blueprint:
     new_subapp['button'] = ctk.CTkButton(
         master=app.root,
         text_color="black",
-        text='',#subapp_name.upper(),
+        text=subapp_name.upper(),
         border_width=0,
         corner_radius=0,
         fg_color="lightgray",
         width=170,
         height=50,
-        # font=ctk.CTkFont(family="Roboto Bold")
-        image=rf.get_render(15, subapp_name.upper()),
+        font=ctk.CTkFont(family="Roboto Bold")
     )
 
     subapp_components.append(new_subapp)
@@ -42,6 +41,7 @@ for subapp_name in blueprint:
 for i, subapp_name in enumerate(blueprint):
     subapp_components[i]['subapp_obj'] = Subapp(subapp_components=subapp_components, blueprint=blueprint[subapp_name], subapp_name=subapp_name, app=app, imgs=imgs, button_position=i, columns_weights=blueprint[subapp_name]['column_weights'])
 
-test_button(app)
+if "--test" in sys.argv:
+    test_button(app)
 
 app.start()

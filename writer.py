@@ -9,10 +9,18 @@ from Doc import *
 from icecream import ic
 from dotenv import load_dotenv
 from base64 import urlsafe_b64encode as b64e, urlsafe_b64decode as b64d
-from reader import read_receipt_id
+from reader import read_case_id, read_receipt_id
 
 
-def write_auth(doc, components):
+def obscure(unobscured: str) -> str:
+    return b64e(zlib.compress(str.encode(unobscured), 9)).decode()
+
+
+def unobscure(obscured: str) -> str:
+    return zlib.decompress(b64d(str.encode(obscured))).decode()
+
+
+def write_payments(doc, components):
 
     client_info_top = [
         {
@@ -118,12 +126,13 @@ def write_auth(doc, components):
     insert_2col_table(document=doc, table_heading="", table_items=card_info_2col)
     insert_4col_table(document=doc, table_heading="\n\nPayment Information (including applicable GST and PST)".upper(), table_items=payment_summary)
     insert_4col_table(document=doc, table_heading="", table_items=payment_info)
-    save_doc(doc, components, "Payments")
+    save_doc(doc=doc, components=components, prefix=f"{read_case_id()} - Payments", folder_name='agreements')
 
 
 def write_receipt(doc, components):
     cart = components.get('cart')
     cart_items = []
+    case_id = components.get('case ID').get()
 
     current_serial = 1
     for current_item in cart.get():
@@ -136,10 +145,12 @@ def write_receipt(doc, components):
         ErrorPopup('Add at least one item to create a document.')
         return False
 
+    if len(case_id.strip()) == 0:
+        case_id = '000000-000'
+
     doc_id = "{:010}".format((read_receipt_id() + 1))
     client_name = components.get('client name').get().strip()
-    payment_number = f"Payment {("{:02}").format(int(components['payment number'].get().strip()))}"
-    filename = f"Receipt {doc_id} - {client_name} - {payment_number}"
+    filename = f"{case_id} - Receipt {doc_id}"
 
     printed_rows = 0
     rows_per_page = 7
@@ -154,19 +165,11 @@ def write_receipt(doc, components):
             doc.add_page_break()
 
     insert_totals_table(doc, cart_items)
-    save_doc(doc=doc, components=components, override_output_filename=filename)
-    insert_receipt_to_history(doc_id, client_name)
+    save_doc(doc=doc, components=components, folder_name='receipts', prefix=filename)
+    insert_receipt_to_history(doc_id, client_name, components.get('case ID').get())
 
 
-def obscure(unobscured: str) -> str:
-    return b64e(zlib.compress(str.encode(unobscured), 9)).decode()
-
-
-def unobscure(obscured: str) -> str:
-    return zlib.decompress(b64d(str.encode(obscured))).decode()
-
-
-def replace_placeholders(doc, components, doctype):
+def write_retainer(doc, components):
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
 
@@ -199,6 +202,38 @@ def replace_placeholders(doc, components, doctype):
         '[PAY_PLAN]': format_payments(),
     }
 
+    replace_placeholders(doc, document_data)
+
+    client_signatures = [
+        {
+            "label_l": f"{document_data['[CLIENT1]']}\n{document_data['[PHONE1]']}\n{document_data['[EMAIL1]']}",
+            "info_l": "",
+            "label_r": f"{document_data['[CLIENT2]']}\n{document_data['[PHONE2]']}\n{document_data['[EMAIL2]']}",
+            "info_r": "",
+        },
+    ]
+
+    insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
+    save_doc(doc=doc, components=components, prefix=f"{read_case_id()} - Retainer", folder_name='agreements')
+    insert_agreement_to_history(components)
+
+
+def write_conduct(doc, components):
+    date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
+
+    document_data = {
+        '[DAY]': date_on_document.strftime("%d"),
+        '[MONTH]': date_on_document.strftime("%b"),
+        '[YEAR]': date_on_document.strftime("%Y"),
+        '[CLIENT1]': (f"{components["client 1 first name"].get()} {components["client 1 last name"].get()}").strip(),
+        '[APP_TYPE]': components["application type"].get(),
+    }
+
+    replace_placeholders(doc, document_data)
+    save_doc(doc=doc, components=components, prefix=f"{read_case_id()} - Conduct", folder_name='agreements')
+
+
+def replace_placeholders(doc, document_data):
     try:
         for paragraph in doc.paragraphs:
             for key, value in document_data.items():
@@ -206,24 +241,11 @@ def replace_placeholders(doc, components, doctype):
                     for run in paragraph.runs:
                         run.text = run.text.replace(key, value)
 
-        client_signatures = [
-            {
-                "label_l": f"{document_data['[CLIENT1]']}\n{document_data['[PHONE1]']}\n{document_data['[EMAIL1]']}",
-                "info_l": "",
-                "label_r": f"{document_data['[CLIENT2]']}\n{document_data['[PHONE2]']}\n{document_data['[EMAIL2]']}",
-                "info_r": "",
-            },
-        ]
-
-        insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
-        insert_retainer_to_history(components)
-        save_doc(doc, components, doctype)
-
     except Exception as e:
         print(e)
 
 
-def insert_retainer_to_history(app_components=None):
+def insert_agreement_to_history(app_components=None):
 
     if app_components is None:
         return
@@ -235,10 +257,11 @@ def insert_retainer_to_history(app_components=None):
         csv_columns.append(f"amount_{str(i)}")
         csv_columns.append(f"date_{str(i)}")
 
-    check_history_dir_and_file(f"{os.getcwd()}\\write", "history.csv", csv_columns)
+    check_history_dir_and_file(f"{os.getcwd()}\\write", "agreements.csv", csv_columns)
 
     # things to enter into the new entry
-    history_entry = ['', os.environ['COMPUTERNAME']]
+    history_entry = [read_case_id()]
+    history_entry.append(os.environ['COMPUTERNAME'])
     history_entry.append(str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")))
     history_entry.append(app_components.get('date on document').get())
     history_entry.append(f"{app_components.get('client 1 first name').get().strip()} {app_components.get('client 1 last name').get().strip()}".strip())
@@ -267,15 +290,15 @@ def insert_retainer_to_history(app_components=None):
     for index, col in enumerate(history_entry):
         history_entry[index] = re.sub("[,]\\s*", "_", str(col))
 
-    with open(f"{os.getcwd()}\\write\\history.csv", "a") as history:
+    with open(f"{os.getcwd()}\\write\\agreements.csv", "a") as history:
         history_entry = (',').join(history_entry)
         history.write(f'{history_entry}\n')
 
 
-def insert_receipt_to_history(doc_id, client_name):
+def insert_receipt_to_history(doc_id="", client_name="", case_id=""):
     client_name = client_name.strip().lower().replace(" ", "_").replace(", ",";").replace(",",";")
 
-    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'receipts.csv', (['created_date', 'document_id', 'client_name', 'created_by']))
+    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'receipts.csv', (['case_id', 'created_by', 'created_date', 'document_id', 'client_name']))
 
     records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\records')
     doc_id = str('[{:010}]'.format(doc_id))
@@ -283,7 +306,7 @@ def insert_receipt_to_history(doc_id, client_name):
 
     try:
         with open(records_file, 'a') as log_file:
-            log_file.write((",").join([timestamp, doc_id, client_name, os.environ['COMPUTERNAME']]))
+            log_file.write((",").join([case_id, os.environ['COMPUTERNAME'], timestamp, doc_id, client_name]))
             log_file.write("\n")
 
     except Exception as e:

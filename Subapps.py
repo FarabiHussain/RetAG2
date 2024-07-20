@@ -153,10 +153,11 @@ class Subapp():
                     action=btn, 
                     app=app, 
                     blueprint=blueprint, 
-                    image=btn_img, 
+                    image=imgs.get(f"{btn}.png"), 
                     btn_color=blueprint['buttons'][btn], 
                     row=0, 
                     col=index, 
+                    # btn_text=btn.upper(),
                 )
 
         if "callbacks" in blueprint.keys():

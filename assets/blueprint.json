@@ -15,6 +15,7 @@
         "client 2 email": {"column": 0, "type": "entry"},
 
         "break 2": {"column": 0, "type": "break", "heading": "APPLICATION DETAILS"},
+        "case ID": {"column": 0, "type": "entry"},
         "date on document": {"column": 0, "type": "datepicker", "show_day":"true"},
         "application type": {"column": 0, "type": "combo", "options": ["EOI", "MPNP", "PR", "Sousal Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]},
         "add taxes": {"column": 0, "type": "combo", "options": ["Yes", "No"], "default": "Yes"},
@@ -56,23 +57,26 @@
         },
 
         "buttons": {
-            "output": "#545454",
+            "agreements output": "#545454",
             "retainer": "#383FBC",
             "payments": "#000042",
             "conduct": "#1A8405",
             "history": "#545454",
             "decrypt": "#545454",
             "spacer 0": "#ffffff",
+            "spacer 1": "#ffffff",
+            "spacer 2": "#ffffff",
             "test": "#d3d3d3",
             "reset agreement": "#BA0600"
         }
     },
 
-    "Receipt": {
+    "Receipts": {
         "column_weights": [1,2,0],
 
-        "break 0": {"column": 0, "type": "break", "heading": "CLIENT"},
+        "break 0": {"column": 0, "type": "break", "heading": "CLIENT AND CASE INFORMATION"},
         "client name": {"column": 0, "type": "entry"},
+        "payment for case ID": {"column": 0, "type": "entry"},
         "break 1": {"column": 0, "type": "break", "heading": "PURCHASE"},
         "service": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
         "rate": {"column": 0, "type": "entry", "default": "$500.00"},
@@ -81,29 +85,31 @@
         "PST percentage": {"column": 0, "type": "entry", "default": "7.0"},
         "price": {"column": 0, "type": "entry", "default": "$560.00"},
         "cart": {"column": 1, "type": "table", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
-        "break 2": {"column": 0, "type": "break", "heading": "INSTALLMENT INFORMATION"},
-        "payment number": {"column": 0, "type": "combo", "options": ["1","2","3","4","5","6","7","8","9","10","11","12"], "default": "1"},
 
         "callbacks": {
             "service": "/assets/functions/service.py",
             "rate": "/assets/functions/rate.py",
             "quantity": "/assets/functions/rate.py",
             "GST percentage": "/assets/functions/rate.py",
-            "PST percentage": "/assets/functions/rate.py"
+            "PST percentage": "/assets/functions/rate.py",
+            "case ID": "/assets/functions/payment_for_case_id.py"
         },
 
         "buttons": {
-            "output": "#545454",
+            "receipts output": "#545454",
             "add item": "#1A8405",
             "remove item": "#BA0600",
             "create receipt": "#000042",
             "find receipt": "#545454",
             "spacer 0": "#ffffff",
             "spacer 1": "#ffffff",
+            "spacer 2": "#ffffff",
+            "spacer 3": "#ffffff",
             "test": "#d3d3d3",
             "reset receipt": "#BA0600"
         },
 
-        "init_app": "/assets/functions/Receipt.py"
+        "init_app_2": "/assets/functions/Receipts.py",
+        "init_app_1": "/assets/functions/Agreements.py"
     }
 }
