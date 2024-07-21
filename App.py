@@ -18,7 +18,7 @@ class App():
 
         self.root = ctk.CTk()
         self.root.resizable(False, False)
-        self.root.configure(fg_color='lightgray')
+        self.root.configure(fg_color='#dbdbdb')
         self.version = "v2.0.3"
         self.root.title(f"AMCAIM Toolbox {self.version}")
         self.blueprint = self.__read_blueprint()
@@ -30,7 +30,7 @@ class App():
 
     def __check_app_ico(self) -> bool:
         try:
-            self.root.iconbitmap(f"{os.getcwd()}\\assets\\icons\\app.ico")
+            self.root.iconbitmap(f"{os.getcwd()}\\assets\\icons\\.ico")
             return True
         except Exception as e:
             print(e)

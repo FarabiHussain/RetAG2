@@ -11,7 +11,7 @@ class Subapp():
         self.button.configure(command=lambda:self.lift_app(subapp_components))
 
         self.subapp_name = subapp_name
-        self.button.place(x=0, y=(50*button_position)+10)
+        self.button.place(x=0, y=(50*button_position) + 3 + (3*button_position))
         self.blueprint = blueprint
 
         self.render_app(self.frame, blueprint, app, imgs, columns_weights, subapp_components)
@@ -28,12 +28,15 @@ class Subapp():
                 setup_function = import_function(function_path, "callback")
                 setup_function(self, app, subapp_components)
 
+    def reset(self):
+        return
+
 
     def lift_app(self, subapp_components):
         for curr_subapp in subapp_components:
-            curr_subapp['button'].configure(text_color="white", fg_color="gray")
+            curr_subapp['button'].configure(text_color="white", fg_color="gray", hover_color="light gray")
 
-        self.button.configure(text_color="black", fg_color="white")
+        self.button.configure(text_color="black", fg_color="white", hover_color="white")
         self.frame.lift()
 
 

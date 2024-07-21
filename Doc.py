@@ -126,8 +126,6 @@ def insert_paragraph(paragraph, text=None):
 def save_doc(doc=None, components=None, folder_name="", prefix="", override_output_filename=""):
     if doc is None or components is None and override_output_filename.strip() == "":
         return False
-    
-    ic(prefix)
 
     try:
         # set up the output directory
@@ -142,7 +140,6 @@ def save_doc(doc=None, components=None, folder_name="", prefix="", override_outp
             output_filename = f"{prefix} - {re.sub(r' \((.*?)\)', '', components['client 1 first name'].get()).strip()} {re.sub(r' \((.*?)\)', '', components['client 1 last name'].get()).strip()}"
 
         output_filename = f"{output_filename}{'.docx' if '.docx' not in output_filename else ''}"
-        ic(output_filename)
 
         # save the file to the output folder
         doc.save(f"{output_dir}{output_filename}")

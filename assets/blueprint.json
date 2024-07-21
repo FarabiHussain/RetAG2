@@ -17,7 +17,7 @@
         "break 2": {"column": 0, "type": "break", "heading": "APPLICATION DETAILS"},
         "case ID": {"column": 0, "type": "entry"},
         "date on document": {"column": 0, "type": "datepicker", "show_day":"true"},
-        "application type": {"column": 0, "type": "combo", "options": ["EOI", "MPNP", "PR", "Sousal Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]},
+        "application type": {"column": 0, "type": "combo", "options": ["EOI", "MPNP", "PR", "Sousal Sponsorship", "Common-Law Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]},
         "add taxes": {"column": 0, "type": "combo", "options": ["Yes", "No"], "default": "Yes"},
 
         "break 3": {"column": 1, "type": "break", "heading": "PAYER INFORMATION"},
@@ -61,13 +61,31 @@
             "retainer": "#383FBC",
             "payments": "#000042",
             "conduct": "#1A8405",
+            "generate case ID": "#ff7b00",
             "history": "#545454",
             "decrypt": "#545454",
-            "spacer 0": "#ffffff",
             "spacer 1": "#ffffff",
             "spacer 2": "#ffffff",
+            "spacer 3": "#ffffff",
+            "spacer 4": "#ffffff",
+            "spacer 5": "#ffffff",
+            "spacer 6": "#ffffff",
             "test": "#d3d3d3",
             "reset agreement": "#BA0600"
+        }
+    },
+
+    "use of representative": {
+        "column_weights": [1,1,1],
+
+        "break 0": {"column": 0, "type": "break", "heading": "APPLICANT INFORMATION"},
+        "applicant given name": {"column": 0, "type": "entry"},
+        "applicant surname": {"column": 0, "type": "entry"},
+        "applicant UCI": {"column": 0, "type": "entry"},
+        "applicant date of birth": {"column": 0, "type": "datepicker", "show_day":"true"},
+
+        "buttons": {
+            "representative": "#114707"
         }
     },
 
@@ -105,6 +123,11 @@
             "spacer 1": "#ffffff",
             "spacer 2": "#ffffff",
             "spacer 3": "#ffffff",
+            "spacer 4": "#ffffff",
+            "spacer 5": "#ffffff",
+            "spacer 6": "#ffffff",
+            "spacer 7": "#ffffff",
+            "spacer 8": "#ffffff",
             "test": "#d3d3d3",
             "reset receipt": "#BA0600"
         },

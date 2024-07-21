@@ -53,4 +53,4 @@ class Img():
         if icon_name in self.images:
             return self.images[icon_name]
 
-        return self.images["Null.png"]
+        return self.images["null.png"]

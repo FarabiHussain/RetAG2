@@ -81,6 +81,8 @@ def test_button(app):
     app.components['expiration'].set(y="2026", m="Dec", d="31")
     app.components['client 1 first name'].set(legal_name.split(" ")[0])
     app.components['client 1 last name'].set(legal_name.split(" ")[1])
+    app.components['applicant surname'].set(legal_name.split(" ")[1])
+    app.components['applicant given name'].set(legal_name.split(" ")[0])
     app.components['client 1 email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
     app.components['client 1 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
     app.components['email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
@@ -93,6 +95,9 @@ def test_button(app):
     app.components['province'].set(f"Manitoba")
     app.components['security code'].set(f"{str(random.randint(100, 999))}")
     app.components['case ID'].set(read_case_id())
+    app.components['client name'].set(f'{app.components['client 1 first name'].get()} {app.components['client 1 last name'].get()}')
+    app.components['applicant date of birth'].set(y="2000", m="Jan", d="01")
+    app.components['applicant UCI'].set("0123456789")
 
     total_amount = 0
     total_months = random.randint(1,12)
@@ -105,12 +110,12 @@ def test_button(app):
     random_row_contents = []
     random_row_infos = []
 
-    for i in range(random.randint(1,5)):
+    for i in range(random.randint(15,20)):
         new_row, new_row_info = generate_row_contents(
             app_components=app.components, 
             override_row_content={
                 'service': f'item_{i+1}',
-                'quantity': f"{str(random.randint(1, 10))}",
+                'quantity': f"{str(random.randint(1, 3))}",
                 'rate': str(random.choice([100,200,300,400,500])),
                 'tax_rate': 12.0,
                 'gst': 7.0,

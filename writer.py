@@ -233,6 +233,37 @@ def write_conduct(doc, components):
     save_doc(doc=doc, components=components, prefix=f"{read_case_id()} - Conduct", folder_name='agreements')
 
 
+def write_imm5476(doc, components):
+    date_on_document = datetime.datetime.now() #(components['date on document'].get(), "%b %d, %Y")
+
+    document_data = {
+        '[DAY]': date_on_document.strftime("%d"),
+        '[MONTH]': date_on_document.strftime("%b"),
+        '[YEAR]': date_on_document.strftime("%Y"),
+        '[signedDate1]': (f"{components["date on document"].get().strip()}"),
+        '[signedDate2]': (f"{components["date on document"].get().strip()}"),
+        '[applicantUCI]': (f"{components["applicant UCI"].get().strip()}"),
+        '[applicantDOB]': (f"{components["applicant date of birth"].get().strip()}"),
+        '[applicantGivenName]': (f"{components["client 1 first name"].get().strip()}"),
+        '[applicantSurname]': (f"{components["client 1 last name"].get().strip().ljust(48)}"),
+        '[nameOfOffice]': "Immigration, Refugees and Citizenship Canada",
+        '[typeOfApplication]': (f"{components["application type"].get().strip()}"),
+    }
+
+    document_data["[applicantDOB]"] = datetime.datetime.strptime(document_data["[applicantDOB]"], "%b %d, %Y")
+    document_data["[signedDate1]"] = datetime.datetime.strptime(document_data["[signedDate1]"], "%b %d, %Y")
+    document_data["[signedDate2]"] = datetime.datetime.strptime(document_data["[signedDate2]"], "%b %d, %Y")
+    document_data["[applicantDOB]"] = datetime.datetime.strftime(document_data["[applicantDOB]"], '%Y-%m-%d')
+    document_data["[signedDate1]"] = datetime.datetime.strftime(document_data["[signedDate1]"], '%Y-%m-%d')
+    document_data["[signedDate2]"] = datetime.datetime.strftime(document_data["[signedDate2]"], '%Y-%m-%d')
+
+    if components["client 2 first name"].get().strip() == "" and components["client 2 last name"].get().strip() == "":
+        document_data["[signedDate2]"] = ""
+
+    replace_placeholders(doc, document_data)
+    save_doc(doc=doc, components=components, override_output_filename=f"{components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()} - imm5476", folder_name='imm5476')
+
+
 def replace_placeholders(doc, document_data):
     try:
         for paragraph in doc.paragraphs:

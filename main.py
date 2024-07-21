@@ -32,7 +32,8 @@ for subapp_name in blueprint:
         fg_color="lightgray",
         width=170,
         height=50,
-        font=ctk.CTkFont(family="Roboto Bold")
+        font=ctk.CTkFont(family="Roboto Bold"),
+        hover_color='#ddd'
     )
 
     subapp_components.append(new_subapp)
@@ -40,6 +41,7 @@ for subapp_name in blueprint:
 # use the above components and render each subapp
 for i, subapp_name in enumerate(blueprint):
     subapp_components[i]['subapp_obj'] = Subapp(subapp_components=subapp_components, blueprint=blueprint[subapp_name], subapp_name=subapp_name, app=app, imgs=imgs, button_position=i, columns_weights=blueprint[subapp_name]['column_weights'])
+    app.add_component(subapp_name, subapp_components[i]['subapp_obj'])
 
 if "--test" in sys.argv:
     test_button(app)

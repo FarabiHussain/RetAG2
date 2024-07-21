@@ -1,19 +1,22 @@
 import math
+import shutil
 import customtkinter as ctk
 import datetime
 import os
-from Popups import ErrorPopup
+from Popups import ErrorPopup, PromptPopup
 from RenderFont import RenderFont
 from Path import *
 from docx import Document
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from writer import write_payments, replace_placeholders, write_conduct, write_receipt, write_retainer
+from reader import read_case_id
+from writer import write_imm5476, write_payments, replace_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, test_button, decrypt_button
-
+import json
+from PyPDFForm import PdfWrapper
 
 family_medium="Roboto Bold"
 family_bold="Roboto Bold"
@@ -540,19 +543,20 @@ class AppButton():
 
 
 class ActionButton():
-    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=120, height=40, row=0, col=0, blueprint={}) -> None:
+    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=81, height=40, row=0, col=0, blueprint={}) -> None:
 
         self.component = ctk.CTkButton(
             master=master,
             text=btn_text,
             image=image,
             border_width=0,
-            corner_radius=2,
+            corner_radius=0,
             fg_color=btn_color,
             command=lambda:self.assign_action(app, action, blueprint),
             width=width,
             height=height,
-            state='disabled' if 'spacer' in action else 'normal'
+            state='disabled' if 'spacer' in action else 'normal',
+            hover_color="dark gray"
         )
         
         self.component.grid(row=row, column=col, pady=[20,5], padx=4)
@@ -564,6 +568,9 @@ class ActionButton():
             for component_name in blueprint.keys():
                 if (component_name in app_components):
                     app_components.get(component_name).reset()
+
+                    if component_name == 'case ID':
+                        app.components.get('case ID').set(read_case_id())
 
             if ("receipt" in action):
                 app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
@@ -583,6 +590,9 @@ class ActionButton():
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
 
+            if datetime.datetime.now().strftime('%b %d, %Y') == app.components.get('payment 1').get('date'):
+                PromptPopup("The first payment is to be made today. Create receipt?", func=app.compnents['Receipts'].lift_app())
+
         elif (action == "conduct"):
             try:
                 doc = Document(resource_path("assets\\templates\\conduct.docx"))
@@ -596,6 +606,9 @@ class ActionButton():
                 write_receipt(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
+
+        elif (action == "generate case ID"):
+            app.components.get('case ID').set(read_case_id())
 
         elif (action == "history"):
             HistoryViewer(app)
@@ -621,6 +634,12 @@ class ActionButton():
             except Exception as e:
                 ErrorPopup(msg=f'Output folder not found')
 
+        elif action == 'representative':
+            try:
+                doc = Document(resource_path("assets\\templates\\imm5476.docx"))
+                write_imm5476(doc, app.get_all_components())
+            except Exception as e:
+                ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
 
 class TabView():
     def __init__(self, master, new_tabs=[]) -> None:
