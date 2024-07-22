@@ -3,6 +3,7 @@ import shutil
 import customtkinter as ctk
 import datetime
 import os
+import glob
 from Popups import ErrorPopup, PromptPopup
 from RenderFont import RenderFont
 from Path import *
@@ -10,7 +11,7 @@ from docx import Document
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from reader import read_case_id
+from reader import read_file_as_list, read_case_id
 from writer import write_imm5476, write_payments, replace_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
@@ -47,18 +48,14 @@ class GUI:
 
 class RowBreak(GUI):
     def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
-        # rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#fff')
-
         self.breakline = ctk.CTkLabel(
             master, 
             text=heading.upper(), 
-            # text='', 
             height=32, 
             width=450, 
             fg_color="#808080", 
             text_color="white", 
             corner_radius=2, 
-            # image=rf.get_render(15, heading.upper())
             font=ctk.CTkFont(family=family_bold, weight='bold')
         )
 
@@ -543,7 +540,7 @@ class AppButton():
 
 
 class ActionButton():
-    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=81, height=40, row=0, col=0, blueprint={}) -> None:
+    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=81, height=40, row=0, col=0, blueprint={}, subapp_name="") -> None:
 
         self.component = ctk.CTkButton(
             master=master,
@@ -552,7 +549,7 @@ class ActionButton():
             border_width=0,
             corner_radius=0,
             fg_color=btn_color,
-            command=lambda:self.assign_action(app, action, blueprint),
+            command=lambda:self.assign_action(app, action, blueprint, subapp_name),
             width=width,
             height=height,
             state='disabled' if 'spacer' in action else 'normal',
@@ -562,7 +559,7 @@ class ActionButton():
         self.component.grid(row=row, column=col, pady=[20,5], padx=4)
 
 
-    def assign_action(self, app=None, action="", blueprint={}) -> None:
+    def assign_action(self, app=None, action="", blueprint={}, subapp_name="") -> None:
         if ("reset" in action):
             app_components = app.get_all_components()
             for component_name in blueprint.keys():
@@ -610,7 +607,7 @@ class ActionButton():
         elif (action == "generate case ID"):
             app.components.get('case ID').set(read_case_id())
 
-        elif (action == "history"):
+        elif (action == "retainer history"):
             HistoryViewer(app)
 
         elif (action == "find receipt"):
@@ -626,7 +623,65 @@ class ActionButton():
             add_item_button(app)
 
         elif (action == "remove item"):
+            cart = app.components['cart']
+
+            selected_row = cart.get_selected_contents()
+            selected_info = cart.get_selected_info()
+
+            if selected_row is None or selected_info is None:
+                ErrorPopup(msg="Select table item to perform action.")
+                return
+
             remove_item_button(app)
+
+        elif (action == "search files"):
+            created_files = read_file_as_list(filename='files.csv')
+            search_id = app.components['search case ID'].get()
+            search_table = app.components['search results']
+
+            search_table.reset()
+
+            row_info_list = []
+            row_contents_list = []
+
+            for row in created_files:
+                if search_id in row['case_id']:
+                    row_info_list.append(row)
+                    row_contents_list.append([
+                        row['document_type'],
+                        row['client_name'],
+                        row['created_date'],
+                        row['created_by'],
+                        row['remarks'],
+                    ])
+
+            search_table.add(
+                row_contents=row_contents_list,
+                row_info=row_info_list,
+            )
+
+        elif (action == "open selected"):
+            search_table = app.components['search results']
+            filename = (search_table.get_selected_info().get('filename', None))
+            document_type = (search_table.get_selected_info().get('document_type', None))
+
+            if filename is None or document_type is None:
+                ErrorPopup(msg="Select table item to perform action.")
+                return
+
+            folder_paths = {
+                'Payment Receipt': (f'{os.getcwd()}\\output\\receipts\\'),
+                'Use of Representative': (f'{os.getcwd()}\\output\\imm5476\\'),
+                'Code of Conduct': (f'{os.getcwd()}\\output\\agreements\\'),
+                'Retainer Agreement': (f'{os.getcwd()}\\output\\agreements\\'),
+                'Payment Authorization': (f'{os.getcwd()}\\output\\agreements\\'),
+            }
+
+            try:
+                os.startfile(f'{folder_paths.get(document_type)}\\{filename}.docx')
+            except Exception as e:
+                print(e)
+                ErrorPopup(msg=f"Could not open {filename}.docx")
 
         elif ("output" in action):
             try:
@@ -640,6 +695,7 @@ class ActionButton():
                 write_imm5476(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
+
 
 class TabView():
     def __init__(self, master, new_tabs=[]) -> None:
@@ -738,7 +794,7 @@ class CellWidget():
 
 
 class RowWidget():
-    def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_color="#eee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
+    def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_info=None, row_color="#eee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
 
         # no parent, nowhere to put this
         if parent_frame is None:
@@ -764,9 +820,9 @@ class RowWidget():
             for c in self.contents:
                 c.cell.configure(fg_color=row_color)
 
-        def select_row(self):
+        def select_row():
             table_obj.selected_row = row_contents
-            app.buttons['Receipts']['remove item'].component.configure(fg_color="#BA0600", state='normal')
+            table_obj.selected_row_info = row_info
 
         # setup the grid system
         for i in range(len(row_contents)+1):
@@ -807,7 +863,7 @@ class RowWidget():
                         text_color="white" if mode is "header" else "black", 
                         fg_color="#000" if mode is "header" else row_color, 
                         font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode is "header" else ctk.CTkFont(family=family_medium, size=12),
-                        command=lambda: select_row(self),
+                        command=lambda: select_row(),
                         on_enter=lambda *args: highlight_row(),
                         on_leave=lambda *args: unhighlight_row(),
                     )
@@ -867,6 +923,7 @@ class TableWidget():
         self.rows_rendered = []
         self.next_empty_index = 0
         self.selected_row = None
+        self.selected_row_info = None
         self.page = 1
 
         for i in range(3):
@@ -990,6 +1047,7 @@ class TableWidget():
                         row_number=index, 
                         mode=self.rows[index + page_offset].get('mode'), 
                         row_contents=self.rows[index + page_offset].get('row_contents'),
+                        row_info=self.rows[index + page_offset].get('info'),
                         row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
                         table_obj=self,
                         app=self.app, 
@@ -1056,7 +1114,7 @@ class TableWidget():
 
 
     def add(self, row_info=None, row_contents=None, row_index=None) -> None:
-        for row_info, row_contents in zip(row_info, row_contents):
+        for current_row_info, current_row_contents in zip(row_info, row_contents):
 
             row_to_update = row_index if row_index is not None else self.next_empty_index
 
@@ -1066,9 +1124,9 @@ class TableWidget():
                     'parent_width': self.parent_width, 
                     'row_number': row_to_update, 
                     'mode': "table", 
-                    'row_contents': row_contents if not None else ['','','','',''],
+                    'row_contents': current_row_contents if not None else ['','','','',''],
                     'row_color': "#ddd" if (row_to_update % 2 == 0) else "#eee",
-                    'info': row_info,
+                    'info': current_row_info,
                 }
             )
 
@@ -1078,7 +1136,7 @@ class TableWidget():
             else:
                 self.rows[row_index] = new_row
 
-        self.update()
+        # self.update()
         self.update(page=self.page)
 
 
@@ -1119,3 +1177,11 @@ class TableWidget():
 
     def get(self) -> list:
         return self.rows
+
+
+    def get_selected_contents(self):
+        return self.selected_row
+
+
+    def get_selected_info(self):
+        return self.selected_row_info

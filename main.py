@@ -40,7 +40,16 @@ for subapp_name in blueprint:
 
 # use the above components and render each subapp
 for i, subapp_name in enumerate(blueprint):
-    subapp_components[i]['subapp_obj'] = Subapp(subapp_components=subapp_components, blueprint=blueprint[subapp_name], subapp_name=subapp_name, app=app, imgs=imgs, button_position=i, columns_weights=blueprint[subapp_name]['column_weights'])
+    subapp_components[i]['subapp_obj'] = Subapp(
+        subapp_components=subapp_components, 
+        blueprint=blueprint[subapp_name], 
+        subapp_name=subapp_name, 
+        app=app, 
+        imgs=imgs, 
+        button_position=i, 
+        columns_weights=blueprint[subapp_name]['column_weights'] if 'column_weights' in blueprint[subapp_name] else None, 
+    )
+
     app.add_component(subapp_name, subapp_components[i]['subapp_obj'])
 
 if "--test" in sys.argv:

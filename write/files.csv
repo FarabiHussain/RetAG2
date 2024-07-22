@@ -1,0 +1,8 @@
+case_id,document_type,created_by,created_date,remarks,client_name,filename
+202407-001,Retainer Agreement,ASCII-13700K,01:15 - July 22 2024,EOI ($448.00),Christopher Hibbitts,202407-001 - Retainer - Christopher Hibbitts
+202407-001,Payment Authorization,ASCII-13700K,01:15 - July 22 2024,$448.00 in 4 months,Christopher Hibbitts,202407-001 - Payments - Christopher - Hibbitts
+202407-001,Code of Conduct,ASCII-13700K,01:15 - July 22 2024,EOI,Christopher Hibbitts,202407-001 - Conduct - Christopher Hibbitts
+202407-001,Payment Receipt,ASCII-13700K,01:15 - July 22 2024,#0000000001 ($1379.84),Christopher Hibbitts,202407-001 - Receipt 0000000001 - Christopher Hibbitts
+202407-001,Payment Receipt,ASCII-13700K,01:15 - July 22 2024,#0000000002 ($2007.04),Christopher Hibbitts,202407-001 - Receipt 0000000002 - Christopher Hibbitts
+202407-001,Payment Receipt,ASCII-13700K,01:16 - July 22 2024,#0000000003 ($2634.24),Christopher Hibbitts,202407-001 - Receipt 0000000003 - Christopher Hibbitts
+202407-002,Retainer Agreement,ASCII-13700K,02:15 - July 22 2024,EOI ($1120.00),Wilma Goodell,202407-002 - Retainer - Wilma Goodell

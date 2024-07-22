@@ -8,7 +8,7 @@ from icecream import ic
 from Popups import ErrorPopup
 from dotenv import load_dotenv
 from writer import obscure, unobscure
-from reader import read_retainer_history, read_case_id
+from reader import read_file_as_list, read_case_id
 
 
 def decrypt_button(app):
@@ -72,17 +72,13 @@ def test_button(app):
     legal_name_2 = names.get_full_name(gender=random.choice(['male', 'female']))
 
     app.components['address'].set("Address")
-    app.components['billing address'].set("Address, Winnipeg, MB")
     app.components['card number'].set(f"{str(random.randint(1000000000000000, 9999999999999999))}")
     app.components['card type'].set("Visa")
     app.components['cardholder name'].set(legal_name)
     app.components['add taxes'].set("Yes")
-    app.components['city'].set("Winnipeg")
     app.components['expiration'].set(y="2026", m="Dec", d="31")
     app.components['client 1 first name'].set(legal_name.split(" ")[0])
     app.components['client 1 last name'].set(legal_name.split(" ")[1])
-    app.components['applicant surname'].set(legal_name.split(" ")[1])
-    app.components['applicant given name'].set(legal_name.split(" ")[0])
     app.components['client 1 email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
     app.components['client 1 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
     app.components['email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
@@ -91,13 +87,12 @@ def test_button(app):
     app.components['client 2 last name'].set(legal_name_2.split(" ")[1])
     app.components['client 2 email'].set(f"{legal_name_2.lower().replace(" ","")}@gmail.com")
     app.components['client 2 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
-    app.components['postal code'].set(f"X1X Y2Y")
-    app.components['province'].set(f"Manitoba")
     app.components['security code'].set(f"{str(random.randint(100, 999))}")
     app.components['case ID'].set(read_case_id())
     app.components['client name'].set(f'{app.components['client 1 first name'].get()} {app.components['client 1 last name'].get()}')
-    app.components['applicant date of birth'].set(y="2000", m="Jan", d="01")
-    app.components['applicant UCI'].set("0123456789")
+    app.components['client 1 date of birth'].set(y="2000", m="Jan", d="01")
+    app.components['client 1 UCI'].set("0123456789")
+    app.components['search case ID'].set("202407-001")
 
     total_amount = 0
     total_months = random.randint(1,12)
@@ -110,7 +105,7 @@ def test_button(app):
     random_row_contents = []
     random_row_infos = []
 
-    for i in range(random.randint(15,20)):
+    for i in range(random.randint(1,3)):
         new_row, new_row_info = generate_row_contents(
             app_components=app.components, 
             override_row_content={
@@ -241,7 +236,7 @@ class HistoryViewer():
 
         # check whether history entries exist
         if entries == []:
-            imported_history = read_retainer_history()
+            imported_history = read_file_as_list()
 
             if len(imported_history) == 0:
                 ErrorPopup(msg="No entries in history.")

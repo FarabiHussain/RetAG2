@@ -3,10 +3,13 @@
         "column_weights": [1,1,1],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT 1 INFORMATION"},
+        "case ID": {"column": 0, "type": "entry"},
         "client 1 first name": {"column": 0, "type": "entry"},
         "client 1 last name": {"column": 0, "type": "entry"},
         "client 1 phone": {"column": 0, "type": "entry"},
         "client 1 email": {"column": 0, "type": "entry"},
+        "client 1 UCI": {"column": 0, "type": "entry"},
+        "client 1 date of birth": {"column": 0, "type": "datepicker", "show_day":"true"},
 
         "break 1": {"column": 0, "type": "break", "heading": "CLIENT 2 INFORMATION"},
         "client 2 first name": {"column": 0, "type": "entry"},
@@ -14,17 +17,13 @@
         "client 2 phone": {"column": 0, "type": "entry"},
         "client 2 email": {"column": 0, "type": "entry"},
 
-        "break 2": {"column": 0, "type": "break", "heading": "APPLICATION DETAILS"},
-        "case ID": {"column": 0, "type": "entry"},
-        "date on document": {"column": 0, "type": "datepicker", "show_day":"true"},
-        "application type": {"column": 0, "type": "combo", "options": ["EOI", "MPNP", "PR", "Sousal Sponsorship", "Common-Law Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]},
-        "add taxes": {"column": 0, "type": "combo", "options": ["Yes", "No"], "default": "Yes"},
+        "break 2": {"column": 1, "type": "break", "heading": "APPLICATION DETAILS"},
+        "date on document": {"column": 1, "type": "datepicker", "show_day":"true"},
+        "application type": {"column": 1, "type": "combo", "options": ["EOI", "MPNP", "PR", "Sousal Sponsorship", "Common-Law Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]},
+        "add taxes": {"column": 1, "type": "combo", "options": ["Yes", "No"], "default": "Yes"},
 
         "break 3": {"column": 1, "type": "break", "heading": "PAYER INFORMATION"},
         "address": {"column": 1, "type": "entry"},
-        "city": {"column": 1, "type": "entry"},
-        "province": {"column": 1, "type": "entry"},
-        "postal code": {"column": 1, "type": "entry"},
         "phone": {"column": 1, "type": "entry"},
         "email": {"column": 1, "type": "entry"},
 
@@ -34,7 +33,6 @@
         "cardholder name": {"column": 1, "type": "entry"},
         "expiration": {"column": 1, "type": "datepicker", "show_day":"false"},
         "security code": {"column": 1, "type": "entry"},
-        "billing address": {"column": 1, "type": "entry"},
 
         "break 5": {"column": 2, "type": "break", "heading": "PAYMENT PLAN"},
         "application fee": {"column": 2, "type": "paymentsplitter"},
@@ -61,8 +59,9 @@
             "retainer": "#383FBC",
             "payments": "#000042",
             "conduct": "#1A8405",
+            "representative": "#114707",
             "generate case ID": "#ff7b00",
-            "history": "#545454",
+            "retainer history": "#545454",
             "decrypt": "#545454",
             "spacer 1": "#ffffff",
             "spacer 2": "#ffffff",
@@ -72,20 +71,6 @@
             "spacer 6": "#ffffff",
             "test": "#d3d3d3",
             "reset agreement": "#BA0600"
-        }
-    },
-
-    "use of representative": {
-        "column_weights": [1,1,1],
-
-        "break 0": {"column": 0, "type": "break", "heading": "APPLICANT INFORMATION"},
-        "applicant given name": {"column": 0, "type": "entry"},
-        "applicant surname": {"column": 0, "type": "entry"},
-        "applicant UCI": {"column": 0, "type": "entry"},
-        "applicant date of birth": {"column": 0, "type": "datepicker", "show_day":"true"},
-
-        "buttons": {
-            "representative": "#114707"
         }
     },
 
@@ -119,7 +104,7 @@
             "remove item": "#BA0600",
             "create receipt": "#000042",
             "find receipt": "#545454",
-            "spacer 0": "#ffffff",
+            "payment history": "#545454",
             "spacer 1": "#ffffff",
             "spacer 2": "#ffffff",
             "spacer 3": "#ffffff",
@@ -130,9 +115,38 @@
             "spacer 8": "#ffffff",
             "test": "#d3d3d3",
             "reset receipt": "#BA0600"
-        },
+        }
+    },
 
-        "init_app_2": "/assets/functions/Receipts.py",
-        "init_app_1": "/assets/functions/Agreements.py"
+    "Search": {
+        "column_weights": [1,2,0],
+        "break 0": {"column": 0, "type": "break", "heading": "FILTERS"},
+        "search case ID": {"column": 0, "type": "entry"},
+        "search results": {"column": 1, "type": "table", "headers": ["document type", "client name", "created date", "created by", "remarks"]},
+
+        "buttons": {
+            "search files": "#383FBC",
+            "open selected": "#000042",
+            "spacer 2": "#ffffff",
+            "spacer 3": "#ffffff",
+            "spacer 4": "#ffffff",
+            "spacer 5": "#ffffff",
+            "spacer 6": "#ffffff",
+            "spacer 7": "#ffffff",
+            "spacer 8": "#ffffff",
+            "spacer 9": "#ffffff",
+            "spacer 10": "#ffffff",
+            "spacer 11": "#ffffff",
+            "spacer 12": "#ffffff",
+            "spacer 13": "#ffffff",
+            "test": "#d3d3d3",
+            "reset receipt": "#BA0600"
+        }
+    },
+
+    "Init": {
+        "init_app_agreements": "/assets/functions/Agreements.py",
+        "init_app_receipts": "/assets/functions/Receipts.py",
+        "init_app_search": "/assets/functions/Search.py"
     }
 }

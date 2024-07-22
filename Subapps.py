@@ -11,7 +11,10 @@ class Subapp():
         self.button.configure(command=lambda:self.lift_app(subapp_components))
 
         self.subapp_name = subapp_name
-        self.button.place(x=0, y=(50*button_position) + 3 + (3*button_position))
+
+        if subapp_name.lower() != 'init':
+            self.button.place(x=0, y=(50*button_position) + 3 + (3*button_position))
+
         self.blueprint = blueprint
 
         self.render_app(self.frame, blueprint, app, imgs, columns_weights, subapp_components)
@@ -160,6 +163,7 @@ class Subapp():
                     btn_color=blueprint['buttons'][btn], 
                     row=0, 
                     col=index, 
+                    subapp_name=self.subapp_name, 
                     # btn_text=btn.upper(),
                 )
 

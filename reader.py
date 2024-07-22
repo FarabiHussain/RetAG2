@@ -19,16 +19,17 @@ def get_recent() -> dict:
             return last_row
 
 
-def read_retainer_history() -> list:
-    history_dir = os.getcwd() + "\\write\\"
+def read_file_as_list(filename='agreements.csv') -> list:
+    history_dir = f"{os.getcwd()}\\write\\"
+    filepath = f'{history_dir}\\{filename}{'.csv' if '.csv' not in filename else ''}'
     history = []
 
     if not os.path.exists(history_dir):
         print("path does not exist")
-    elif not os.path.exists(history_dir + "\\agreements.csv"):
+    elif not os.path.exists(filepath):
         print("file does not exist")
     else:
-        with open(history_dir + "\\agreements.csv", mode='r') as infile:
+        with open(filepath, mode='r') as infile:
             temp = list(csv.DictReader(infile))
             temp.reverse()
             history = temp
@@ -56,7 +57,7 @@ def read_receipt_id():
     try:
         with open(records_file, 'r') as log_file:
             doc_id = log_file.readlines()[-1]
-            doc_id = doc_id.split(",")[1]
+            doc_id = doc_id.split(",")[3]
             doc_id = doc_id.replace("[","").replace("]","")
 
             return int(doc_id)
