@@ -185,6 +185,7 @@ def write_receipt(doc, components):
 def write_retainer(doc, components):
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
+    case_id = components['case ID'].get().strip()
 
     # formats the list of data so that it can be displayed on the output document
     def format_payments():
@@ -215,6 +216,20 @@ def write_retainer(doc, components):
         '[PAY_PLAN]': format_payments(),
     }
 
+    for d in ['[CLIENT1]', '[EMAIL1]', '[PHONE1]', '[APP_TYPE]', '[APP_FEE]', '[PAY_PLAN]']:
+        if len(document_data[d].strip()) == 0:
+            ErrorPopup(msg="Failed to create retainer.\n\nThe following must not be empty:\n"
+                + "- client 1 first name\n"
+                + "- client 1 last name\n"
+                + "- client 1 phone number\n"
+                + "- client 1 email\n"
+                + "- application type\n"
+                + "- application fee\n"
+                + "- payment plan"
+            )
+
+            return False
+
     replace_placeholders(doc, document_data)
 
     client_signatures = [
@@ -227,20 +242,22 @@ def write_retainer(doc, components):
     ]
 
     insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
-    output_filename = f"{components['case ID'].get().strip()} - Retainer - {document_data['[CLIENT1]']}"
+    output_filename = f"{case_id} - Retainer - {document_data['[CLIENT1]']}"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
         insert_agreement_to_history(components)
 
         log_created_files(
-            case_id=components['case ID'].get().strip(), 
+            case_id=case_id, 
             document_type='Retainer Agreement', 
             timestamp=str(datetime.datetime.now().strftime("%H:%M - %B %d %Y")), 
             remarks=f'{components['application type'].get()} ({"${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)})',
             client_name=components.get('client name').get().strip(), 
             filename=output_filename, 
         )
+
+        return response
 
 
 def write_conduct(doc, components):
@@ -253,6 +270,18 @@ def write_conduct(doc, components):
         '[CLIENT1]': (f"{components["client 1 first name"].get()} {components["client 1 last name"].get()}").strip(),
         '[APP_TYPE]': components["application type"].get(),
     }
+
+    for d in ['[CLIENT1]', '[APP_TYPE]']:
+        if len(document_data[d].strip()) == 0:
+            ErrorPopup(msg="Failed to create code of conduct.\n\nThe following must not be empty:\n"
+                + "- client 1 first name\n"
+                + "- client 1 last name\n"
+                + "- client 1 phone number\n"
+                + "- client 1 email\n"
+                + "- application type\n"
+            )
+
+            return False
 
     replace_placeholders(doc, document_data)
     output_filename = f"{components['case ID'].get().strip()} - Conduct - {document_data['[CLIENT1]']}"
@@ -282,9 +311,20 @@ def write_imm5476(doc, components):
         '[applicantDOB]': (f"{components["client 1 date of birth"].get().strip()}"),
         '[applicantGivenName]': (f"{components["client 1 first name"].get().strip()}"),
         '[applicantSurname]': (f"{components["client 1 last name"].get().strip().ljust(48)}"),
-        '[nameOfOffice]': "Immigration, Refugees and Citizenship Canada",
-        '[typeOfApplication]': (f"{components["application type"].get().strip()}"),
+        # '[nameOfOffice]': "IRCC".ljust(45),
+        # '[typeOfApplication]': (f"{components["application type"].get().strip()}"),
     }
+
+    for d in ['[applicantUCI]', '[applicantDOB]', '[applicantGivenName]', '[applicantSurname]']:
+        if len(document_data[d].strip()) == 0:
+            ErrorPopup(msg="Failed to create imm5476.\n\nThe following must not be empty:\n"
+                + "- client 1 first name\n"
+                + "- client 1 last name\n"
+                + "- client 1 UCI\n"
+                + "- client 1 date of birth\n"
+            )
+
+            return False
 
     document_data["[applicantDOB]"] = datetime.datetime.strptime(document_data["[applicantDOB]"], "%b %d, %Y")
     document_data["[signedDate1]"] = datetime.datetime.strptime(document_data["[signedDate1]"], "%b %d, %Y")
@@ -396,11 +436,42 @@ def log_created_files(case_id="", document_type="", timestamp="", remarks="", cl
     records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
 
     try:
-        with open(records_file, 'a') as log_file:
+        with open(records_file, 'r+') as log_file:
+            prev_line = log_file.readlines()[-1]
+            print(prev_line)
+
             new_entry = (",").join([case_id, document_type, os.environ['COMPUTERNAME'], timestamp, remarks, client_name, filename])
             print(new_entry)
-            log_file.write(new_entry)
-            log_file.write("\n")
+
+            ic(prev_line == new_entry)
+
+            if prev_line == new_entry:
+
+                # https://stackoverflow.com/a/10289740/23618954
+                # Move the pointer (similar to a cursor in a text editor) to the end of the file
+                log_file.seek(0, os.SEEK_END)
+
+                # This code means the following code skips the very last character in the file -
+                # i.e. in the case the last line is null we delete the last line
+                # and the penultimate one
+                pos = log_file.tell() - 1
+
+                # Read each character in the file one at a time from the penultimate
+                # character going backwards, searching for a newline character
+                # If we find a new line, exit the search
+                while pos > 0 and log_file.read(1) != "\n":
+                    pos -= 1
+                    log_file.seek(pos, os.SEEK_SET)
+
+                # So long as we're not at the start of the file, delete all the characters ahead
+                # of this position
+                if pos > 0:
+                    log_file.seek(pos, os.SEEK_SET)
+                    log_file.truncate()
+
+            else:
+                log_file.write(new_entry)
+                log_file.write("\n")
 
     except Exception as e:
         print(e)

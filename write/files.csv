@@ -6,3 +6,35 @@ case_id,document_type,created_by,created_date,remarks,client_name,filename
 202407-001,Payment Receipt,ASCII-13700K,01:15 - July 22 2024,#0000000002 ($2007.04),Christopher Hibbitts,202407-001 - Receipt 0000000002 - Christopher Hibbitts
 202407-001,Payment Receipt,ASCII-13700K,01:16 - July 22 2024,#0000000003 ($2634.24),Christopher Hibbitts,202407-001 - Receipt 0000000003 - Christopher Hibbitts
 202407-002,Retainer Agreement,ASCII-13700K,02:15 - July 22 2024,EOI ($1120.00),Wilma Goodell,202407-002 - Retainer - Wilma Goodell
+202407-003,Retainer Agreement,FARABI-AMCAIM,11:24 - July 22 2024,EOI ($1008.00),Marie Roswell,202407-003 - Retainer - Marie Roswell
+202407-003,Payment Authorization,FARABI-AMCAIM,11:24 - July 22 2024,$1008.00 in 9 months,Marie Roswell,202407-003 - Payments - Marie - Roswell
+202407-003,Code of Conduct,FARABI-AMCAIM,11:24 - July 22 2024,EOI,Marie Roswell,202407-003 - Conduct - Marie Roswell
+202407-003,Use of Representative,FARABI-AMCAIM,11:24 - July 22 2024,EOI,Marie Roswell,Marie - Roswell - imm5476
+202407-004,Use of Representative,FARABI-AMCAIM,11:26 - July 22 2024,EOI,Justin Senior,Justin - Senior - imm5476
+202407-004,Use of Representative,FARABI-AMCAIM,11:26 - July 22 2024,EOI,Harold Sutton,Harold - Sutton - imm5476
+202407-004,Use of Representative,FARABI-AMCAIM,11:26 - July 22 2024,EOI,Linda Johnson,Linda - Johnson - imm5476
+202407-004,Use of Representative,FARABI-AMCAIM,11:26 - July 22 2024,EOI,James Doucet,James - Doucet - imm5476
+202407-004,Use of Representative,FARABI-AMCAIM,11:27 - July 22 2024,EOI,James Doucet,James - Doucet - imm5476
+202407-004,Use of Representative,FARABI-AMCAIM,11:27 - July 22 2024,EOI,James Doucet,James - Doucet - imm5476
+202407-008,Retainer Agreement,FARABI-AMCAIM,11:47 - July 22 2024,EOI ($1344.00),Sarah Joos,202407-008 - Retainer - Sarah Joos
+202407-008,Retainer Agreement,FARABI-AMCAIM,11:47 - July 22 2024,EOI ($1344.00),Sarah Joos,202407-008 - Retainer - Sarah Joos
+202407-009,Retainer Agreement,FARABI-AMCAIM,11:48 - July 22 2024,EOI ($1232.00),Manuel Fulton,202407-009 - Retainer - Manuel Fulton
+202407-009,Retainer Agreement,FARABI-AMCAIM,11:48 - July 22 2024,EOI ($1232.00),Manuel Fulton,202407-009 - Retainer - Manuel Fulton
+202407-010,Retainer Agreement,FARABI-AMCAIM,12:43 - July 22 2024,EOI ($560.00),Alexander Kilberg,202407-010 - Retainer - Alexander Kilberg
+202407-011,Retainer Agreement,FARABI-AMCAIM,12:43 - July 22 2024,EOI ($336.00),Janine Garcia,202407-011 - Retainer - Janine Garcia
+202407-011,Retainer Agreement,FARABI-AMCAIM,12:44 - July 22 2024,EOI ($336.00),Janine Garcia,202407-011 - Retainer - Janine Garcia
+202407-012,Retainer Agreement,FARABI-AMCAIM,12:45 - July 22 2024,EOI ($896.00),Latesha Lannier,202407-012 - Retainer - Latesha Lannier
+202407-013,Retainer Agreement,FARABI-AMCAIM,12:47 - July 22 2024,EOI ($1120.00),Roberta Sommerfeld,202407-013 - Retainer - Roberta Sommerfeld
+202407-013,Retainer Agreement,FARABI-AMCAIM,12:47 - July 22 2024,EOI ($1120.00),Roberta Sommerfeld,202407-013 - Retainer - Roberta Sommerfeld
+202407-014,Retainer Agreement,FARABI-AMCAIM,12:49 - July 22 2024,EOI ($1344.00),Michael Gordon,202407-014 - Retainer - Michael Gordon
+202407-015,Retainer Agreement,FARABI-AMCAIM,12:50 - July 22 2024,EOI ($1120.00),Marilyn King,202407-015 - Retainer - Marilyn King
+202407-016,Retainer Agreement,FARABI-AMCAIM,12:56 - July 22 2024,EOI ($1344.00),Marvin Lawson,202407-016 - Retainer - Marvin Lawson
+202407-017,Retainer Agreement,FARABI-AMCAIM,12:56 - July 22 2024,EOI ($1344.00),Richard Locket,202407-017 - Retainer - Richard Locket
+202407-018,Retainer Agreement,FARABI-AMCAIM,12:57 - July 22 2024,EOI ($1344.00),Everette Garza,202407-018 - Retainer - Everette Garza
+202407-019,Retainer Agreement,FARABI-AMCAIM,13:01 - July 22 2024,EOI ($112.00),Jackie Dougherty,202407-019 - Retainer - Jackie Dougherty
+202407-020,Retainer Agreement,FARABI-AMCAIM,13:05 - July 22 2024,EOI ($1232.00),Arnold Daugherty,202407-020 - Retainer - Arnold Daugherty
+202407-021,Use of Representative,FARABI-AMCAIM,13:14 - July 22 2024,EOI,Wayne Schenck,Wayne - Schenck - imm5476
+202407-021,Payment Receipt,FARABI-AMCAIM,13:30 - July 22 2024,#0000000249 ($501.76),Michelle Nix,202407-021 - Receipt 0000000249 - Michelle Nix
+202407-021,Payment Receipt,FARABI-AMCAIM,13:55 - July 22 2024,#0000000249 ($2759.68),Terrie Krueger,202407-021 - Receipt 0000000249 - Terrie Krueger
+202407-021,Retainer Agreement,FARABI-AMCAIM,14:03 - July 22 2024,EOI ($336.00),Wanda (test) Lewis (test),202407-021 - Retainer - Wanda (test) Lewis (test)
+202407-022,Retainer Agreement,FARABI-AMCAIM,14:04 - July 22 2024,EOI ($112.00),Ryan (test) Koch (test),202407-022 - Retainer - Ryan (test) Koch (test)

@@ -17,7 +17,6 @@ from dateutil import relativedelta as rd
 from typing import Literal
 from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, test_button, decrypt_button
 import json
-from PyPDFForm import PdfWrapper
 
 family_medium="Roboto Bold"
 family_bold="Roboto Bold"
@@ -583,12 +582,21 @@ class ActionButton():
         elif (action == "retainer"):
             try:
                 doc = Document(resource_path("assets\\templates\\retainer.docx"))
-                write_retainer(doc, app.get_all_components())
+                response = write_retainer(doc, app.get_all_components())
+
+                if response == True and datetime.datetime.now().strftime('%b %d, %Y') == app.components.get('payment 1').get('date'):
+                        PromptPopup("The first payment is to be made today. Create receipt?", func=lambda: app.components['Receipts'].lift_app(app.subapp_components['Receipts']))
+                        app.components['service'].set(app.components['application type'].get())
+                        app.components['quantity'].set('1')
+                        app.components['PST percentage'].set('5.0')
+                        app.components['PST percentage'].set('7.0')
+                        app.components['rate'].set(f'${app.components['payment 1'].get('amount')}')
+                        app.components['price'].set("${:,.2f}".format(float(app.components['payment 1'].get('amount')) * 1.12))
+                        app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                        app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                        app.components['cart'].reset()
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
-
-            if datetime.datetime.now().strftime('%b %d, %Y') == app.components.get('payment 1').get('date'):
-                PromptPopup("The first payment is to be made today. Create receipt?", func=app.compnents['Receipts'].lift_app())
 
         elif (action == "conduct"):
             try:
@@ -1142,7 +1150,6 @@ class TableWidget():
 
     def remove(self) -> None:
         rows_after_removal = []
-        self.app.buttons['Receipts']['remove item'].component.configure(fg_color='light gray', state='disabled')
 
         for row in self.rows:
             if (row['row_contents'] != self.selected_row):

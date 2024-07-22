@@ -73,8 +73,9 @@ def read_case_id():
     curr_timestamp = str(datetime.datetime.now().strftime('%Y%m'))
     doc_id = f'{curr_timestamp}-001'
 
-    try:
 
+    # fix this to use CSV columns instead of split()
+    try:
         with open(records_file, 'r') as log_file:
             prev_doc_id = log_file.readlines()[-1]
 

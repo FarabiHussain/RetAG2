@@ -17,6 +17,7 @@ class Subapp():
 
         self.blueprint = blueprint
 
+        app.subapp_components[subapp_name] = subapp_components
         self.render_app(self.frame, blueprint, app, imgs, columns_weights, subapp_components)
 
         if button_position == 0:

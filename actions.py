@@ -77,14 +77,14 @@ def test_button(app):
     app.components['cardholder name'].set(legal_name)
     app.components['add taxes'].set("Yes")
     app.components['expiration'].set(y="2026", m="Dec", d="31")
-    app.components['client 1 first name'].set(legal_name.split(" ")[0])
-    app.components['client 1 last name'].set(legal_name.split(" ")[1])
+    app.components['client 1 first name'].set(legal_name.split(" ")[0] + " (test)")
+    app.components['client 1 last name'].set(legal_name.split(" ")[1] + " (test)")
     app.components['client 1 email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
     app.components['client 1 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
     app.components['email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
     app.components['phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
-    app.components['client 2 first name'].set(legal_name_2.split(" ")[0])
-    app.components['client 2 last name'].set(legal_name_2.split(" ")[1])
+    app.components['client 2 first name'].set(legal_name_2.split(" ")[0] + " (test)")
+    app.components['client 2 last name'].set(legal_name_2.split(" ")[1] + " (test)")
     app.components['client 2 email'].set(f"{legal_name_2.lower().replace(" ","")}@gmail.com")
     app.components['client 2 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
     app.components['security code'].set(f"{str(random.randint(100, 999))}")
@@ -98,7 +98,7 @@ def test_button(app):
     total_months = random.randint(1,12)
     for i in range(total_months):
         total_amount += 100
-        app.components[f'payment {i+1}'].set("100", "2025", "Jan", i+1)
+        app.components[f'payment {i+1}'].set("100", "2024", "Jul", 22+i)
 
     app.components['application fee'].set(f"${total_amount}", total_months)
 
