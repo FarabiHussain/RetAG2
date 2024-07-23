@@ -686,7 +686,7 @@ class ActionButton():
             }
 
             try:
-                os.startfile(f'{folder_paths.get(document_type)}\\{filename}.docx')
+                os.startfile(f'{folder_paths.get(document_type)}\\{filename}.docx'.replace('\\\\', '\\'))
             except Exception as e:
                 print(e)
                 ErrorPopup(msg=f"Could not open {filename}.docx")
@@ -760,7 +760,7 @@ class CellWidget():
                 master=master, 
                 width=width, 
                 height=height, 
-                text=text, 
+                text=f'{str(text[0:22])}...{str(text[-4:])}' if len(str(text)) > 28 else text,
                 text_color=text_color, 
                 fg_color=fg_color, 
                 font=font,
@@ -771,7 +771,7 @@ class CellWidget():
                 master=master, 
                 width=width, 
                 height=height, 
-                text=text, 
+                text=f'{str(text[0:22])}...{str(text[-4:])}' if len(str(text)) > 28 else text, 
                 text_color=text_color, 
                 fg_color=fg_color, 
                 font=font,

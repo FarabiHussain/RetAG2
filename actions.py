@@ -447,7 +447,8 @@ class ReceiptFinder():
         try:
             open_counter = 0
             open_limit = int(self.qty_of_docs_to_open.cget('text'))
-            for f in sorted(glob(f"{os.getcwd()}\\output\\receipt\\*.docx"), key=os.path.getmtime, reverse=True):
+            for f in sorted(glob(f"{os.getcwd()}\\output\\receipts\\*.docx"), key=os.path.getmtime, reverse=True):
+                ic(f)
                 if all(keyword in f for keyword in search_filters):
                     os.startfile(f)
                     open_counter += 1

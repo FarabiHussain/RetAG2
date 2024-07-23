@@ -122,6 +122,7 @@
         "column_weights": [1,2,0],
         "break 0": {"column": 0, "type": "break", "heading": "FILTERS"},
         "search case ID": {"column": 0, "type": "entry"},
+        "search client name": {"column": 0, "type": "entry"},
         "search results": {"column": 1, "type": "table", "headers": ["document type", "client name", "created date", "created by", "remarks"]},
 
         "buttons": {

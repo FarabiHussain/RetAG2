@@ -129,7 +129,8 @@ def write_payments(doc, components):
 def write_receipt(doc, components):
     cart = components.get('cart')
     cart_items = []
-    case_id = components.get('case ID').get()
+    case_id = components.get('payment for case ID').get()
+    ic(case_id)
 
     current_serial = 1
     total = 0
@@ -169,11 +170,10 @@ def write_receipt(doc, components):
     if response:
         insert_receipt_to_history(receipt_id, client_name, components.get('case ID').get())
 
-        case_id = components['case ID'].get().strip()
         tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
 
         log_created_files(
-            case_id=case_id if len(case_id) > 0 else "ONE-TIME PURCHASE", 
+            case_id=case_id if len(case_id) > 0 else "000000-000", 
             document_type='Payment Receipt', 
             timestamp=str(datetime.datetime.now().strftime("%H:%M - %B %d %Y")), 
             remarks=f'#{receipt_id} ({"${:.2f}".format(total * tax_multiplier)})',
