@@ -182,8 +182,6 @@ def add_item_button(app):
         compare_keys = ['service', 'rate', 'gst', 'pst']
     )
 
-    ic(update_index)
-
     if existing_item_info is not None:
         new_row, new_row_info = generate_row_contents(
             quantity_offset=float(existing_item_info.get('quantity')),
@@ -298,7 +296,6 @@ class HistoryViewer():
 
         # bring the window forward if found
         else:
-            ic("showing existing window")
             history_window.show()
 
 
@@ -448,7 +445,6 @@ class ReceiptFinder():
             open_counter = 0
             open_limit = int(self.qty_of_docs_to_open.cget('text'))
             for f in sorted(glob(f"{os.getcwd()}\\output\\receipts\\*.docx"), key=os.path.getmtime, reverse=True):
-                ic(f)
                 if all(keyword in f for keyword in search_filters):
                     os.startfile(f)
                     open_counter += 1

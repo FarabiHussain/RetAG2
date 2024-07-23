@@ -644,24 +644,51 @@ class ActionButton():
 
         elif (action == "search files"):
             created_files = read_file_as_list(filename='files.csv')
-            search_id = app.components['search case ID'].get()
+            search_id = app.components['search case ID'].get().strip()
+            search_name = app.components['search client name'].get().strip()
+            search_category = app.components['search category'].get().strip()
             search_table = app.components['search results']
 
             search_table.reset()
-
+            
             row_info_list = []
             row_contents_list = []
+            created_files_filtered = []
 
-            for row in created_files:
-                if search_id in row['case_id']:
-                    row_info_list.append(row)
-                    row_contents_list.append([
-                        row['document_type'],
-                        row['client_name'],
-                        row['created_date'],
-                        row['created_by'],
-                        row['remarks'],
-                    ])
+            # filter by category
+            if search_category != 'All':
+                for row in created_files:
+                    if row['document_type'] == search_category:
+                        created_files_filtered.append(row)
+            else:
+                created_files_filtered = created_files
+
+            # filter by ID
+            if len(search_id) > 0:
+                temp = []
+                for row in created_files_filtered:
+                    if search_id in row['case_id']:
+                        temp.append(row)
+                created_files_filtered = temp
+
+            # filter by name
+            if len(search_name) > 0:
+                temp = []
+                for row in created_files_filtered:
+                    if search_name in row['client_name']:
+                        temp.append(row)
+                created_files_filtered = temp
+
+            # no filter applied for ID or name
+            for row in created_files_filtered:
+                row_info_list.append(row)
+                row_contents_list.append([
+                    row['document_type'],
+                    row['client_name'],
+                    row['created_date'],
+                    row['created_by'],
+                    row['remarks'],
+                ])
 
             search_table.add(
                 row_contents=row_contents_list,

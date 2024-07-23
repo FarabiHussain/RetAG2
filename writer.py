@@ -2,6 +2,7 @@ import os
 import datetime
 import re
 import zlib
+import difflib
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from Path import *
@@ -98,8 +99,6 @@ def write_payments(doc, components):
             }
         )
 
-        print(curr_amount, curr_date)
-
     insert_2col_table(document=doc, table_heading="Client Information".upper(), table_items=client_info_top)
     insert_2col_table(document=doc, table_heading="\n\nCard Information".upper(), table_items=card_info_2col)
     doc.add_page_break()
@@ -130,7 +129,6 @@ def write_receipt(doc, components):
     cart = components.get('cart')
     cart_items = []
     case_id = components.get('payment for case ID').get()
-    ic(case_id)
 
     current_serial = 1
     total = 0
@@ -176,7 +174,7 @@ def write_receipt(doc, components):
             case_id=case_id if len(case_id) > 0 else "000000-000", 
             document_type='Payment Receipt', 
             timestamp=str(datetime.datetime.now().strftime("%H:%M - %B %d %Y")), 
-            remarks=f'#{receipt_id} ({"${:.2f}".format(total * tax_multiplier)})',
+            remarks=f'#{receipt_id} ({"${:.2f}".format(total)})',
             client_name=components.get('client name').get().strip(),
             filename=filename
         )
@@ -381,6 +379,7 @@ def insert_agreement_to_history(app_components=None):
     history_entry = [app_components['case ID'].get().strip()]
     history_entry.append(os.environ['COMPUTERNAME'])
     history_entry.append(str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")))
+    history_entry.append('Retainer Agreement')
     history_entry.append(app_components.get('date on document').get())
     history_entry.append(f"{app_components.get('client 1 first name').get().strip()} {app_components.get('client 1 last name').get().strip()}".strip())
     history_entry.append(app_components.get('client 1 email').get().strip())
@@ -436,42 +435,34 @@ def log_created_files(case_id="", document_type="", timestamp="", remarks="", cl
     records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
 
     try:
-        with open(records_file, 'r+') as log_file:
-            prev_line = log_file.readlines()[-1]
-            print(prev_line)
+        with open(records_file, 'r') as log_file:
+            all_lines = log_file.readlines()
+            prev_entry_list = all_lines[-1].strip().split(',')
 
-            new_entry = (",").join([case_id, document_type, os.environ['COMPUTERNAME'], timestamp, remarks, client_name, filename])
-            print(new_entry)
+            new_entry_list = [case_id, document_type, os.environ['COMPUTERNAME'], timestamp, remarks, client_name, filename]
+            header_columns = all_lines[0].strip().split(',')
+            # header_columns.remove('created_date')
+            new_entry_dict = {}
+            prev_entry_dict = {}
 
-            ic(prev_line == new_entry)
+            for idx, col in enumerate(header_columns):
+                if col == 'created_date':
+                    continue
 
-            if prev_line == new_entry:
+                new_entry_dict[col] = new_entry_list[idx]
+                prev_entry_dict[col] = prev_entry_list[idx]
 
-                # https://stackoverflow.com/a/10289740/23618954
-                # Move the pointer (similar to a cursor in a text editor) to the end of the file
-                log_file.seek(0, os.SEEK_END)
+            new_entry_string = (",").join(new_entry_list)
 
-                # This code means the following code skips the very last character in the file -
-                # i.e. in the case the last line is null we delete the last line
-                # and the penultimate one
-                pos = log_file.tell() - 1
+        if(new_entry_dict == prev_entry_dict):
+            with open(records_file, 'w') as log_file:
+                all_lines = all_lines[0:-1]
+                log_file.writelines(all_lines)
+                log_file.write(new_entry_string+'\n')
 
-                # Read each character in the file one at a time from the penultimate
-                # character going backwards, searching for a newline character
-                # If we find a new line, exit the search
-                while pos > 0 and log_file.read(1) != "\n":
-                    pos -= 1
-                    log_file.seek(pos, os.SEEK_SET)
-
-                # So long as we're not at the start of the file, delete all the characters ahead
-                # of this position
-                if pos > 0:
-                    log_file.seek(pos, os.SEEK_SET)
-                    log_file.truncate()
-
-            else:
-                log_file.write(new_entry)
-                log_file.write("\n")
+        else:
+            with open(records_file, 'a') as log_file:
+                log_file.write(new_entry_string+'\n')
 
     except Exception as e:
         print(e)

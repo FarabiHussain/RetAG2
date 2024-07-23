@@ -19,7 +19,24 @@
 
         "break 2": {"column": 1, "type": "break", "heading": "APPLICATION DETAILS"},
         "date on document": {"column": 1, "type": "datepicker", "show_day":"true"},
-        "application type": {"column": 1, "type": "combo", "options": ["EOI", "MPNP", "PR", "Sousal Sponsorship", "Common-Law Sponsorship", "SOWP", "PFL", "PGWP", "Study Permit", "Study Permit Extension", "SRI", "LMIA", "Visitor Visa", "Super Visa"]},
+        "application type": {"column": 1, "type": "combo", "options": [
+                "EOI", 
+                "MPNP", 
+                "Permanent Residence", 
+                "Spousal Sponsorship", 
+                "Common-Law Sponsorship", 
+                "SOWP", 
+                "PFL Response", 
+                "PGWP", 
+                "Study Permit", 
+                "Study Permit Extension", 
+                "SRI", 
+                "LMIA", 
+                "Visitor Visa", 
+                "Visitor Record", 
+                "Super Visa"
+            ]
+        },
         "add taxes": {"column": 1, "type": "combo", "options": ["Yes", "No"], "default": "Yes"},
 
         "break 3": {"column": 1, "type": "break", "heading": "PAYER INFORMATION"},
@@ -123,7 +140,23 @@
         "break 0": {"column": 0, "type": "break", "heading": "FILTERS"},
         "search case ID": {"column": 0, "type": "entry"},
         "search client name": {"column": 0, "type": "entry"},
-        "search results": {"column": 1, "type": "table", "headers": ["document type", "client name", "created date", "created by", "remarks"]},
+        "search category": {"column": 0, "type": "combo", "default": "All", "options": [
+                "All", 
+                "Retainer Agreement", 
+                "Payment Receipt", 
+                "Payment Authorization", 
+                "Code of Conduct", 
+                "Use of Representative"
+            ]
+        },
+        "search results": {"column": 1, "type": "table", "headers": [
+                "document type", 
+                "client name", 
+                "created date", 
+                "created by", 
+                "remarks"
+            ]
+        },
 
         "buttons": {
             "search files": "#383FBC",
