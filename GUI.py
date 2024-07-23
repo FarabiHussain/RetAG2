@@ -650,7 +650,7 @@ class ActionButton():
             search_table = app.components['search results']
 
             search_table.reset()
-            
+
             row_info_list = []
             row_contents_list = []
             created_files_filtered = []

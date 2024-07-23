@@ -24,13 +24,12 @@ class Subapp():
             self.lift_app(subapp_components)
 
 
-    def init_app(self, app, subapp_components):
-        if 'init_app' in self.blueprint:
-            function_path = self.blueprint['init_app']
+    def init_app(self, app, subapp_components, function_path):
+        function_path = function_path
 
-            if not os.path.exists(function_path):
-                setup_function = import_function(function_path, "callback")
-                setup_function(self, app, subapp_components)
+        if not os.path.exists(function_path):
+            setup_function = import_function(function_path, "callback")
+            setup_function(self, app, subapp_components)
 
     def reset(self):
         return
@@ -175,6 +174,8 @@ class Subapp():
 
                 current_component.add_callback(component_name=component_name, app=app, callback=current_callback)
 
-        if "init_app" in blueprint.keys():
-            self.init_app(app, subapp_components)
+        for blueprint_key in blueprint.keys():
+            if "init" in blueprint_key:
+                self.init_app(app, subapp_components, blueprint[blueprint_key])
+
 
