@@ -733,27 +733,52 @@ class ActionButton():
 
 
 class TabView():
-    def __init__(self, master, new_tabs=[]) -> None:
+    def __init__(self, master, new_tabs=[], parent_width=0, height=0, top_offset=0, tab_components=[]) -> None:
 
-        self.TabView = ctk.CTkTabView(master, corner_radius=2, fg_color="#fff")
-        self.TabView.pack(expand=True, fill="both", padx=10, pady=10)
+        self.component = ctk.CTkTabview(
+            master=master, 
+            corner_radius=3, 
+            fg_color="#fff", 
+            width=parent_width, 
+            height=height, 
+            segmented_button_fg_color='white', 
+            segmented_button_unselected_color='#efefef', 
+            segmented_button_selected_color='#aaa', 
+            text_color='black',
+            border_width=2,
+            border_color='#efefef'
+        )
+
+        self.component.grid(row=top_offset)
 
         if len(new_tabs) > 0:
             self.tabs = {}
             self.set_tabs(new_tabs)
 
+        for button in self.component._segmented_button._buttons_dict.values():
+            button.configure(
+                width=parent_width/len(new_tabs)*0.9, 
+                height=32, 
+                corner_radius=4, 
+                border_width=2,
+                border_color='#fff', 
+                font=ctk.CTkFont(family=family_bold, weight='bold'))
+
     def set_tabs(self, new_tabs):
         for tab in new_tabs:
-            tab_obj = self.TabView.add(tab)
+            tab_obj = self.component.add(tab)
             self.tabs[tab] = tab_obj
 
     def get_tabs(self):
         tabs = {}
 
         for tab_name in self.tabs:
-            tabs[tab_name] = self.TabView.tab(name=tab_name) 
+            tabs[tab_name] = self.component.tab(name=tab_name) 
 
         return tabs
+
+    def reset(self):
+        return
 
 
 class WindowView():
@@ -834,10 +859,10 @@ class RowWidget():
         # no parent, nowhere to put this
         if parent_frame is None:
             return
-        
+
         if len(row_contents) == 0:
             if is_blank:
-                row_contents=['','','','','']
+                row_contents=[''] * len(table_obj.headers)
             else:
                 row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"]
 
@@ -865,7 +890,7 @@ class RowWidget():
 
         # set the number of buttons based on the mode
         # 5 in a tools row where all 5 cols are buttons
-        for i in range(5 if mode=="tools" else 0):
+        for i in range(len(table_obj.headers) if mode=="tools" else 0):
             self.buttons.append(
                 ctk.CTkButton(
                     master=self.container,
@@ -874,7 +899,7 @@ class RowWidget():
                     border_width=0,
                     corner_radius=0,
                     fg_color="black" if row_contents[i] != "" else "light gray",
-                    width=(parent_width-61)/5,
+                    width=(parent_width-61)/len(table_obj.headers),
                     height=38,
                     font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
                     state="disabled" if row_contents[i] == "" else "normal",
@@ -892,7 +917,7 @@ class RowWidget():
                     CellWidget(
                         master=self.container, 
                         type='button' if (not is_blank and i == 0 and mode != 'header') else 'label',
-                        width=(parent_width-61)/5, 
+                        width=(parent_width-61)/len(table_obj.headers), 
                         height=38, 
                         text=content, 
                         text_color="white" if mode is "header" else "black", 
@@ -951,6 +976,7 @@ class TableWidget():
 
         self.app = app
         self.rows = rows
+        self.headers = headers
         self.parent_frame = master
         self.parent_width = parent_width
         self.parent_height = parent_height
@@ -978,6 +1004,7 @@ class TableWidget():
             mode="header", 
             row_contents=headers, 
             app=self.app, 
+            table_obj=self
         )
 
         self.table_frame = ctk.CTkFrame(
@@ -996,18 +1023,16 @@ class TableWidget():
             height=self.parent_height*0.05
         )
 
+        tools_row_contents = [''] * len(self.headers)
+        tools_row_contents[0] = 'previous page'
+        tools_row_contents[1] = 'next page'
+
         self.tools = RowWidget(
             parent_frame=self.tools_frame, 
             parent_width=self.parent_width, 
             mode="tools", 
             app=self.app, 
-            row_contents=[
-                "previous page", 
-                "next page", 
-                "", 
-                "", 
-                ""
-            ], 
+            row_contents=tools_row_contents, 
             row_content_methods=[
                 lambda:self.navigate(page=self.page-1),
                 lambda:self.navigate(page=self.page+1),
@@ -1101,9 +1126,11 @@ class TableWidget():
                     parent_width=self.parent_width, 
                     row_number=index + page_offset, 
                     row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
-                    is_blank = True,
+                    # is_blank = True,
+                    row_contents=[''] * len(self.headers),
                     mode='table', 
                     app=self.app, 
+                    table_obj=self, 
                 )
 
                 # set the next button to be active if the last row was blank
@@ -1159,7 +1186,7 @@ class TableWidget():
                     'parent_width': self.parent_width, 
                     'row_number': row_to_update, 
                     'mode': "table", 
-                    'row_contents': current_row_contents if not None else ['','','','',''],
+                    'row_contents': current_row_contents if not None else [''] * len(self.headers),
                     'row_color': "#ddd" if (row_to_update % 2 == 0) else "#eee",
                     'info': current_row_info,
                 }

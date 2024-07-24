@@ -178,6 +178,54 @@
         }
     },
 
+    "Invitation Letter": {
+        "column_weights": [1,1,1],
+
+        "break 1": {"column": 1, "type": "break", "heading": "HOST INFORMATION"},
+        "host creator": {"column": 1, "type": "tabview", "tabs": ["host 1", "host 2"], 
+        "tab_components": [
+                {
+                    "host name": {"column": 0, "type": "entry"},
+                    "host date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
+                    "status in Canada": {"column": 0, "type": "entry"},
+                    "host passport no.": {"column": 0, "type": "entry"},
+                    "host address": {"column": 0, "type": "entry"},
+                    "host phone number": {"column": 0, "type": "entry"},
+                    "host email address": {"column": 0, "type": "entry"},
+                    "host occupation": {"column": 0, "type": "entry"},
+                    "host 1 relationship to host 2": {"column": 0, "type": "entry"},
+                    "bearer of expenses": {"column": 0, "type": "combo", "default": "All", "options": ["host(s)", "guest(s)"]},
+                    "attached documents": {"column": 0, "type": "entry"}
+                }
+            ]
+        },
+
+        "guest list": {"column": 2, "type": "table", "headers": [
+                "name", 
+                "host/guest"
+            ]
+        },
+
+        "buttons": {
+            "add host": "#1A8405",
+            "add guest": "#114707",
+            "spacer 2": "#ffffff",
+            "spacer 3": "#ffffff",
+            "spacer 4": "#ffffff",
+            "spacer 5": "#ffffff",
+            "spacer 6": "#ffffff",
+            "spacer 7": "#ffffff",
+            "spacer 8": "#ffffff",
+            "spacer 9": "#ffffff",
+            "spacer 10": "#ffffff",
+            "spacer 11": "#ffffff",
+            "spacer 12": "#ffffff",
+            "spacer 13": "#ffffff",
+            "test": "#d3d3d3",
+            "reset receipt": "#BA0600"
+        }
+    },
+
     "Init": {
         "init_app_agreements": "/assets/functions/Agreements.py",
         "init_app_receipts": "/assets/functions/Receipts.py",

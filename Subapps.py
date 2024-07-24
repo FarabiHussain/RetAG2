@@ -140,6 +140,16 @@ class Subapp():
                     app=app, 
                 )
 
+            elif specs['type'] == "tabview":
+                new_component = TabView(
+                    master=self.page_columns[specs['column']], 
+                    parent_width=column_widths[blueprint['column_weights'][specs['column']]], 
+                    height=670, 
+                    new_tabs=specs['tabs'], 
+                    tab_components=specs['tab_components'], 
+                    top_offset=offset, 
+                )
+
             app.add_component(label, new_component)
 
             offset += 1
