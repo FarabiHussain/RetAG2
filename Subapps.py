@@ -43,29 +43,30 @@ class Subapp():
         self.frame.lift()
 
 
-    def render_app(self, frame, blueprint, app, imgs, columns_weights, subapp_components):
+    def render_app(self, frame, blueprint, app, imgs, columns_weights, subapp_components, master=None):
         column_widths = [0, 460, 990, 1380]
 
-        self.page_columns = [
-            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
-            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
-            ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
-        ]
+        if master is None:
+            self.page_columns = [
+                ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
+            ]
 
-        if columns_weights == [1,1,1]:
-            self.page_columns[0].place(x=25, y=25)
-            self.page_columns[1].place(x=505, y=25)
-            self.page_columns[2].place(x=985, y=25)
+            if columns_weights == [1,1,1]:
+                self.page_columns[0].place(x=25, y=25)
+                self.page_columns[1].place(x=505, y=25)
+                self.page_columns[2].place(x=985, y=25)
 
-        elif columns_weights == [1,2,0] or columns_weights == [1,0,2]:
-            self.page_columns[1].configure(width=940)
-            self.page_columns[0].place(x=25, y=25)
-            self.page_columns[1].place(x=505, y=25)
+            elif columns_weights == [1,2,0] or columns_weights == [1,0,2]:
+                self.page_columns[1].configure(width=940)
+                self.page_columns[0].place(x=25, y=25)
+                self.page_columns[1].place(x=505, y=25)
 
-        elif columns_weights == [2,1,0] or columns_weights == [2,0,1]:
-            self.page_columns[0].configure(width=940)
-            self.page_columns[0].place(x=25, y=25)
-            self.page_columns[1].place(x=965, y=25)
+            elif columns_weights == [2,1,0] or columns_weights == [2,0,1]:
+                self.page_columns[0].configure(width=940)
+                self.page_columns[0].place(x=25, y=25)
+                self.page_columns[1].place(x=965, y=25)
 
 
         offset = 0
@@ -143,6 +144,7 @@ class Subapp():
             elif specs['type'] == "tabview":
                 new_component = TabView(
                     master=self.page_columns[specs['column']], 
+                    app=app, 
                     parent_width=column_widths[blueprint['column_weights'][specs['column']]], 
                     height=670, 
                     new_tabs=specs['tabs'], 
@@ -159,11 +161,7 @@ class Subapp():
 
         if "buttons" in blueprint.keys():
             app.buttons[self.subapp_name] = {}
-            rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#ffffff')
-
             for index, btn in enumerate(blueprint.get("buttons")):
-                btn_img = rf.get_render(13, btn.upper())
-
                 app.buttons[self.subapp_name][btn] = ActionButton(
                     master=btn_frame, 
                     action=btn, 
@@ -174,7 +172,6 @@ class Subapp():
                     row=0, 
                     col=index, 
                     subapp_name=self.subapp_name, 
-                    # btn_text=btn.upper(),
                 )
 
         if "callbacks" in blueprint.keys():

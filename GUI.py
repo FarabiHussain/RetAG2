@@ -125,7 +125,7 @@ class ComboBox(GUI):
 
 
 class Entry(GUI):
-    def __init__(self, master=None, app=None, label_text="", left_offset=0, top_offset=0, placeholder="", default_text=None) -> None:
+    def __init__(self, master=None, app=None, width=250, label_text="", left_offset=0, top_offset=0, placeholder="", default_text=None) -> None:
         """create a new GUI Entry object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
@@ -135,7 +135,7 @@ class Entry(GUI):
 
         self.component = ctk.CTkEntry(
             master,
-            width=250,
+            width=width,
             height=32,
             border_width=0,
             corner_radius=2,
@@ -733,20 +733,22 @@ class ActionButton():
 
 
 class TabView():
-    def __init__(self, master, new_tabs=[], parent_width=0, height=0, top_offset=0, tab_components=[]) -> None:
+    def __init__(self, master, app=None, new_tabs=[], parent_width=0, height=0, top_offset=0, tab_components=[]) -> None:
+
+        self.tab_contents={}
 
         self.component = ctk.CTkTabview(
             master=master, 
-            corner_radius=3, 
-            fg_color="#fff", 
+            corner_radius=0, 
+            fg_color="white", 
             width=parent_width, 
             height=height, 
             segmented_button_fg_color='white', 
-            segmented_button_unselected_color='#efefef', 
-            segmented_button_selected_color='#aaa', 
+            segmented_button_unselected_color='#c4ddff', 
+            segmented_button_selected_color='#79b2ff', 
             text_color='black',
-            border_width=2,
-            border_color='#efefef'
+            # border_width=1,
+            # border_color='#ddd'
         )
 
         self.component.grid(row=top_offset)
@@ -755,14 +757,49 @@ class TabView():
             self.tabs = {}
             self.set_tabs(new_tabs)
 
-        for button in self.component._segmented_button._buttons_dict.values():
+        for index, each_tab in enumerate(tab_components):
+            for offset, comp in enumerate(each_tab):
+                comp_type = each_tab[comp]['type']
+
+                if comp_type == "entry":
+                    self.tab_contents[comp] = Entry(
+                        master=self.tabs[new_tabs[index]], 
+                        app=app, 
+                        label_text=comp, 
+                        top_offset=offset, 
+                    )
+
+                elif comp_type == "datepicker":
+                    self.tab_contents[comp] = DatePicker(
+                        master=self.tabs[new_tabs[index]], 
+                        label_text=comp, 
+                        top_offset=offset, 
+                        show_day=True if each_tab[comp]['show_day'].lower() == "true" else False,
+                    )
+
+                elif comp_type == "combo":
+                    self.tab_contents[comp] = ComboBox(
+                    master=self.tabs[new_tabs[index]], 
+                    app=app, 
+                    label_text=comp, 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    options=each_tab[comp]['options'], 
+                    default_option=(None if 'default' not in each_tab[comp] else each_tab[comp]['default']),
+                )
+
+                if comp in self.tab_contents:
+                    self.tab_contents[comp].label.configure(width=180)
+
+        for index, button in enumerate(self.component._segmented_button._buttons_dict.values()):
             button.configure(
                 width=parent_width/len(new_tabs)*0.9, 
                 height=32, 
-                corner_radius=4, 
-                border_width=2,
+                corner_radius=0, 
+                border_width=0,
                 border_color='#fff', 
-                font=ctk.CTkFont(family=family_bold, weight='bold'))
+                font=ctk.CTkFont(family=family_bold, weight='bold'), 
+            )
 
     def set_tabs(self, new_tabs):
         for tab in new_tabs:
