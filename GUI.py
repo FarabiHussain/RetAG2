@@ -739,16 +739,16 @@ class TabView():
 
         self.component = ctk.CTkTabview(
             master=master, 
-            corner_radius=0, 
+            corner_radius=4, 
             fg_color="white", 
             width=parent_width, 
             height=height, 
             segmented_button_fg_color='white', 
-            segmented_button_unselected_color='#c4ddff', 
+            segmented_button_unselected_color='#E6F1FF', 
             segmented_button_selected_color='#79b2ff', 
             text_color='black',
-            # border_width=1,
-            # border_color='#ddd'
+            border_width=1,
+            border_color='#CBE1FF'
         )
 
         self.component.grid(row=top_offset)

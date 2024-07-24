@@ -181,43 +181,13 @@
     "Invitation Letter": {
         "column_weights": [1,1,1],
 
-        "break 0": {"column": 0, "type": "break", "heading": "GEUST(S) INFORMATION"},
-        "guest creator": {"column": 0, "type": "tabview", "tabs": ["travel info", "guest 1", "guest 2", "guest 3", "guest 4", "guest 5"], 
+        "break 1": {"column": 0, "type": "break", "heading": "HOST(S) INFORMATION"},
+        "host creator": {"column": 0, "type": "tabview", "tabs": ["host info", "host 1", "host 2"], 
             "tab_components": [
                 {
-                    "purpose of visit": {"column": 0, "type": "entry"},
-                    "address in Canada": {"column": 0, "type": "entry"},
-                    "arrival date": {"column": 0, "type": "datepicker", "show_day": "true"},
-                    "departure date": {"column": 0, "type": "datepicker", "show_day": "true"}
+                    "bearer of expenses": {"column": 0, "type": "combo", "default": "host(s)", "options": ["host(s)", "guest(s)"]},
+                    "attached documents": {"column": 0, "type": "entry"}
                 },
-                {
-                    "guest 1 name": {"column": 0, "type": "entry"},
-                    "guest 1 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
-                    "guest 1 passport no.": {"column": 0, "type": "entry"},
-                    "guest 1 address": {"column": 0, "type": "entry"},
-                    "guest 1 phone number": {"column": 0, "type": "entry"},
-                    "guest 1 email address": {"column": 0, "type": "entry"},
-                    "guest 1 occupation": {"column": 0, "type": "entry"},
-                    "guest 1 citizen of": {"column": 0, "type": "entry"},
-                    "guest 1 relation to host 1": {"column": 0, "type": "entry"}
-                },
-                {
-                    "guest 2 name": {"column": 0, "type": "entry"},
-                    "guest 2 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
-                    "guest 2 passport no.": {"column": 0, "type": "entry"},
-                    "guest 2 address": {"column": 0, "type": "entry"},
-                    "guest 2 phone number": {"column": 0, "type": "entry"},
-                    "guest 2 email address": {"column": 0, "type": "entry"},
-                    "guest 2 occupation": {"column": 0, "type": "entry"},
-                    "guest 2 citizen of": {"column": 0, "type": "entry"},
-                    "guest 2 relation to host 1": {"column": 0, "type": "entry"}
-                }
-            ]
-        },
-
-        "break 1": {"column": 1, "type": "break", "heading": "HOST(S) INFORMATION"},
-        "host creator": {"column": 1, "type": "tabview", "tabs": ["host 1", "host 2"], 
-            "tab_components": [
                 {
                     "host 1 name": {"column": 0, "type": "entry"},
                     "host 1 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
@@ -227,9 +197,7 @@
                     "host 1 email address": {"column": 0, "type": "entry"},
                     "host 1 occupation": {"column": 0, "type": "entry"},
                     "status in Canada": {"column": 0, "type": "entry"},
-                    "relationship to host 2": {"column": 0, "type": "entry"},
-                    "bearer of expenses": {"column": 0, "type": "combo", "default": "host(s)", "options": ["host(s)", "guest(s)"]},
-                    "attached documents": {"column": 0, "type": "entry"}
+                    "relationship to host 2": {"column": 0, "type": "entry"}
                 },
                 {
                     "host 2 name": {"column": 0, "type": "entry"},
@@ -245,9 +213,78 @@
             ]
         },
 
+        "break 0": {"column": 1, "type": "break", "heading": "GUEST(S) INFORMATION"},
+        "guest creator": {"column": 1, "type": "tabview", "tabs": ["travel info", "guest 1", "guest 2", "guest 3", "guest 4", "guest 5"], 
+            "tab_components": [
+                {
+                    "purpose of visit": {"column": 0, "type": "entry"},
+                    "address in Canada": {"column": 0, "type": "entry"},
+                    "arrival date": {"column": 0, "type": "datepicker", "show_day": "true"},
+                    "departure date": {"column": 0, "type": "datepicker", "show_day": "true"}
+                },
+                {
+                    "guest 1 full name": {"column": 0, "type": "entry"},
+                    "guest 1 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
+                    "guest 1 passport no.": {"column": 0, "type": "entry"},
+                    "guest 1 address": {"column": 0, "type": "entry"},
+                    "guest 1 phone number": {"column": 0, "type": "entry"},
+                    "guest 1 email address": {"column": 0, "type": "entry"},
+                    "guest 1 occupation": {"column": 0, "type": "entry"},
+                    "guest 1 country of citizenship": {"column": 0, "type": "entry"},
+                    "guest 1 relation to host 1": {"column": 0, "type": "entry"}
+                },
+                {
+                    "guest 2 full name": {"column": 0, "type": "entry"},
+                    "guest 2 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
+                    "guest 2 passport no.": {"column": 0, "type": "entry"},
+                    "guest 2 address": {"column": 0, "type": "entry"},
+                    "guest 2 phone number": {"column": 0, "type": "entry"},
+                    "guest 2 email address": {"column": 0, "type": "entry"},
+                    "guest 2 occupation": {"column": 0, "type": "entry"},
+                    "guest 2 country of citizenship": {"column": 0, "type": "entry"},
+                    "guest 2 relation to host 1": {"column": 0, "type": "entry"}
+                },
+                {
+                    "guest 3 full name": {"column": 0, "type": "entry"},
+                    "guest 3 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
+                    "guest 3 passport no.": {"column": 0, "type": "entry"},
+                    "guest 3 address": {"column": 0, "type": "entry"},
+                    "guest 3 phone number": {"column": 0, "type": "entry"},
+                    "guest 3 email address": {"column": 0, "type": "entry"},
+                    "guest 3 occupation": {"column": 0, "type": "entry"},
+                    "guest 3 country of citizenship": {"column": 0, "type": "entry"},
+                    "guest 3 relation to host 1": {"column": 0, "type": "entry"}
+                },
+                {
+                    "guest 4 full name": {"column": 0, "type": "entry"},
+                    "guest 4 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
+                    "guest 4 passport no.": {"column": 0, "type": "entry"},
+                    "guest 4 address": {"column": 0, "type": "entry"},
+                    "guest 4 phone number": {"column": 0, "type": "entry"},
+                    "guest 4 email address": {"column": 0, "type": "entry"},
+                    "guest 4 occupation": {"column": 0, "type": "entry"},
+                    "guest 4 country of citizenship": {"column": 0, "type": "entry"},
+                    "guest 4 relation to host 1": {"column": 0, "type": "entry"}
+                },
+                {
+                    "guest 5 full name": {"column": 0, "type": "entry"},
+                    "guest 5 date of birth": {"column": 0, "type": "datepicker", "show_day": "true"},
+                    "guest 5 passport no.": {"column": 0, "type": "entry"},
+                    "guest 5 address": {"column": 0, "type": "entry"},
+                    "guest 5 phone number": {"column": 0, "type": "entry"},
+                    "guest 5 email address": {"column": 0, "type": "entry"},
+                    "guest 5 occupation": {"column": 0, "type": "entry"},
+                    "guest 5 country of citizenship": {"column": 0, "type": "entry"},
+                    "guest 5 relation to host 1": {"column": 0, "type": "entry"}
+                }
+            ]
+        },
+
+        "break 2": {"column": 2, "type": "break", "heading": "LETTER CONCLUSION"},
+
         "buttons": {
-            "add host": "#1A8405",
-            "add guest": "#114707",
+            "create letter": "#1A8405",
+            "spacer 1": "#ffffff",
             "spacer 2": "#ffffff",
             "spacer 3": "#ffffff",
             "spacer 4": "#ffffff",
