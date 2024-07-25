@@ -88,6 +88,19 @@ class Subapp():
                     default_text=(None if 'default' not in specs else specs['default']),
                 )
 
+            elif specs['type'] == "textbox":
+                new_component = TextBox(
+                    master=self.page_columns[specs['column']], 
+                    app=app, 
+                    label_text=label, 
+                    left_offset=0, 
+                    lines=specs['lines'], 
+                    height=specs['box_height'], 
+                    instructions_text=specs['instructions_text'], 
+                    parent_width=column_widths[blueprint['column_weights'][specs['column']]], 
+                    top_offset=offset, 
+                )
+
             elif specs['type'] == "datepicker":
                 new_component = DatePicker(
                     master=self.page_columns[specs['column']], 

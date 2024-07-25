@@ -135,7 +135,7 @@
         }
     },
 
-    "Search": {
+    "Files": {
         "column_weights": [1,2,0],
         "break 0": {"column": 0, "type": "break", "heading": "FILTERS"},
         "search case ID": {"column": 0, "type": "entry"},
@@ -281,6 +281,10 @@
         },
 
         "break 2": {"column": 2, "type": "break", "heading": "LETTER CONCLUSION"},
+        "conclusion content": {
+            "column": 2, "type": "textbox", "lines":5, "box_height": 540, 
+            "instructions_text": "Include details about the guest(s)'s responsibilities and strong ties to their home country to communicate that their will not overstay the validity of their status. Include other details about financial and social standing that may be beneficial, and any documents from the host(s) that they wish to include with the invitation."
+        },
 
         "buttons": {
             "create letter": "#1A8405",
@@ -305,6 +309,6 @@
     "Init": {
         "init_app_agreements": "/assets/functions/Agreements.py",
         "init_app_receipts": "/assets/functions/Receipts.py",
-        "init_app_search": "/assets/functions/Search.py"
+        "init_app_search": "/assets/functions/Files.py"
     }
 }

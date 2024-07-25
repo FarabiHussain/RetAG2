@@ -117,7 +117,7 @@ def write_payments(doc, components):
         application_fee = "${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)
         installments = components['application fee'].get('months')
 
-        log_created_files(
+        log_created_file(
             case_id=components['case ID'].get().strip(), 
             document_type='Payment Authorization', 
             timestamp=timestamp, 
@@ -174,7 +174,7 @@ def write_receipt(doc, components):
     if response:
         insert_receipt_to_history(receipt_id, client_name, components.get('case ID').get())
 
-        log_created_files(
+        log_created_file(
             case_id=case_id if len(case_id) > 0 else "000000-000", 
             document_type='Payment Receipt', 
             timestamp=timestamp, 
@@ -255,7 +255,7 @@ def write_retainer(doc, components):
     if response:
         insert_agreement_to_history(components)
 
-        log_created_files(
+        log_created_file(
             case_id=case_id, 
             document_type='Retainer Agreement', 
             timestamp=timestamp, 
@@ -301,7 +301,7 @@ def write_conduct(doc, components):
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
-        log_created_files(
+        log_created_file(
             case_id=components['case ID'].get().strip(), 
             document_type='Code of Conduct', 
             timestamp=timestamp, 
@@ -313,6 +313,7 @@ def write_conduct(doc, components):
 
 def write_imm5476(doc, components):
     date_on_document = datetime.datetime.now()
+    case_id = components['case ID'].get().strip()
 
     document_data = {
         '[DAY]': date_on_document.strftime("%d"),
@@ -354,12 +355,12 @@ def write_imm5476(doc, components):
     timestamp_obj = datetime.datetime.now()
     timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
-    
-    output_filename = f"[{formatted_timestamp}] {components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()} - imm5476"
+
+    output_filename = f"[{formatted_timestamp}] {case_id} - {document_data['[applicantSurname]']} - {document_data['[applicantGivenName]']} - imm5476"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='imm5476')
 
     if response:
-        log_created_files(
+        log_created_file(
             case_id=components['case ID'].get().strip(), 
             document_type='Use of Representative', 
             timestamp=timestamp, 
@@ -450,7 +451,7 @@ def insert_receipt_to_history(doc_id="", client_name="", case_id=""):
         print(e)
 
 
-def log_created_files(case_id="", document_type="", timestamp="", remarks="", client_name="", filename=""):
+def log_created_file(case_id="", document_type="", timestamp="", remarks="", client_name="", filename="") -> bool:
     check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
     records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
 
@@ -461,7 +462,6 @@ def log_created_files(case_id="", document_type="", timestamp="", remarks="", cl
 
             new_entry_list = [case_id, document_type, os.environ['COMPUTERNAME'], timestamp, remarks, client_name, filename]
             header_columns = all_lines[0].strip().split(',')
-            # header_columns.remove('created_date')
             new_entry_dict = {}
             prev_entry_dict = {}
 
@@ -486,6 +486,39 @@ def log_created_files(case_id="", document_type="", timestamp="", remarks="", cl
 
     except Exception as e:
         print(e)
+        return False
+
+    return True
+
+
+def remove_file_from_log(filename) -> bool:
+    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
+    records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
+    keep_lines = []
+    matched_line = None
+    filename  = filename.replace('.docx', '')
+
+    try:
+        with open(records_file, 'r') as log_file:
+            all_lines = log_file.readlines()
+
+        for curr_line in all_lines:
+            if filename in curr_line.strip():
+                matched_line = curr_line.strip()
+            else:
+                keep_lines.append(curr_line)
+
+        if matched_line is not None:
+            with open(records_file, 'w') as log_file:
+                log_file.writelines(keep_lines)
+        else:
+            return False
+
+    except Exception as e:
+        print(e)
+        return False
+
+    return True
 
 
 def check_history_dir_and_file(check_dir, check_file, csv_columns):

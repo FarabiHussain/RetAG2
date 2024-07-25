@@ -12,7 +12,7 @@ from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
 from reader import read_file_as_list, read_case_id
-from writer import write_imm5476, write_payments, replace_placeholders, write_conduct, write_receipt, write_retainer
+from writer import remove_file_from_log, write_imm5476, write_payments, replace_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, test_button, decrypt_button
@@ -151,7 +151,6 @@ class Entry(GUI):
     def reset(self) -> None:
         self.stringvar.set(self.default_text if self.default_text is not None else '')
 
-
     def stringvar_callback(self, *args):
         self.callback(self.app_components)
 
@@ -162,6 +161,48 @@ class Entry(GUI):
         self.app_components = app.get_all_components()
         self.callback = callback
         self.stringvar.trace_add('write', self.stringvar_callback)
+
+
+class TextBox(GUI):
+    def __init__(self, master=None, app=None, lines=1, height=200, parent_width=0, label_text="", instructions_text="", left_offset=0, top_offset=0) -> None:
+        # super().__init__(master, '', left_offset, top_offset)
+
+        width = parent_width*0.98
+
+        self.instructions = ctk.CTkTextbox(
+            master=master,
+            width=width,
+            height=lines*20,
+            bg_color="#fff", 
+            fg_color="#fff", 
+            wrap='word', 
+            font=ctk.CTkFont(family=family_medium), 
+        )
+
+        self.instructions.insert('0.0', instructions_text)
+        self.instructions.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
+        self.instructions.configure(state='disabled')
+
+
+        self.component = ctk.CTkTextbox(
+            master=master, 
+            width=width, 
+            height=height, 
+            border_width=0, 
+            corner_radius=4, 
+            bg_color="#fff", 
+            fg_color="#eee", 
+            font=ctk.CTkFont(family=family_medium), 
+        )
+
+        self.reset()
+        self.component.grid(row=top_offset+1, column=0, pady=10, padx=5, columnspan=5)
+
+    def reset(self):
+        self.component.delete('0.0', 'end')
+
+    def get(self):
+        return self.component.get()
 
 
 class DatePicker(GUI):
@@ -747,7 +788,13 @@ class ActionButton():
 
             PromptPopup(msg=f'Would you like to cancel {searched_filename}', func=lambda:None)
 
-            pass
+            try:
+                os.remove(searched_filepath)
+                successfully_removed = remove_file_from_log(filename=searched_filename)
+                if not successfully_removed:
+                    ErrorPopup(msg=f'Could not remove {searched_filename}.')
+            except Exception as e:
+                ErrorPopup(msg=f'Could not remove {searched_filename}.')
 
 
 class TabView():
