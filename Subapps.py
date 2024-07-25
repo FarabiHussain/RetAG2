@@ -101,6 +101,8 @@ class Subapp():
                     top_offset=offset, 
                 )
 
+                offset += 1
+
             elif specs['type'] == "datepicker":
                 new_component = DatePicker(
                     master=self.page_columns[specs['column']], 
@@ -145,6 +147,17 @@ class Subapp():
                     top_offset=offset, 
                     heading=specs['heading'],
                 )
+
+            elif specs['type'] == "rowbutton":
+                new_component = RowButton(
+                    master=self.page_columns[specs['column']], 
+                    app=app, 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    label=specs['label'],
+                    method=import_function(specs['method'], "callback")
+                )
+
 
             elif specs['type'] == "table":
                 new_component = TableWidget(

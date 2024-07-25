@@ -4,7 +4,7 @@ import customtkinter as ctk
 import datetime
 import os
 import glob
-from Popups import ErrorPopup, PromptPopup
+from Popups import ErrorPopup, InfoPopup, PromptPopup
 from RenderFont import RenderFont
 from Path import *
 from docx import Document
@@ -45,7 +45,7 @@ class GUI:
         self.stringvar.set("")
 
 
-class RowBreak(GUI):
+class RowBreak():
     def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
         self.breakline = ctk.CTkLabel(
             master, 
@@ -59,6 +59,26 @@ class RowBreak(GUI):
         )
 
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
+
+    def reset(self) -> None:
+        return
+
+
+class RowButton(GUI):
+    def __init__(self, master=None, app=None, left_offset=0, top_offset=0, label="", method=None) -> None:
+        self.component = ctk.CTkButton(
+            master, 
+            text=label.upper(), 
+            height=32, 
+            width=450, 
+            fg_color="#33008B", 
+            text_color="white", 
+            corner_radius=2, 
+            font=ctk.CTkFont(family=family_bold, weight='bold'), 
+            command=lambda: method(app), 
+        )
+
+        self.component.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
 
     def reset(self) -> None:
         return
@@ -175,6 +195,7 @@ class TextBox(GUI):
             height=lines*20,
             bg_color="#fff", 
             fg_color="#fff", 
+            text_color='#444444', 
             wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
         )
@@ -192,6 +213,7 @@ class TextBox(GUI):
             corner_radius=4, 
             bg_color="#fff", 
             fg_color="#eee", 
+            wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
         )
 
@@ -202,7 +224,11 @@ class TextBox(GUI):
         self.component.delete('0.0', 'end')
 
     def get(self):
-        return self.component.get()
+        return self.component.get('0.0', 'end')
+
+    def set(self, text):
+        self.reset()
+        self.component.insert('0.0', text)
 
 
 class DatePicker(GUI):
@@ -796,6 +822,9 @@ class ActionButton():
             except Exception as e:
                 ErrorPopup(msg=f'Could not remove {searched_filename}.')
 
+        else:
+            InfoPopup(msg='This feature is still under construction.')
+
 
 class TabView():
     def __init__(self, master, app=None, new_tabs=[], parent_width=0, height=0, top_offset=0, tab_components=[]) -> None:
@@ -855,6 +884,8 @@ class TabView():
 
                 if comp in self.tab_contents:
                     self.tab_contents[comp].label.configure(width=180)
+
+                app.add_component(comp, self.tab_contents[comp])
 
         for index, button in enumerate(self.component._segmented_button._buttons_dict.values()):
             button.configure(

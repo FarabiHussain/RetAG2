@@ -533,3 +533,32 @@ def check_history_dir_and_file(check_dir, check_file, csv_columns):
             history.write("\n")
             history.close()
 
+
+def get_prompt_response(prompt="") -> str:
+    import google.generativeai as genai
+    from dotenv import load_dotenv
+
+    if prompt.strip() == "":
+        return ""
+
+    load_dotenv()
+    genai.configure(api_key=os.getenv('API_KEY'))
+
+    # See https://ai.google.dev/api/python/google/generativeai/GenerativeModel
+    generation_config = {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64,
+        "max_output_tokens": 8192,
+        "response_mime_type": "text/plain",
+    }
+
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-flash",
+        generation_config=generation_config,
+    )
+
+    chat_session = model.start_chat(history=[])
+    response = chat_session.send_message(prompt)
+
+    return(response.text)

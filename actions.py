@@ -93,6 +93,19 @@ def test_button(app):
     app.components['client 1 UCI'].set("0123456789")
     app.components['search case ID'].set("202407-001")
 
+    app.components["guest 1 full name"].set(names.get_full_name(gender=random.choice(['male', 'female'])))
+    app.components["guest 1 date of birth"].set(y="2000", m="Jan", d="01")
+    app.components["guest 1 passport no."].set('XXXXXXXXX')
+    app.components["guest 1 address"].set('Hypothetical Address, City, Province, Country, ABC ABC')
+    app.components["guest 1 phone number"].set('999-999-9999')
+    app.components["guest 1 email address"].set('email@domain.com')
+    app.components["guest 1 occupation"].set('occupation')
+    app.components["guest 1 country of citizenship"].set('Mars')
+    app.components["guest 1 relation to host 1"].set('sibling')
+    app.components["purpose of visit"].set('to visit me, their sibling')
+    app.components["country of residence"].set('UK')
+    app.components["address in Canada"].set('1325 Markhan Rd, Winnipeg, MB, Canada')
+
     total_amount = 0
     total_months = random.randint(1,12)
     for i in range(total_months):
