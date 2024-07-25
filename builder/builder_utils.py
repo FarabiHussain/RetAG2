@@ -122,7 +122,7 @@ def build_exe(cwd, ver):
         log_file.write("\n[" + dt.now().strftime("%d/%m/%Y, %H:%M:%I" + "]\t") + "v" + (".").join(ver))
 
     output_dir = (cwd + "\\releases")
-    os.startfile(output_dir)
+    os.startfile(f'{output_dir}\\{filename}')
 
 
 # replace the app version in `variables.py` with the selected version 
