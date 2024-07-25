@@ -1,6 +1,6 @@
 case_id,document_type,created_by,created_date,remarks,client_name,filename
-000000-000,Payment Receipt,REY-AWAIS,11/3/2024 15:52,PayTrack #0000000002,Arshad Manzur,000000-000 - Receipt 0000000002 - arshad manzur
-000000-000,Payment Receipt,REY-AWAIS,11/3/2024 18:42,PayTrack #0000000005,Harjinder Singh Kanda,000000-000 - Receipt 0000000005 - harjinder singh kanda
-202407-035,Payment Authorization,ASCII-13700K,01:04 - July 23 2024,$784.00 in 7 months,Erma (test) Cooper (test),202407-035 - Payments - Erma (test) - Cooper (test)
-202407-035,Payment Authorization,ASCII-13700K,01:10 - July 23 2024,$560.00 in 5 months,Cari (test) Smith (test),202407-035 - Payments - Cari (test) - Smith (test)
-202407-035,Payment Authorization,ASCII-13700K,01:20 - July 23 2024,$560.00 in 5 months,Harrison (test) Stay (test),202407-035 - Payments - Harrison (test) - Stay (test)
+202407-001,Retainer Agreement,FARABI-AMCAIM,19:12 - July 24 2024,EOI ($1120.00),Susan (test) Gomez (test),[2024.07.24-19.12.51] 202407-001 - Retainer - Susan (test) Gomez (test)
+202407-001,Payment Authorization,FARABI-AMCAIM,19:12 - July 24 2024,$1120.00 in 10 months,Susan (test) Gomez (test),[2024.07.24-19.12.51] 202407-001 - Payments - Susan (test) - Gomez (test)
+202407-001,Code of Conduct,FARABI-AMCAIM,19:12 - July 24 2024,EOI,Susan (test) Gomez (test),[2024.07.24-19.12.51] 202407-001 - Conduct - Susan (test) Gomez (test)
+202407-001,Use of Representative,FARABI-AMCAIM,19:12 - July 24 2024,EOI,Susan (test) Gomez (test),[2024.07.24-19.12.52] Susan (test) - Gomez (test) - imm5476
+202407-001,Payment Receipt,FARABI-AMCAIM,19:13 - July 24 2024,#0000000001 ($1120.00),Susan (test) Gomez (test),[2024.07.24-19.13.06] 202407-001 - Receipt 0000000001 - Susan (test) Gomez (test)

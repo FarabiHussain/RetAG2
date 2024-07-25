@@ -8,7 +8,6 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from Path import *
 from Doc import *
 from icecream import ic
-from dotenv import load_dotenv
 from base64 import urlsafe_b64encode as b64e, urlsafe_b64decode as b64d
 from reader import read_case_id, read_receipt_id
 
@@ -105,13 +104,16 @@ def write_payments(doc, components):
     insert_4col_table(document=doc, table_heading="Payment Information (including applicable GST and PST)".upper(), table_items=payment_summary)
     insert_4col_table(document=doc, table_heading="", table_items=payment_info)
 
-    filename = f" - Payments - "
     client_name = f'{components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()}'
-    output_filename = f"{components['case ID'].get().strip()} - Payments - {client_name}"
+
+    timestamp_obj = datetime.datetime.now()
+    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
+    formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
+
+    output_filename = f"[{formatted_timestamp}] {components['case ID'].get().strip()} - Payments - {client_name}"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
-        timestamp = str(datetime.datetime.now().strftime("%H:%M - %B %d %Y"))
         application_fee = "${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)
         installments = components['application fee'].get('months')
 
@@ -148,11 +150,15 @@ def write_receipt(doc, components):
 
     receipt_id = "{:010}".format((read_receipt_id() + 1))
     client_name = components.get('client name').get().strip()
-    filename = f"{case_id} - Receipt {receipt_id} - {client_name}"
+
+    timestamp_obj = datetime.datetime.now()
+    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
+    formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
+
+    filename = f"[{formatted_timestamp}] {case_id} - Receipt {receipt_id} - {client_name}"
 
     printed_rows = 0
     rows_per_page = 7
-    timestamp = str(datetime.datetime.now().strftime("%H:%M - %B %d %Y"))
 
     while printed_rows < len(cart_items):
         insert_invoice_info(doc, receipt_id, client_name, timestamp)
@@ -168,12 +174,10 @@ def write_receipt(doc, components):
     if response:
         insert_receipt_to_history(receipt_id, client_name, components.get('case ID').get())
 
-        tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
-
         log_created_files(
             case_id=case_id if len(case_id) > 0 else "000000-000", 
             document_type='Payment Receipt', 
-            timestamp=str(datetime.datetime.now().strftime("%H:%M - %B %d %Y")), 
+            timestamp=timestamp, 
             remarks=f'#{receipt_id} ({"${:.2f}".format(total)})',
             client_name=components.get('client name').get().strip(),
             filename=filename
@@ -240,7 +244,12 @@ def write_retainer(doc, components):
     ]
 
     insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
-    output_filename = f"{case_id} - Retainer - {document_data['[CLIENT1]']}"
+
+    timestamp_obj = datetime.datetime.now()
+    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
+    formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
+
+    output_filename = f"[{formatted_timestamp}] {case_id} - Retainer - {document_data['[CLIENT1]']}"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
@@ -249,7 +258,7 @@ def write_retainer(doc, components):
         log_created_files(
             case_id=case_id, 
             document_type='Retainer Agreement', 
-            timestamp=str(datetime.datetime.now().strftime("%H:%M - %B %d %Y")), 
+            timestamp=timestamp, 
             remarks=f'{components['application type'].get()} ({"${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)})',
             client_name=components.get('client name').get().strip(), 
             filename=output_filename, 
@@ -260,6 +269,7 @@ def write_retainer(doc, components):
 
 def write_conduct(doc, components):
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
+    case_id = components['case ID'].get().strip()
 
     document_data = {
         '[DAY]': date_on_document.strftime("%d"),
@@ -282,14 +292,19 @@ def write_conduct(doc, components):
             return False
 
     replace_placeholders(doc, document_data)
-    output_filename = f"{components['case ID'].get().strip()} - Conduct - {document_data['[CLIENT1]']}"
+
+    timestamp_obj = datetime.datetime.now()
+    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
+    formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
+
+    output_filename = f"[{formatted_timestamp}] {case_id} - Conduct - {document_data['[CLIENT1]']}"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
         log_created_files(
             case_id=components['case ID'].get().strip(), 
             document_type='Code of Conduct', 
-            timestamp=str(datetime.datetime.now().strftime("%H:%M - %B %d %Y")), 
+            timestamp=timestamp, 
             remarks=components['application type'].get(),
             client_name=components.get('client name').get().strip(),
             filename=output_filename, 
@@ -297,7 +312,7 @@ def write_conduct(doc, components):
 
 
 def write_imm5476(doc, components):
-    date_on_document = datetime.datetime.now() #(components['date on document'].get(), "%b %d, %Y")
+    date_on_document = datetime.datetime.now()
 
     document_data = {
         '[DAY]': date_on_document.strftime("%d"),
@@ -309,8 +324,8 @@ def write_imm5476(doc, components):
         '[applicantDOB]': (f"{components["client 1 date of birth"].get().strip()}"),
         '[applicantGivenName]': (f"{components["client 1 first name"].get().strip()}"),
         '[applicantSurname]': (f"{components["client 1 last name"].get().strip().ljust(48)}"),
-        # '[nameOfOffice]': "IRCC".ljust(45),
-        # '[typeOfApplication]': (f"{components["application type"].get().strip()}"),
+        '[nameOfOffice]': "".ljust(45),
+        '[typeOfApplication]': (f""),
     }
 
     for d in ['[applicantUCI]', '[applicantDOB]', '[applicantGivenName]', '[applicantSurname]']:
@@ -335,14 +350,19 @@ def write_imm5476(doc, components):
         document_data["[signedDate2]"] = ""
 
     replace_placeholders(doc, document_data)
-    output_filename = f"{components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()} - imm5476"
+
+    timestamp_obj = datetime.datetime.now()
+    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
+    formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
+    
+    output_filename = f"[{formatted_timestamp}] {components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()} - imm5476"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='imm5476')
 
     if response:
         log_created_files(
             case_id=components['case ID'].get().strip(), 
             document_type='Use of Representative', 
-            timestamp=str(datetime.datetime.now().strftime("%H:%M - %B %d %Y")), 
+            timestamp=timestamp, 
             remarks=components['application type'].get(),
             client_name = components.get('client name').get().strip(),
             filename=output_filename, 

@@ -51,7 +51,6 @@ def decrypt_button(app):
 
             cipher_text=decryptor_window.__encrypted_strvar.get()
             input_password=decryptor_window.__password_strvar.get()
-            # input_password="viewp0rt"
 
             if os.getenv('PW') == obscure(input_password):
                 plain_text = unobscure(cipher_text)

@@ -161,7 +161,7 @@
         "buttons": {
             "search files": "#383FBC",
             "open selected": "#000042",
-            "spacer 2": "#ffffff",
+            "cancel selected": "#C11919",
             "spacer 3": "#ffffff",
             "spacer 4": "#ffffff",
             "spacer 5": "#ffffff",

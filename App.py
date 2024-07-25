@@ -2,6 +2,8 @@ import customtkinter as ctk
 import os
 import json
 import GUI
+from openai import OpenAI
+from dotenv import load_dotenv
 from Path import *
 from icecream import ic
 from pprint import pprint

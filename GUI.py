@@ -557,20 +557,45 @@ class ActionButton():
         
         self.component.grid(row=row, column=col, pady=[20,5], padx=4)
 
+    def find_file(self, app):
+        search_table = app.components['search results']
+        filename = (search_table.get_selected_info().get('filename', None))
+        document_type = (search_table.get_selected_info().get('document_type', None))
+
+        if filename is None or document_type is None:
+            ErrorPopup(msg="Select table item to perform action.")
+            return (None, None)
+
+        folder_paths = {
+            'Payment Receipt': (f'{os.getcwd()}\\output\\receipts\\'),
+            'Use of Representative': (f'{os.getcwd()}\\output\\imm5476\\'),
+            'Code of Conduct': (f'{os.getcwd()}\\output\\agreements\\'),
+            'Retainer Agreement': (f'{os.getcwd()}\\output\\agreements\\'),
+            'Payment Authorization': (f'{os.getcwd()}\\output\\agreements\\'),
+        }
+
+        return (
+            f'{folder_paths.get(document_type)}\\{filename}.docx'.replace('\\\\', '\\'),
+            f'{filename}.docx'
+        )
 
     def assign_action(self, app=None, action="", blueprint={}, subapp_name="") -> None:
         if ("reset" in action):
-            app_components = app.get_all_components()
-            for component_name in blueprint.keys():
-                if (component_name in app_components):
-                    app_components.get(component_name).reset()
 
-                    if component_name == 'case ID':
-                        app.components.get('case ID').set(read_case_id())
+            def reset_fields(app):
+                app_components = app.get_all_components()
+                for component_name in blueprint.keys():
+                    if (component_name in app_components):
+                        app_components.get(component_name).reset()
 
-            if ("receipt" in action):
-                app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-                app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                        if component_name == 'case ID':
+                            app.components.get('case ID').set(read_case_id())
+
+                if ("receipt" in action):
+                    app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                    app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+
+            PromptPopup(msg="Are you sure you want to reset all fields?", func=lambda: reset_fields(app))
 
         elif (action == "payments"):
             try:
@@ -696,27 +721,13 @@ class ActionButton():
             )
 
         elif (action == "open selected"):
-            search_table = app.components['search results']
-            filename = (search_table.get_selected_info().get('filename', None))
-            document_type = (search_table.get_selected_info().get('document_type', None))
-
-            if filename is None or document_type is None:
-                ErrorPopup(msg="Select table item to perform action.")
-                return
-
-            folder_paths = {
-                'Payment Receipt': (f'{os.getcwd()}\\output\\receipts\\'),
-                'Use of Representative': (f'{os.getcwd()}\\output\\imm5476\\'),
-                'Code of Conduct': (f'{os.getcwd()}\\output\\agreements\\'),
-                'Retainer Agreement': (f'{os.getcwd()}\\output\\agreements\\'),
-                'Payment Authorization': (f'{os.getcwd()}\\output\\agreements\\'),
-            }
+            searched_filepath, searched_filename = self.find_file(app=app)
 
             try:
-                os.startfile(f'{folder_paths.get(document_type)}\\{filename}.docx'.replace('\\\\', '\\'))
+                os.startfile(searched_filepath)
             except Exception as e:
                 print(e)
-                ErrorPopup(msg=f"Could not open {filename}.docx")
+                ErrorPopup(msg=f"Could not open {searched_filename}")
 
         elif ("output" in action):
             try:
@@ -724,12 +735,19 @@ class ActionButton():
             except Exception as e:
                 ErrorPopup(msg=f'Output folder not found')
 
-        elif action == 'representative':
+        elif (action == 'representative'):
             try:
                 doc = Document(resource_path("assets\\templates\\imm5476.docx"))
                 write_imm5476(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
+
+        elif (action == "cancel selected"):
+            searched_filepath, searched_filename = self.find_file(app=app)
+
+            PromptPopup(msg=f'Would you like to cancel {searched_filename}', func=lambda:None)
+
+            pass
 
 
 class TabView():
