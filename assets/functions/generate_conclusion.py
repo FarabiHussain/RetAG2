@@ -5,7 +5,6 @@ import time
 
 
 def callback(app=None):
-    ic("/assets/functions/generate_conclusion.py")
 
     if app is None:
         return
@@ -48,10 +47,14 @@ def callback(app=None):
         prompt.append(f'The purpose of their visit is {purpose_of_visit}.')
         prompt.append(f'They will be staying at {address_in_Canada}.')
         prompt.append(f'They plan to visit from {arrival_date} to {departure_date}.')
-
-        
         prompt.append(f'They have significant ties to their home country of {country_of_residence} in the form of property and jobs, so they will not overstay their validity.')
-        prompt.append('Make sure to mention each and every point above. Reword and rephrase the points above. Use full names instead of Ms. and Mr.')
+        prompt.append(f'All expenses in relation to their stay in Canada will be the {bearer_of_expenses} responsibility.')
+        prompt.append(f'To support this letter, I have attached the following documents: {attached_documents}.')
+
+        prompt.append('''
+            Make sure to mention each and every point above. Reword and rephrase the points above. Use full names instead of Ms. and Mr. 
+            Add a line break in the end, and include a request that their application be considered and then thank the immigration officer for their consideration.
+        ''')
 
         prompt_response = get_prompt_response("\n".join(prompt))
 
@@ -61,5 +64,3 @@ def callback(app=None):
 
     child_thread_1 = threading.Thread(target=run_model)
     child_thread_1.start()
-    # time.sleep(5)
-    # child_thread_1.join()

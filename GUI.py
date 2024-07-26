@@ -842,7 +842,7 @@ class TabView():
             segmented_button_selected_color='#79b2ff', 
             text_color='black',
             border_width=1,
-            border_color='#CBE1FF'
+            border_color='#79b2ff'
         )
 
         self.component.grid(row=top_offset)
