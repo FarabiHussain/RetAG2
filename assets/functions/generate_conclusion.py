@@ -38,10 +38,10 @@ def callback(app=None):
         prompt=[f'Write a closing paragraph for an invitation letter to be submitted to IRCC including the following information:\nI am inviting the following people:']
 
         for i in range(1,6):
-            if guest_fields[f'guest {i} full name'] != '':
-                guest_name = guest_fields[f'guest {i} full name']
-                relation_to_host = guest_fields[f'guest {i} relation to host 1']
+            guest_name = guest_fields[f'guest {i} full name']
+            relation_to_host = guest_fields[f'guest {i} relation to host 1']
 
+            if guest_name != '' and relation_to_host != '':
                 prompt.append(f'My {relation_to_host}, {guest_name}.')
 
         prompt.append(f'The purpose of their visit is {purpose_of_visit}.')
@@ -49,12 +49,14 @@ def callback(app=None):
         prompt.append(f'They plan to visit from {arrival_date} to {departure_date}.')
         prompt.append(f'They have significant ties to their home country of {country_of_residence} in the form of property and jobs, so they will not overstay their validity.')
         prompt.append(f'All expenses in relation to their stay in Canada will be the {bearer_of_expenses} responsibility.')
-        prompt.append(f'To support this letter, I have attached the following documents: {attached_documents}.')
 
-        prompt.append('''
-            Make sure to mention each and every point above. Reword and rephrase the points above. Use full names instead of Ms. and Mr. 
-            Add a line break in the end, and include a request that their application be considered and then thank the immigration officer for their consideration.
-        ''')
+        if len(attached_documents) > 0:
+            prompt.append(f'To support this letter, I have attached the following documents: {attached_documents}.')
+
+        prompt.append(
+            '''Make sure to mention each and every point above. Reword and rephrase the points above. Use full names instead of Ms. and Mr. 
+            Finish with a request that their application be considered and then thank the immigration officer for their consideration.'''
+        )
 
         prompt_response = get_prompt_response("\n".join(prompt))
 

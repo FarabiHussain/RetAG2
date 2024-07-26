@@ -284,7 +284,7 @@
         "break 2": {"column": 2, "type": "break", "heading": "LETTER CONCLUSION"},
         "conclusion content": {
             "column": 2, "type": "textbox", "lines":5, "box_height": 435, 
-            "instructions_text": "Include details about the guest(s)'s responsibilities and strong ties to their home country to communicate that their will not overstay the validity of their status. Include other details about financial and social standing that may be beneficial, and any documents from the host(s) that they wish to include with the invitation."
+            "instructions_text": "Include details about the guest(s)'s responsibilities and strong ties to their home country to communicate that they will not overstay the validity of their status. Include other details about financial and social standing that may be beneficial, and any documents from the host(s) that they wish to include with the invitation."
         },
 
         "generate conclusion": {"column": 2, "type": "rowbutton", "label": "Generate Conclusion", "method": "/assets/functions/generate_conclusion.py"},

@@ -20,7 +20,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
-        self.version = "v2.0.13"
+        self.version = "v2.0.14"
         self.root.title(f"AMCAIM Toolbox {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}
@@ -127,6 +127,10 @@ class App():
 
     def start(self) -> None:
         self.root.mainloop()
+
+
+    def focus(self) -> None:
+        self.root.focus_force()
 
 
     def hide(self) -> None:

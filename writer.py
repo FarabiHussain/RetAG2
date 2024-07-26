@@ -2,7 +2,6 @@ import os
 import datetime
 import re
 import zlib
-import difflib
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from Path import *
@@ -117,7 +116,7 @@ def write_payments(doc, components):
         application_fee = "${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)
         installments = components['application fee'].get('months')
 
-        log_created_file(
+        write_file_to_history(
             case_id=components['case ID'].get().strip(), 
             document_type='Payment Authorization', 
             timestamp=timestamp, 
@@ -172,9 +171,9 @@ def write_receipt(doc, components):
     response = save_doc(doc=doc, components=components, folder_name='receipts', override_output_filename=filename)
 
     if response:
-        insert_receipt_to_history(receipt_id, client_name, components.get('case ID').get())
+        write_receipt_to_history(receipt_id, client_name, components.get('case ID').get())
 
-        log_created_file(
+        write_file_to_history(
             case_id=case_id if len(case_id) > 0 else "000000-000", 
             document_type='Payment Receipt', 
             timestamp=timestamp, 
@@ -232,7 +231,7 @@ def write_retainer(doc, components):
 
             return False
 
-    replace_placeholders(doc, document_data)
+    overwrite_placeholders(doc, document_data)
 
     client_signatures = [
         {
@@ -253,9 +252,9 @@ def write_retainer(doc, components):
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
-        insert_agreement_to_history(components)
+        write_agreement_to_history(components)
 
-        log_created_file(
+        write_file_to_history(
             case_id=case_id, 
             document_type='Retainer Agreement', 
             timestamp=timestamp, 
@@ -263,6 +262,16 @@ def write_retainer(doc, components):
             client_name=components.get('client name').get().strip(), 
             filename=output_filename, 
         )
+
+        components['service'].set(components['application type'].get())
+        components['quantity'].set('1')
+        components['PST percentage'].set('5.0')
+        components['PST percentage'].set('7.0')
+        components['rate'].set(f'${components['payment 1'].get('amount')}')
+        components['price'].set("${:,.2f}".format(float(components['payment 1'].get('amount')) * 1.12))
+        components['cart'].tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+        components['cart'].tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+        components['cart'].reset()
 
         return response
 
@@ -291,7 +300,7 @@ def write_conduct(doc, components):
 
             return False
 
-    replace_placeholders(doc, document_data)
+    overwrite_placeholders(doc, document_data)
 
     timestamp_obj = datetime.datetime.now()
     timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
@@ -301,7 +310,7 @@ def write_conduct(doc, components):
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
-        log_created_file(
+        write_file_to_history(
             case_id=components['case ID'].get().strip(), 
             document_type='Code of Conduct', 
             timestamp=timestamp, 
@@ -350,17 +359,17 @@ def write_imm5476(doc, components):
     if components["client 2 first name"].get().strip() == "" and components["client 2 last name"].get().strip() == "":
         document_data["[signedDate2]"] = ""
 
-    replace_placeholders(doc, document_data)
+    overwrite_placeholders(doc, document_data)
 
     timestamp_obj = datetime.datetime.now()
     timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
 
-    output_filename = f"[{formatted_timestamp}] {case_id} - {document_data['[applicantSurname]']} - {document_data['[applicantGivenName]']} - imm5476"
+    output_filename = f"[{formatted_timestamp}] {case_id} - {document_data['[applicantSurname]'].strip()} - {document_data['[applicantGivenName]'].strip()} - imm5476"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='imm5476')
 
     if response:
-        log_created_file(
+        write_file_to_history(
             case_id=components['case ID'].get().strip(), 
             document_type='Use of Representative', 
             timestamp=timestamp, 
@@ -370,7 +379,7 @@ def write_imm5476(doc, components):
         )
 
 
-def replace_placeholders(doc, document_data):
+def overwrite_placeholders(doc, document_data):
     try:
         for paragraph in doc.paragraphs:
             for key, value in document_data.items():
@@ -382,7 +391,7 @@ def replace_placeholders(doc, document_data):
         print(e)
 
 
-def insert_agreement_to_history(app_components=None):
+def write_agreement_to_history(app_components=None):
 
     if app_components is None:
         return
@@ -433,7 +442,7 @@ def insert_agreement_to_history(app_components=None):
         history.write(f'{history_entry}\n')
 
 
-def insert_receipt_to_history(doc_id="", client_name="", case_id=""):
+def write_receipt_to_history(doc_id="", client_name="", case_id=""):
     client_name = client_name.strip()
 
     check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'receipts.csv', (['case_id', 'created_by', 'created_date', 'document_id', 'client_name']))
@@ -451,7 +460,7 @@ def insert_receipt_to_history(doc_id="", client_name="", case_id=""):
         print(e)
 
 
-def log_created_file(case_id="", document_type="", timestamp="", remarks="", client_name="", filename="") -> bool:
+def write_file_to_history(case_id="", document_type="", timestamp="", remarks="", client_name="", filename="") -> bool:
     check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
     records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
 
@@ -491,7 +500,7 @@ def log_created_file(case_id="", document_type="", timestamp="", remarks="", cli
     return True
 
 
-def remove_file_from_log(filename) -> bool:
+def remove_file_from_history(filename) -> bool:
     check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
     records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
     keep_lines = []

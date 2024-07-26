@@ -1,3 +1,4 @@
+import threading
 import customtkinter as ctk
 import os
 import names
@@ -63,6 +64,27 @@ def decrypt_button(app):
         decryptor_window.show()
 
 
+def reset_button(app=None, blueprint={}, action=""):
+    app_components = app.get_all_components()
+
+    for component_name in blueprint.keys():
+        print(component_name)
+
+        if 'tab_components' in blueprint[component_name]:
+            for curr_tab in blueprint[component_name]['tab_components']:
+                reset_button(app, curr_tab, action)
+
+        if (component_name in app_components):
+            app_components.get(component_name).reset()
+
+            if component_name == 'case ID':
+                app.components.get('case ID').set(read_case_id())
+
+    if ("receipt" in action):
+        app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+        app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+
+
 def test_button(app):
 
     app.reset_all_components()
@@ -92,7 +114,6 @@ def test_button(app):
     app.components['client 1 date of birth'].set(y="2000", m="Jan", d="01")
     app.components['client 1 UCI'].set("0123456789")
     app.components['search case ID'].set("202407-001")
-
     app.components["guest 1 full name"].set(names.get_full_name(gender=random.choice(['male', 'female'])))
     app.components["guest 1 date of birth"].set(y="2000", m="Jan", d="01")
     app.components["guest 1 passport no."].set('XXXXXXXXX')
@@ -139,6 +160,60 @@ def test_button(app):
     )
 
     update_total_row(cart=app.components.get('cart'))
+
+
+def search_files_button(app):
+    created_files = read_file_as_list(filename='files.csv')
+    search_id = app.components['search case ID'].get().strip()
+    search_name = app.components['search client name'].get().strip()
+    search_category = app.components['search category'].get().strip()
+    search_table = app.components['search results']
+
+    search_table.reset()
+
+    row_info_list = []
+    row_contents_list = []
+    created_files_filtered = []
+
+    # filter by category
+    if search_category != 'All':
+        for row in created_files:
+            if row['document_type'] == search_category:
+                created_files_filtered.append(row)
+    else:
+        created_files_filtered = created_files
+
+    # filter by ID
+    if len(search_id) > 0:
+        temp = []
+        for row in created_files_filtered:
+            if search_id in row['case_id']:
+                temp.append(row)
+        created_files_filtered = temp
+
+    # filter by name
+    if len(search_name) > 0:
+        temp = []
+        for row in created_files_filtered:
+            if search_name in row['client_name']:
+                temp.append(row)
+        created_files_filtered = temp
+
+    # no filter applied for ID or name
+    for row in created_files_filtered:
+        row_info_list.append(row)
+        row_contents_list.append([
+            row['document_type'],
+            row['client_name'],
+            row['created_date'],
+            row['created_by'],
+            row['remarks'],
+        ])
+
+    search_table.add(
+        row_contents=row_contents_list,
+        row_info=row_info_list,
+    )
 
 
 def generate_row_contents(quantity_offset=None, app_components=None, override_row_content={}):
@@ -210,10 +285,19 @@ def add_item_button(app):
 
 
 def remove_item_button(app):
-    app_components = app.get_all_components()
-    cart = app_components.get('cart')
+
+    cart = app.components['cart']
+
+    selected_row = cart.get_selected_contents()
+    selected_info = cart.get_selected_info()
+
+    if selected_row is None or selected_info is None:
+        ErrorPopup(msg="Select table item to perform action.")
+        return
 
     cart.remove()
+    cart.selected_row = None
+    cart.selected_row_info = None
 
     update_total_row(cart=cart)
 

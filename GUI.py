@@ -12,10 +12,10 @@ from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
 from reader import read_file_as_list, read_case_id
-from writer import remove_file_from_log, write_imm5476, write_payments, replace_placeholders, write_conduct, write_receipt, write_retainer
+from writer import remove_file_from_history, write_imm5476, write_payments, overwrite_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
-from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, test_button, decrypt_button
+from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, reset_button, search_files_button, test_button, decrypt_button
 import json
 
 family_medium="Roboto Bold"
@@ -647,22 +647,7 @@ class ActionButton():
         )
 
     def assign_action(self, app=None, action="", blueprint={}, subapp_name="") -> None:
-        if ("reset" in action):
-
-            def reset_fields(app):
-                app_components = app.get_all_components()
-                for component_name in blueprint.keys():
-                    if (component_name in app_components):
-                        app_components.get(component_name).reset()
-
-                        if component_name == 'case ID':
-                            app.components.get('case ID').set(read_case_id())
-
-                if ("receipt" in action):
-                    app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-                    app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-
-            PromptPopup(msg="Are you sure you want to reset all fields?", func=lambda: reset_fields(app))
+        if ("reset" in action): PromptPopup(msg="Are you sure you want to reset all fields?", func=lambda: reset_button(app, blueprint, action))
 
         elif (action == "payments"):
             try:
@@ -677,16 +662,8 @@ class ActionButton():
                 response = write_retainer(doc, app.get_all_components())
 
                 if response == True and datetime.datetime.now().strftime('%b %d, %Y') == app.components.get('payment 1').get('date'):
-                        PromptPopup("The first payment is to be made today. Create receipt?", func=lambda: app.components['Receipts'].lift_app(app.subapp_components['Receipts']))
-                        app.components['service'].set(app.components['application type'].get())
-                        app.components['quantity'].set('1')
-                        app.components['PST percentage'].set('5.0')
-                        app.components['PST percentage'].set('7.0')
-                        app.components['rate'].set(f'${app.components['payment 1'].get('amount')}')
-                        app.components['price'].set("${:,.2f}".format(float(app.components['payment 1'].get('amount')) * 1.12))
-                        app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-                        app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-                        app.components['cart'].reset()
+                    PromptPopup("The first payment is to be made today. Create receipt?", func=lambda: app.components['Receipts'].lift_app(app.subapp_components['Receipts']))
+                    app.focus()
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
 
@@ -704,88 +681,21 @@ class ActionButton():
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
 
-        elif (action == "generate case ID"):
-            app.components.get('case ID').set(read_case_id())
+        elif (action == "generate case ID"): app.components.get('case ID').set(read_case_id())
 
-        elif (action == "retainer history"):
-            HistoryViewer(app)
+        elif (action == "retainer history"): HistoryViewer(app)
 
-        elif (action == "find receipt"):
-            ReceiptFinder(app)
+        elif (action == "find receipt"): ReceiptFinder(app)
 
-        elif (action == "test"):
-            test_button(app)
+        elif (action == "test"): test_button(app)
 
-        elif (action == "decrypt"):
-            decrypt_button(app)
+        elif (action == "decrypt"): decrypt_button(app)
 
-        elif (action == "add item"):
-            add_item_button(app)
+        elif (action == "add item"): add_item_button(app)
 
-        elif (action == "remove item"):
-            cart = app.components['cart']
+        elif (action == "remove item"): remove_item_button(app)
 
-            selected_row = cart.get_selected_contents()
-            selected_info = cart.get_selected_info()
-
-            if selected_row is None or selected_info is None:
-                ErrorPopup(msg="Select table item to perform action.")
-                return
-
-            remove_item_button(app)
-
-        elif (action == "search files"):
-            created_files = read_file_as_list(filename='files.csv')
-            search_id = app.components['search case ID'].get().strip()
-            search_name = app.components['search client name'].get().strip()
-            search_category = app.components['search category'].get().strip()
-            search_table = app.components['search results']
-
-            search_table.reset()
-
-            row_info_list = []
-            row_contents_list = []
-            created_files_filtered = []
-
-            # filter by category
-            if search_category != 'All':
-                for row in created_files:
-                    if row['document_type'] == search_category:
-                        created_files_filtered.append(row)
-            else:
-                created_files_filtered = created_files
-
-            # filter by ID
-            if len(search_id) > 0:
-                temp = []
-                for row in created_files_filtered:
-                    if search_id in row['case_id']:
-                        temp.append(row)
-                created_files_filtered = temp
-
-            # filter by name
-            if len(search_name) > 0:
-                temp = []
-                for row in created_files_filtered:
-                    if search_name in row['client_name']:
-                        temp.append(row)
-                created_files_filtered = temp
-
-            # no filter applied for ID or name
-            for row in created_files_filtered:
-                row_info_list.append(row)
-                row_contents_list.append([
-                    row['document_type'],
-                    row['client_name'],
-                    row['created_date'],
-                    row['created_by'],
-                    row['remarks'],
-                ])
-
-            search_table.add(
-                row_contents=row_contents_list,
-                row_info=row_info_list,
-            )
+        elif (action == "search files"): search_files_button(app)
 
         elif (action == "open selected"):
             searched_filepath, searched_filename = self.find_file(app=app)
@@ -816,9 +726,11 @@ class ActionButton():
 
             try:
                 os.remove(searched_filepath)
-                successfully_removed = remove_file_from_log(filename=searched_filename)
+                successfully_removed = remove_file_from_history(filename=searched_filename)
                 if not successfully_removed:
                     ErrorPopup(msg=f'Could not remove {searched_filename}.')
+                else:
+                    search_files_button(app)
             except Exception as e:
                 ErrorPopup(msg=f'Could not remove {searched_filename}.')
 
@@ -886,6 +798,7 @@ class TabView():
                     self.tab_contents[comp].label.configure(width=180)
 
                 app.add_component(comp, self.tab_contents[comp])
+
 
         for index, button in enumerate(self.component._segmented_button._buttons_dict.values()):
             button.configure(
