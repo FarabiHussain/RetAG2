@@ -1,0 +1,7 @@
+case_id,document_type,created_by,created_date,remarks,client_name,filename
+202407-001,Payment Receipt,FARABI-AMCAIM,19:02 - July 26 2024,#0000000003 ($2688.00),Marty (test) Cunha (test),[2024.07.26-19.02.57] 202407-001 - Receipt 0000000003 - Marty (test) Cunha (test)
+202407-001,Retainer Agreement,FARABI-AMCAIM,19:04 - July 26 2024,EOI ($560.00),Loretta (test) Nelson (test),[2024.07.26-19.04.22] 202407-001 - Retainer - Loretta (test) Nelson (test)
+202407-001,Payment Authorization,FARABI-AMCAIM,19:04 - July 26 2024,$560.00 in 5 months,Loretta (test) Nelson (test),[2024.07.26-19.04.22] 202407-001 - Payments - Loretta (test) - Nelson (test)
+202407-001,Code of Conduct,FARABI-AMCAIM,19:04 - July 26 2024,EOI,Loretta (test) Nelson (test),[2024.07.26-19.04.22] 202407-001 - Conduct - Loretta (test) Nelson (test)
+202407-001,Use of Representative,FARABI-AMCAIM,19:04 - July 26 2024,EOI,Loretta (test) Nelson (test),[2024.07.26-19.04.23] 202407-001 - Nelson (test) - Loretta (test) - imm5476
+202407-001,Payment Receipt,FARABI-AMCAIM,19:04 - July 26 2024,#0000000004 ($112.00),Loretta (test) Nelson (test),[2024.07.26-19.04.28] 202407-001 - Receipt 0000000004 - Loretta (test) Nelson (test)

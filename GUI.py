@@ -722,17 +722,18 @@ class ActionButton():
         elif (action == "cancel selected"):
             searched_filepath, searched_filename = self.find_file(app=app)
 
-            PromptPopup(msg=f'Would you like to cancel {searched_filename}', func=lambda:None)
+            confirmation = PromptPopup(msg=f'Would you like to cancel {searched_filename}', func=lambda:None).get()
 
-            try:
-                os.remove(searched_filepath)
-                successfully_removed = remove_file_from_history(filename=searched_filename)
-                if not successfully_removed:
+            if confirmation:
+                try:
+                    os.remove(searched_filepath)
+                    successfully_removed = remove_file_from_history(filename=searched_filename)
+                    if not successfully_removed:
+                        ErrorPopup(msg=f'Could not remove {searched_filename}.')
+                    else:
+                        search_files_button(app)
+                except Exception as e:
                     ErrorPopup(msg=f'Could not remove {searched_filename}.')
-                else:
-                    search_files_button(app)
-            except Exception as e:
-                ErrorPopup(msg=f'Could not remove {searched_filename}.')
 
         else:
             InfoPopup(msg='This feature is still under construction.')
@@ -924,11 +925,13 @@ class RowWidget():
 
         def unhighlight_row():
             for c in self.contents:
+                ic(c)
                 c.cell.configure(fg_color=row_color)
 
         def select_row():
             table_obj.selected_row = row_contents
             table_obj.selected_row_info = row_info
+            highlight_row()
 
         # setup the grid system
         for i in range(len(row_contents)+1):

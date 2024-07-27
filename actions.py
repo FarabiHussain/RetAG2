@@ -195,7 +195,7 @@ def search_files_button(app):
     if len(search_name) > 0:
         temp = []
         for row in created_files_filtered:
-            if search_name in row['client_name']:
+            if search_name.lower() in row['client_name'].lower():
                 temp.append(row)
         created_files_filtered = temp
 
