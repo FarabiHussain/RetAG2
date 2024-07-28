@@ -969,9 +969,9 @@ class RowWidget():
                         width=(parent_width-61)/len(table_obj.headers), 
                         height=38, 
                         text=content, 
-                        text_color="white" if mode is "header" else "black", 
-                        fg_color="#000" if mode is "header" else row_color, 
-                        font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode is "header" else ctk.CTkFont(family=family_medium, size=12),
+                        text_color="white" if mode == "header" else "black", 
+                        fg_color="#000" if mode == "header" else row_color, 
+                        font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode == "header" else ctk.CTkFont(family=family_medium, size=12),
                         command=lambda: select_row(),
                         on_enter=lambda *args: highlight_row(),
                         on_leave=lambda *args: unhighlight_row(),
@@ -1295,3 +1295,9 @@ class TableWidget():
 
     def get_selected_info(self):
         return self.selected_row_info
+
+
+class CheckboxGroup():
+    def __init__(self) -> None:
+        
+        pass
