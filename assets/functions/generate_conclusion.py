@@ -20,7 +20,7 @@ def callback(app=None):
 
 
     for i in range(1,6):
-        guest_fields[f"guest {i} full name"] = app.components[f"guest {i} full name"].get().strip()
+        guest_fields[f"guest {i} name"] = app.components[f"guest {i} name"].get().strip()
         guest_fields[f"guest {i} date of birth"] = app.components[f"guest {i} date of birth"].get().strip()
         guest_fields[f"guest {i} passport no."] = app.components[f"guest {i} passport no."].get().strip()
         guest_fields[f"guest {i} address"] = app.components[f"guest {i} address"].get().strip()
@@ -38,7 +38,7 @@ def callback(app=None):
         prompt=[f'Write a closing paragraph for an invitation letter to be submitted to IRCC including the following information:\nI am inviting the following people:']
 
         for i in range(1,6):
-            guest_name = guest_fields[f'guest {i} full name']
+            guest_name = guest_fields[f'guest {i} name']
             relation_to_host = guest_fields[f'guest {i} relation to host 1']
 
             if guest_name != '' and relation_to_host != '':

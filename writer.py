@@ -320,6 +320,52 @@ def write_conduct(doc, components):
         )
 
 
+def write_invitation(doc, components):
+    case_id = components['case ID'].get().strip()
+    date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
+    bearer_of_expenses = {
+        'host(s)': "paid for by me and will be my responsibility",
+        'guest(s)': "their own responsibility and will be paid for by themselves. I will provide additional support if any assistance is needed",
+    }
+
+    document_data = {
+        '[DAY]': date_on_document.strftime("%d"),
+        '[MONTH]': date_on_document.strftime("%b"),
+        '[YEAR]': date_on_document.strftime("%Y"),
+        '[BEARER]': bearer_of_expenses.get(components["bearer of expenses"].get(), bearer_of_expenses['host(s)']),
+        '[GUEST_PURPOSE]': components['purpose of visit'].get(),
+        '[GUEST_CANADIAN_ADDRESS]': components['address in Canada'].get(),
+        '[GUEST_ARRIVAL]': components['arrival date'].get(),
+        '[GUEST_DEPARTURE]': components['departure date'].get(),
+        '[GUEST_RESIDENCE]': components['country of residence'].get(),
+    }
+
+    for i in range(1,3):
+        if components[f'host {i} name'].get().strip() != '':
+            other_host = "2" if i==1 else "1"
+            document_data[f'[HOST{i}_NAME]'] = components[f"host {i} name"].get().strip()
+            document_data[f'[HOST{i}_BIRTH]'] = components[f"host {i} date of birth"].get().strip()
+            document_data[f'[HOST{i}_PASSPORT]'] = components[f"host {i} passport no."].get().strip()
+            document_data[f'[HOST{i}_ADDRESS]'] = components[f"host {i} address"].get().strip()
+            document_data[f'[HOST{i}_PHONE]'] = components[f"host {i} phone number"].get().strip()
+            document_data[f'[HOST{i}_EMAIL]'] = components[f"host {i} email address"].get().strip()
+            document_data[f'[HOST{i}_OCCUPATION]'] = components[f"host {i} occupation"].get().strip()
+            document_data[f'[HOST{i}_STATUS]'] = components[f"host {i} status in Canada"].get().strip()
+            document_data[f'[HOST{i}_RELATION_TO_HOST{other_host}]'] = components[f'relationship to host {other_host}'].get().lower().strip()
+
+    for i in range(1,6):
+        if components[f'guest {i} name'].get().strip() != '':
+            document_data[f'[GUEST{i}_BIRTH]'] = components[f"guest {i} date of birth"].get().strip()
+            document_data[f'[GUEST{i}_PASSPORT]'] = components[f"guest {i} passport no."].get().strip()
+            document_data[f'[GUEST{i}_ADDRESS]'] = components[f"guest {i} address"].get().strip()
+            document_data[f'[GUEST{i}_PHONE]'] = components[f"guest {i} phone number"].get().strip()
+            document_data[f'[GUEST{i}_EMAIL]'] = components[f"guest {i} email address"].get().strip()
+            document_data[f'[GUEST{i}_OCCUPATION]'] = components[f"guest {i} occupation"].get().strip()
+            document_data[f'[GUEST{i}_CITIZENSHIP]'] = components[f"guest {i} country of citizenship"].get().strip()
+
+    ic(document_data)
+
+
 def write_imm5476(doc, components):
     date_on_document = datetime.datetime.now()
     case_id = components['case ID'].get().strip()

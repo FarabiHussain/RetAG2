@@ -12,7 +12,7 @@ from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
 from reader import read_file_as_list, read_case_id
-from writer import remove_file_from_history, write_imm5476, write_payments, overwrite_placeholders, write_conduct, write_receipt, write_retainer
+from writer import remove_file_from_history, write_imm5476, write_invitation, write_payments, overwrite_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, reset_button, search_files_button, test_button, decrypt_button
@@ -681,6 +681,13 @@ class ActionButton():
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
 
+        elif (action == "create letter"):
+            try:
+                doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
+                write_invitation(doc, app.get_all_components())
+            except Exception as e:
+                ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
+
         elif (action == "generate case ID"): app.components.get('case ID').set(read_case_id())
 
         elif (action == "retainer history"): HistoryViewer(app)
@@ -903,7 +910,7 @@ class CellWidget():
 class RowWidget():
     def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_info=None, row_color="#eee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
 
-        # no parent, nowhere to put this
+        # no parent means nowhere to put this
         if parent_frame is None:
             return
 
@@ -918,20 +925,27 @@ class RowWidget():
         self.contents = []
         self.info = {}
         self.selected = False
+        self.selectable = table_obj is not None
+        table_width = len(table_obj.headers) if table_obj is not None else len(row_contents)
 
         def highlight_row():
-            for c in self.contents:
-                c.cell.configure(fg_color='#7ac8ff')
+            if self.selectable and (row_contents != table_obj.selected_row):
+                for c in self.contents:
+                    c.cell.configure(fg_color='#7ac8ff')
 
         def unhighlight_row():
-            for c in self.contents:
-                ic(c)
-                c.cell.configure(fg_color=row_color)
+            if self.selectable and (row_contents != table_obj.selected_row):
+                for c in self.contents:
+                    c.cell.configure(fg_color=row_color)
 
         def select_row():
-            table_obj.selected_row = row_contents
-            table_obj.selected_row_info = row_info
-            highlight_row()
+            if self.selectable:
+                table_obj.unhighlight()
+                table_obj.selected_row = row_contents
+                table_obj.selected_row_info = row_info
+
+                for c in self.contents:
+                    c.cell.configure(fg_color='#ffd07a')
 
         # setup the grid system
         for i in range(len(row_contents)+1):
@@ -939,7 +953,7 @@ class RowWidget():
 
         # set the number of buttons based on the mode
         # 5 in a tools row where all 5 cols are buttons
-        for i in range(len(table_obj.headers) if mode=="tools" else 0):
+        for i in range(table_width if mode=="tools" else 0):
             self.buttons.append(
                 ctk.CTkButton(
                     master=self.container,
@@ -948,7 +962,7 @@ class RowWidget():
                     border_width=0,
                     corner_radius=0,
                     fg_color="black" if row_contents[i] != "" else "light gray",
-                    width=(parent_width-61)/len(table_obj.headers),
+                    width=(parent_width-61)/table_width,
                     height=38,
                     font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
                     state="disabled" if row_contents[i] == "" else "normal",
@@ -965,8 +979,8 @@ class RowWidget():
                 self.contents.append(
                     CellWidget(
                         master=self.container, 
-                        type='button' if (not is_blank and i == 0 and mode != 'header') else 'label',
-                        width=(parent_width-61)/len(table_obj.headers), 
+                        type='button' if (not is_blank and mode != 'header') else 'label',
+                        width=(parent_width-61)/table_width, 
                         height=38, 
                         text=content, 
                         text_color="white" if mode == "header" else "black", 
@@ -1125,6 +1139,13 @@ class TableWidget():
         self.update(page=page)
 
 
+    def unhighlight(self):
+
+        for i, r in enumerate(self.rows_rendered):
+            for c in r.contents:
+                c.cell.configure(fg_color="#ddd" if i % 2==0 else "#eee")
+
+
     def refresh(self):
 
         for r in self.rows_rendered:
@@ -1264,7 +1285,6 @@ class TableWidget():
         self.tools.buttons[0].configure(fg_color="white", state="disabled", text="")
         self.navigate(page=1)
         self.update()
-
 
 
     def contains(self, row_info=[], compare_keys=[]):
