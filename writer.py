@@ -20,6 +20,7 @@ def unobscure(obscured: str) -> str:
 
 
 def write_payments(doc, components):
+    check_case_id_before_submit(components)
 
     client_info_top = [
         {
@@ -127,6 +128,7 @@ def write_payments(doc, components):
 
 
 def write_receipt(doc, components):
+    check_case_id_before_submit(components)
     cart = components.get('cart')
     cart_items = []
     case_id = components.get('payment for case ID').get()
@@ -184,6 +186,7 @@ def write_receipt(doc, components):
 
 
 def write_retainer(doc, components):
+    check_case_id_before_submit(components)
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
     case_id = components['case ID'].get().strip()
@@ -277,6 +280,7 @@ def write_retainer(doc, components):
 
 
 def write_conduct(doc, components):
+    check_case_id_before_submit(components)
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     case_id = components['case ID'].get().strip()
 
@@ -321,6 +325,7 @@ def write_conduct(doc, components):
 
 
 def write_invitation(doc, components):
+    check_case_id_before_submit(components)
     case_id = components['case ID'].get().strip()
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     bearer_of_expenses = {
@@ -367,6 +372,7 @@ def write_invitation(doc, components):
 
 
 def write_imm5476(doc, components):
+    check_case_id_before_submit(components)
     date_on_document = datetime.datetime.now()
     case_id = components['case ID'].get().strip()
 
@@ -588,6 +594,14 @@ def check_history_dir_and_file(check_dir, check_file, csv_columns):
             history.write("\n")
             history.close()
 
+
+def check_case_id_before_submit(components):
+    retrieved_case_id = read_case_id()
+    current_case_id = components['case ID'].get().strip()
+
+    if retrieved_case_id == current_case_id:
+        InfoPopup(msg=f"current case ID {current_case_id} is already occupied, next available case ID {read_case_id()} will be used for this case.")
+        components.get('case ID').set(retrieved_case_id)
 
 def get_prompt_response(prompt="") -> str:
     import google.generativeai as genai
