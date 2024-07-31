@@ -20,8 +20,6 @@ def unobscure(obscured: str) -> str:
 
 
 def write_payments(doc, components):
-    check_case_id_before_submit(components)
-
     client_info_top = [
         {
             "label": "first name",
@@ -128,7 +126,6 @@ def write_payments(doc, components):
 
 
 def write_receipt(doc, components):
-    check_case_id_before_submit(components)
     cart = components.get('cart')
     cart_items = []
     case_id = components.get('payment for case ID').get()
@@ -280,7 +277,6 @@ def write_retainer(doc, components):
 
 
 def write_conduct(doc, components):
-    check_case_id_before_submit(components)
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     case_id = components['case ID'].get().strip()
 
@@ -325,7 +321,6 @@ def write_conduct(doc, components):
 
 
 def write_invitation(doc, components):
-    check_case_id_before_submit(components)
     case_id = components['case ID'].get().strip()
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     bearer_of_expenses = {
@@ -372,7 +367,6 @@ def write_invitation(doc, components):
 
 
 def write_imm5476(doc, components):
-    check_case_id_before_submit(components)
     date_on_document = datetime.datetime.now()
     case_id = components['case ID'].get().strip()
 
@@ -489,9 +483,19 @@ def write_agreement_to_history(app_components=None):
     for index, col in enumerate(history_entry):
         history_entry[index] = re.sub("[,]\\s*", "_", str(col))
 
-    with open(f"{os.getcwd()}\\write\\agreements.csv", "a") as history:
-        history_entry = (',').join(history_entry)
-        history.write(f'{history_entry}\n')
+    with open(f"{os.getcwd()}\\write\\agreements.csv", "r") as history:
+        readlines = history.readlines()
+
+    with open(f"{os.getcwd()}\\write\\agreements.csv", "a+") as history:
+        readlines = history.readlines()
+        sorted_lines = []
+        print(readlines)
+
+        if len(readlines) > 1:
+            sorted_lines = [readlines[0]] + sorted(readlines[1:])
+
+        sorted_lines += ["\n" + (',').join(history_entry)]
+        history.write(('').join(sorted_lines))
 
 
 def write_receipt_to_history(doc_id="", client_name="", case_id=""):
@@ -596,12 +600,13 @@ def check_history_dir_and_file(check_dir, check_file, csv_columns):
 
 
 def check_case_id_before_submit(components):
-    retrieved_case_id = read_case_id()
-    current_case_id = components['case ID'].get().strip()
+    prev_case_id = read_case_id(get_next=False)
+    curr_case_id = components['case ID'].get().strip()
+    next_case_id = f"{prev_case_id.split('-')[0]}-{"{:03}".format(int(prev_case_id.split('-')[1]) + 1)}"
 
-    if retrieved_case_id == current_case_id:
-        InfoPopup(msg=f"current case ID {current_case_id} is already occupied, next available case ID {read_case_id()} will be used for this case.")
-        components.get('case ID').set(retrieved_case_id)
+    if prev_case_id == curr_case_id:
+        InfoPopup(msg=f"current case ID {curr_case_id} is already occupied, next available case ID {next_case_id} will be used for this case.")
+        components.get('case ID').set(next_case_id)
 
 def get_prompt_response(prompt="") -> str:
     import google.generativeai as genai
