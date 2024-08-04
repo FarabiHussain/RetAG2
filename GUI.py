@@ -932,17 +932,17 @@ class RowWidget():
         table_width = len(table_obj.headers) if table_obj is not None else len(row_contents)
 
         def highlight_row():
-            if self.selectable and (row_contents != table_obj.selected_row):
+            if self.selectable and (row_contents != table_obj.selected_row) and is_blank is False:
                 for c in self.contents:
                     c.cell.configure(fg_color='#7ac8ff')
 
         def unhighlight_row():
-            if self.selectable and (row_contents != table_obj.selected_row):
+            if self.selectable and (row_contents != table_obj.selected_row) and is_blank is False:
                 for c in self.contents:
                     c.cell.configure(fg_color=row_color)
 
         def select_row():
-            if self.selectable:
+            if self.selectable and is_blank is False:
                 table_obj.unhighlight()
                 table_obj.selected_row = row_contents
                 table_obj.selected_row_info = row_info
@@ -1143,7 +1143,6 @@ class TableWidget():
 
 
     def unhighlight(self):
-
         for i, r in enumerate(self.rows_rendered):
             for c in r.contents:
                 c.cell.configure(fg_color="#ddd" if i % 2==0 else "#eee")
@@ -1199,7 +1198,7 @@ class TableWidget():
                     parent_width=self.parent_width, 
                     row_number=index + page_offset, 
                     row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
-                    # is_blank = True,
+                    is_blank = True,
                     row_contents=[''] * len(self.headers),
                     mode='table', 
                     app=self.app, 

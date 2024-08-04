@@ -68,29 +68,43 @@ def read_receipt_id():
     return 0
 
 # read agreements.csv to retrieve the last created id
-def read_case_id():
+def read_case_id(get_next=True):
     records_file = (f'{os.getcwd()}\\write\\agreements.csv').replace('\\write\\write', '\\agreements')
     curr_timestamp = str(datetime.datetime.now().strftime('%Y%m'))
-    doc_id = f'{curr_timestamp}-001'
+    case_id = f'{curr_timestamp}-001'
+    heading_line = []
+    indexes = {}
 
 
     # fix this to use CSV columns instead of split()
     try:
         with open(records_file, 'r') as log_file:
-            prev_doc_id = log_file.readlines()[-1]
+            readlines = log_file.readlines()
 
-        prev_doc_id = prev_doc_id.split(",")[0]
-        prev_timestamp = (prev_doc_id.split('-')[0])
-        prev_number = (prev_doc_id.split('-')[1])
+            if len(readlines) == 1:
+                return case_id
+
+            heading_line = readlines[0]
+            prev_case_id = readlines[-1]
+
+            # sorted_lines = [readlines[0]] + sorted(readlines[1:])
+            # ic(sorted_lines)
+
+        for i, column_name in enumerate(heading_line.split(',')):
+            indexes[column_name] = i
+
+        prev_case_id = prev_case_id.split(",")[indexes['case_id']]
+        prev_timestamp = (prev_case_id.split('-')[0])
+        prev_number = (prev_case_id.split('-')[1])
 
         if curr_timestamp == prev_timestamp:
-            curr_number = "{:03}".format(int(prev_number) + 1)
+            curr_number = "{:03}".format(int(prev_number) + (1 if get_next else 0))
         else:
             curr_number = "001"
 
-        doc_id = f"{curr_timestamp}-{curr_number}"
+        case_id = f"{curr_timestamp}-{curr_number}"
 
     except Exception as e:
-        print(f"Error when reading ID, returning {doc_id}\n\n{e}")
+        print(f"Error when reading ID, returning {case_id}\n\n{e}")
 
-    return doc_id
+    return case_id

@@ -95,8 +95,8 @@
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT AND CASE INFORMATION"},
-        "client name": {"column": 0, "type": "entry"},
         "payment for case ID": {"column": 0, "type": "entry"},
+        "client name": {"column": 0, "type": "entry"},
         "break 1": {"column": 0, "type": "break", "heading": "PURCHASE"},
         "service": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
         "rate": {"column": 0, "type": "entry", "default": "$500.00"},

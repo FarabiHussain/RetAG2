@@ -20,7 +20,6 @@ def unobscure(obscured: str) -> str:
 
 
 def write_payments(doc, components):
-
     client_info_top = [
         {
             "label": "first name",
@@ -184,6 +183,7 @@ def write_receipt(doc, components):
 
 
 def write_retainer(doc, components):
+    check_case_id_before_submit(components)
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
     case_id = components['case ID'].get().strip()
@@ -590,9 +590,19 @@ def write_agreement_to_history(app_components=None):
     for index, col in enumerate(history_entry):
         history_entry[index] = re.sub("[,]\\s*", "_", str(col))
 
-    with open(f"{os.getcwd()}\\write\\agreements.csv", "a") as history:
-        history_entry = (',').join(history_entry)
-        history.write(f'{history_entry}\n')
+    with open(f"{os.getcwd()}\\write\\agreements.csv", "r") as history:
+        readlines = history.readlines()
+
+    with open(f"{os.getcwd()}\\write\\agreements.csv", "a+") as history:
+        readlines = history.readlines()
+        sorted_lines = []
+        print(readlines)
+
+        if len(readlines) > 1:
+            sorted_lines = [readlines[0]] + sorted(readlines[1:])
+
+        sorted_lines += ["\n" + (',').join(history_entry)]
+        history.write(('').join(sorted_lines))
 
 
 def write_receipt_to_history(doc_id="", client_name="", case_id=""):
@@ -695,6 +705,15 @@ def check_history_dir_and_file(check_dir, check_file, csv_columns):
             history.write("\n")
             history.close()
 
+
+def check_case_id_before_submit(components):
+    prev_case_id = read_case_id(get_next=False)
+    curr_case_id = components['case ID'].get().strip()
+    next_case_id = f"{prev_case_id.split('-')[0]}-{"{:03}".format(int(prev_case_id.split('-')[1]) + 1)}"
+
+    if prev_case_id == curr_case_id:
+        InfoPopup(msg=f"current case ID {curr_case_id} is already occupied, next available case ID {next_case_id} will be used for this case.")
+        components.get('case ID').set(next_case_id)
 
 def get_prompt_response(prompt="") -> str:
     import google.generativeai as genai

@@ -54,7 +54,7 @@ for i, subapp_name in enumerate(blueprint):
 
 if "--test" in sys.argv:
     test_button(app)
-    subapp_components[3]['subapp_obj'].lift_app(subapp_components)
+    # subapp_components[3]['subapp_obj'].lift_app(subapp_components)
     pass
 
 app.start()
