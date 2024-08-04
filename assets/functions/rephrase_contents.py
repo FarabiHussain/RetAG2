@@ -5,7 +5,6 @@ import time
 
 
 def callback(app=None):
-    ic("/assets/functions/generate_conclusion.py")
 
     if app is None:
         return

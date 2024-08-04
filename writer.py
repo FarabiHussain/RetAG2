@@ -20,6 +20,11 @@ def unobscure(obscured: str) -> str:
 
 
 def write_payments(doc, components):
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Poppins'
+    font.size = PT(8)
+
     client_info_top = [
         {
             "label": "first name",
@@ -130,6 +135,11 @@ def write_receipt(doc, components):
     cart_items = []
     case_id = components.get('payment for case ID').get()
 
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Poppins'
+    font.size = PT(8)
+
     current_serial = 1
     total = 0
     for current_item in cart.get():
@@ -188,10 +198,15 @@ def write_retainer(doc, components):
     tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
     case_id = components['case ID'].get().strip()
 
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Poppins'
+    font.size = PT(8)
+
     # formats the list of data so that it can be displayed on the output document
     def format_payments():
         payments_string = []
-        payments_string.append(f"Payment of CAN {'${:.2f}'.format(components[f"payment 1"].get('amount') * tax_multiplier)} to be paid in {components[f"payment 1"].get('date')}, after signing the retainer, is non-refundable.")
+        payments_string.append(f"Payment of CAN {'${:.2f}'.format(components[f"payment 1"].get('amount') * tax_multiplier)} to be paid on {components[f"payment 1"].get('date')}, after signing the retainer, is non-refundable.")
 
         for i in range(2, 13):
             current_amount = components[f"payment {i}"].get('amount')
@@ -203,6 +218,7 @@ def write_retainer(doc, components):
         return ("\n").join(payments_string)
 
     document_data = {
+        '[CASE_ID]': case_id,
         '[DAY]': date_on_document.strftime("%d"),
         '[MONTH]': date_on_document.strftime("%b"),
         '[YEAR]': date_on_document.strftime("%Y"),
@@ -285,8 +301,10 @@ def write_conduct(doc, components):
         '[MONTH]': date_on_document.strftime("%b"),
         '[YEAR]': date_on_document.strftime("%Y"),
         '[CLIENT1]': (f"{components["client 1 first name"].get()} {components["client 1 last name"].get()}").strip(),
-        '[APP_TYPE]': components["application type"].get(),
+        '[APP_TYPE]': components["application type"].get().strip(),
     }
+
+    document_data['[APP_TYPE]'].replace('application', '').replace('Application', '')
 
     for d in ['[CLIENT1]', '[APP_TYPE]']:
         if len(document_data[d].strip()) == 0:
@@ -322,6 +340,8 @@ def write_conduct(doc, components):
 
 def write_invitation(doc, components):
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
+    has_second_host = False
+
     bearer_of_expenses = {
         'host(s)': "paid for by me and will be my responsibility",
         'guest(s)': "their own responsibility and will be paid for by themselves. I will provide additional support if any assistance is needed",
@@ -354,8 +374,7 @@ def write_invitation(doc, components):
             document_data[f'[HOST{i}_STATUS]'] = components[f"host {i} status in Canada"].get().strip()
             document_data[f'[HOST{i}_RELATION_TO_HOST{other_host}]'] = components[f'relationship to host {other_host}'].get().lower().strip()
 
-    if '[HOST2_NAME]' in document_data:
-        doc = Document(resource_path("assets\\templates\\invitation_2.docx"))
+        has_second_host = '[HOST2_NAME]' in document_data
 
     for i in range(1,6):
         if components[f'guest {i} name'].get().strip() != '':
@@ -378,22 +397,13 @@ def write_invitation(doc, components):
     document_data['[GUEST_NAMES]'] = replace_last((', ').join(document_data['[GUEST_NAMES]']), (", "), ", and ")
     document_data['[GUEST_INFO]'] = ('\n').join(document_data['[GUEST_INFO]'])
 
+    if has_second_host:
+        doc = Document(resource_path("assets\\templates\\invitation_2.docx"))
+        intro_text = (f"This letter is to express me and my {document_data[f'[HOST1_RELATION_TO_HOST2]'].lower()}'s interest in inviting {document_data['[GUEST_NAMES]']} to Canada and to furthermore support their Temporary Resident Visa application.")
+    else:
+        intro_text = (f"This letter is to express my interest in inviting {document_data['[GUEST_NAMES]']} to Canada and to furthermore support their Temporary Resident Visa application.")
 
-    intro_text = (
-        f"This letter is to express my interest in inviting {document_data['[GUEST_NAMES]']} to Canada "
-        + f"and to furthermore support their Temporary Resident Visa application."
-    )
-
-    if '[HOST2_NAME]' in document_data:
-        intro_text = (
-            f"This letter is to express me and my {document_data[f'[HOST1_RELATION_TO_HOST2]'].lower()}'s "
-            + f"interest in inviting {document_data['[GUEST_NAMES]']} to Canada and to furthermore support their Temporary Resident Visa application."
-        )
-
-    outro_text = (
-        f"\n\n{components['conclusion content'].get()}"
-        + f"\n\nIf any clarification or information is required, please do not hesitate to contact us at our email addresses and phone numbers below."
-    )
+    outro_text = (f"\n\n{components['conclusion content'].get()}\nIf any clarification or information is required, please do not hesitate to contact us at our email addresses and phone numbers below.\n\n")
 
     style = doc.styles['Normal']
     font = style.font
@@ -419,6 +429,9 @@ def write_invitation(doc, components):
                     {"label": "Current Occupation", "info": document_data[f'[HOST{host_number}_OCCUPATION]']},
                 ]
             )
+
+    if has_second_host:
+        doc.add_page_break()
 
     for guest_number in range(1,6):
         if f'[GUEST{guest_number}_NAME]' in document_data:
@@ -491,13 +504,13 @@ def write_imm5476(doc, components):
         '[typeOfApplication]': (f""),
     }
 
-    for d in ['[applicantUCI]', '[applicantDOB]', '[applicantGivenName]', '[applicantSurname]']:
+    for d in ['[applicantDOB]', '[applicantGivenName]', '[applicantSurname]']:
         if len(document_data[d].strip()) == 0:
             ErrorPopup(msg="Failed to create imm5476.\n\nThe following must not be empty:\n"
                 + "- client 1 first name\n"
                 + "- client 1 last name\n"
-                + "- client 1 UCI\n"
                 + "- client 1 date of birth\n"
+                + "\n\nclient 1 UCI must be provided if the client has one."
             )
 
             return False
@@ -596,7 +609,6 @@ def write_agreement_to_history(app_components=None):
     with open(f"{os.getcwd()}\\write\\agreements.csv", "a+") as history:
         readlines = history.readlines()
         sorted_lines = []
-        print(readlines)
 
         if len(readlines) > 1:
             sorted_lines = [readlines[0]] + sorted(readlines[1:])
@@ -711,9 +723,10 @@ def check_case_id_before_submit(components):
     curr_case_id = components['case ID'].get().strip()
     next_case_id = f"{prev_case_id.split('-')[0]}-{"{:03}".format(int(prev_case_id.split('-')[1]) + 1)}"
 
-    if prev_case_id == curr_case_id:
+    if prev_case_id == curr_case_id and '-001' not in curr_case_id:
         InfoPopup(msg=f"current case ID {curr_case_id} is already occupied, next available case ID {next_case_id} will be used for this case.")
         components.get('case ID').set(next_case_id)
+
 
 def get_prompt_response(prompt="") -> str:
     import google.generativeai as genai

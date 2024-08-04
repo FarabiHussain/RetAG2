@@ -145,8 +145,9 @@ def save_doc(doc=None, components=None, folder_name="", prefix="", override_outp
         doc.save(f"{output_dir}{output_filename}")
 
         # open the word file
-        if "--test" not in sys.argv:
-            os.startfile(output_dir + output_filename)
+        # if "--test" not in sys.argv:
+            # os.startfile(output_dir + output_filename)
+        os.startfile(output_dir + output_filename)
 
     except Exception as e:
         # ErrorPopup(f"Exception when saving and opening document:\n\n{str(e)}")
@@ -167,7 +168,7 @@ def insert_invoice_info(document=None, doc_id="", billed_to="", timestamp=""):
     else:
         insert_paragraph(
             document.add_paragraph(),
-            (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\nBilled to\t{billed_to}\n"),
+            (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\nBilled to\t\t{billed_to}\n"),
         )
 
 
@@ -205,8 +206,8 @@ def insert_items_table(doc=None, cart_items=[]):
 
     # set the table borders
     for cell in items_table.rows[0].cells:
-        set_cell_border(cell, bottom={"sz": 6, "color": "#EEE", "val": "single", "space": "10"})
-        set_cell_border(cell, top={"sz": 6, "color": "#EEE", "val": "single", "space": "15"})
+        set_cell_border(cell, bottom={"sz": 8, "color": "#aaaaaa", "val": "single", "space": "10"})
+        set_cell_border(cell, top={"sz": 8, "color": "#aaaaaa", "val": "single", "space": "15"})
 
     # set column widths
     for idx, col in enumerate(headings):
@@ -214,9 +215,9 @@ def insert_items_table(doc=None, cart_items=[]):
             cell.width = CM(col["width"])
 
             if index > 0:
-                set_cell_border(cell, bottom={"sz": 6, "color": "#EEE", "val": "single", "space": "15"},)
+                set_cell_border(cell, bottom={"sz": 8, "color": "#aaaaaa", "val": "single", "space": "15"},)
 
-        set_cell_border(cell, bottom={"sz": 6, "color": "#EEE", "val": "single", "space": "0"})
+        set_cell_border(cell, bottom={"sz": 8, "color": "#aaaaaa", "val": "single", "space": "0"})
 
     # set row heights
     for index, row in enumerate(items_table.rows):

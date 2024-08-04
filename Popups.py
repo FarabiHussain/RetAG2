@@ -19,7 +19,6 @@ class PromptPopup():
             self.execute()
 
     def execute(self):
-        print(self.func)
         self.func()
 
     def get(self):

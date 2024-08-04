@@ -87,9 +87,6 @@ def read_case_id(get_next=True):
             heading_line = readlines[0]
             prev_case_id = readlines[-1]
 
-            # sorted_lines = [readlines[0]] + sorted(readlines[1:])
-            # ic(sorted_lines)
-
         for i, column_name in enumerate(heading_line.split(',')):
             indexes[column_name] = i
 

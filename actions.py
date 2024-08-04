@@ -68,8 +68,6 @@ def reset_button(app=None, blueprint={}, action=""):
     app_components = app.get_all_components()
 
     for component_name in blueprint.keys():
-        print(component_name)
-
         if 'tab_components' in blueprint[component_name]:
             for curr_tab in blueprint[component_name]['tab_components']:
                 reset_button(app, curr_tab, action)

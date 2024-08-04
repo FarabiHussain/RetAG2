@@ -682,12 +682,18 @@ class ActionButton():
                 ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
 
         elif (action == "create letter"):
-            doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
-            write_invitation(doc, app.get_all_components())
+
+            if len(app.components['conclusion content'].get().strip()) == 0:
+                if PromptPopup("No conclusion was written. Create letter without one?", func=lambda: None).get() is False:
+                    return
+
+            elif app.components['conclusion content'].get().strip() == 'loading...':
+                InfoPopup('Conclusion content is still loading. Please wait.')
+                return
+
             try:
-                pass
-                # doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
-                # write_invitation(doc, app.get_all_components())
+                doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
+                write_invitation(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing invitation:\n\n{str(e)}')
 
