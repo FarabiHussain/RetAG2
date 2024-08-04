@@ -145,8 +145,8 @@ def save_doc(doc=None, components=None, folder_name="", prefix="", override_outp
         doc.save(f"{output_dir}{output_filename}")
 
         # open the word file
-        if "--test" not in sys.argv:
-            os.startfile(output_dir + output_filename)
+        # if "--test" not in sys.argv:
+        os.startfile(output_dir + output_filename)
 
     except Exception as e:
         # ErrorPopup(f"Exception when saving and opening document:\n\n{str(e)}")

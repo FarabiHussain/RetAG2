@@ -121,7 +121,7 @@ def test_button(app):
         app.components[f"host {i} name"].set(host_name)
         app.components[f"host {i} date of birth"].set(y=f"199{random.randint(0,9)}", m=random.randint(0,11), d=random.randint(1,28))
         app.components[f"host {i} passport no."].set('XXXXXXXXX')
-        app.components[f"host {i} address"].set('999 St Marys Rd, Winnipeg, MB R3C 0C4')
+        app.components[f"host {i} address"].set("999 St Mary\'s Rd, Winnipeg, MB R3C 0C4")
         app.components[f"host {i} phone number"].set('999-999-9999')
         app.components[f"host {i} email address"].set('email@domain.com')
         app.components[f"host {i} occupation"].set('occupation')

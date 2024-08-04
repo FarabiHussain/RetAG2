@@ -682,11 +682,14 @@ class ActionButton():
                 ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
 
         elif (action == "create letter"):
+            doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
+            write_invitation(doc, app.get_all_components())
             try:
-                doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
-                write_invitation(doc, app.get_all_components())
+                pass
+                # doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
+                # write_invitation(doc, app.get_all_components())
             except Exception as e:
-                ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
+                ErrorPopup(msg=f'Exception while writing invitation:\n\n{str(e)}')
 
         elif (action == "generate case ID"): app.components.get('case ID').set(read_case_id())
 
