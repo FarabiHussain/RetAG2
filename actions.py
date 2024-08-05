@@ -111,7 +111,7 @@ def test_button(app):
     app.components['client name'].set(f'{app.components['client 1 first name'].get()} {app.components['client 1 last name'].get()}')
     app.components['client 1 date of birth'].set(y=f"199{random.randint(0,9)}", m=random.randint(0,11), d=random.randint(1,28))
     app.components['client 1 UCI'].set("0123456789")
-    app.components['search case ID'].set("202407-001")
+    # app.components['search case ID'].set("202407-001")
 
     for i in range(1,random.randint(2,3)):
         other_host = "2" if i==1 else "1"

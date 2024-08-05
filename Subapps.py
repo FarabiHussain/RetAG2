@@ -149,6 +149,7 @@ class Subapp():
                 )
 
             elif specs['type'] == "rowbutton":
+                ic(specs['label'])
                 new_component = RowButton(
                     master=self.page_columns[specs['column']], 
                     app=app, 

@@ -104,6 +104,7 @@
         "GST percentage": {"column": 0, "type": "entry", "default": "5.0"},
         "PST percentage": {"column": 0, "type": "entry", "default": "7.0"},
         "price": {"column": 0, "type": "entry", "default": "$560.00"},
+        "adjust rate": {"column": 0, "type": "rowbutton", "label": "Adjust Rate", "method": "/assets/functions/adjust_rate.py"},
         "cart": {"column": 1, "type": "table", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
 
         "callbacks": {
