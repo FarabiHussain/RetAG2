@@ -1,3 +1,5 @@
+from Popups import ErrorPopup
+
 def callback(app_components=None):
 
     if app_components is None:
@@ -12,14 +14,13 @@ def callback(app_components=None):
 
         price = float(app_components.get("quantity").get()) * float(app_components.get("rate").get().strip().replace("$","")) * tax_multuplier
 
-        app_components.get("price").set(
-            f"{"${:,.2f}".format(price)}"
-        )
+        app_components.get("price").set(f"{"${:,.2f}".format(price)}")
+        app_components.get("price").component.configure(fg_color="light green", text_color="#000000")
 
         app_components.get("rate").component.configure(fg_color="light gray", text_color="#000000")
-        app_components.get("price").component.configure(fg_color="light green", text_color="#000000")
 
     except Exception as e:
         app_components.get("price").set("")
         app_components.get("price").component.configure(fg_color="#dddddd", text_color="#aaaaaa")
+        ErrorPopup(e)
 
