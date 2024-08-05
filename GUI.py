@@ -869,6 +869,7 @@ class CellWidget():
         self.width = width
         self.height = height
         self.text = text
+        self.cell_type = type
 
         if type == 'label':
             self.cell = ctk.CTkLabel(
@@ -949,11 +950,13 @@ class RowWidget():
 
         def select_row():
             if self.selectable and is_blank is False:
-                table_obj.unhighlight()
                 table_obj.selected_row = row_contents
                 table_obj.selected_row_info = row_info
+                # table_obj.update()
+                table_obj.unhighlight()
 
                 for c in self.contents:
+                    ic(c.cell.cget('text'))
                     c.cell.configure(fg_color='#ffd07a')
 
         # setup the grid system
@@ -1151,7 +1154,8 @@ class TableWidget():
     def unhighlight(self):
         for i, r in enumerate(self.rows_rendered):
             for c in r.contents:
-                c.cell.configure(fg_color="#ddd" if i % 2==0 else "#eee")
+                ic(c.cell.cget('text'))
+                c.cell.configure(fg_color="#dddddd" if i % 2==0 else "#eeeeee")
 
 
     def refresh(self):
@@ -1178,6 +1182,11 @@ class TableWidget():
 
         for index in range(self.rows_per_page):
             if (index + page_offset) < len(self.rows):
+                row_colr = "#ddd" if ((index + page_offset) % 2 == 0) else "#eee"
+
+                if (self.rows[index + page_offset].get('row_contents') == self.selected_row):
+                    row_colr = '#ffd07a'
+
                 self.rows_rendered.append(
                     RowWidget(
                         parent_frame=self.table_frame, 
@@ -1186,7 +1195,7 @@ class TableWidget():
                         mode=self.rows[index + page_offset].get('mode'), 
                         row_contents=self.rows[index + page_offset].get('row_contents'),
                         row_info=self.rows[index + page_offset].get('info'),
-                        row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
+                        row_color=row_colr,
                         table_obj=self,
                         app=self.app, 
                     )

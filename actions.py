@@ -154,7 +154,7 @@ def test_button(app):
     random_row_contents = []
     random_row_infos = []
 
-    for i in range(random.randint(1,3)):
+    for i in range(random.randint(5,10)):
         new_row, new_row_info = generate_row_contents(
             app_components=app.components, 
             override_row_content={
@@ -314,6 +314,7 @@ def remove_item_button(app):
     cart.remove()
     cart.selected_row = None
     cart.selected_row_info = None
+    # cart.unhighlight()
 
     update_total_row(cart=cart)
 
