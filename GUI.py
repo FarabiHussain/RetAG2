@@ -53,7 +53,7 @@ class RowBreak():
             height=32, 
             width=450, 
             fg_color="#808080", 
-            text_color="white", 
+            text_color="#ffffff", 
             corner_radius=2, 
             font=ctk.CTkFont(family=family_bold, weight='bold')
         )
@@ -72,7 +72,7 @@ class RowButton(GUI):
             height=32, 
             width=450, 
             fg_color="#33008B", 
-            text_color="white", 
+            text_color="#ffffff", 
             corner_radius=2, 
             font=ctk.CTkFont(family=family_bold, weight='bold'), 
             command=lambda: method(app), 
@@ -101,8 +101,8 @@ class ComboBox(GUI):
             height=32,
             border_width=0,
             corner_radius=2,
-            bg_color="#fff",
-            fg_color="#ddd",
+            bg_color="#ffffff",
+            fg_color="#dddddd",
             values=options,
             variable=self.stringvar,
             font=ctk.CTkFont(family=family_medium),
@@ -159,8 +159,8 @@ class Entry(GUI):
             height=32,
             border_width=0,
             corner_radius=2,
-            bg_color="#fff",
-            fg_color="#ddd",
+            bg_color="#ffffff",
+            fg_color="#dddddd",
             textvariable=self.stringvar,
             font=ctk.CTkFont(family=family_medium),
         )
@@ -193,8 +193,8 @@ class TextBox(GUI):
             master=master,
             width=width,
             height=lines*20,
-            bg_color="#fff", 
-            fg_color="#fff", 
+            bg_color="#ffffff", 
+            fg_color="#ffffff", 
             text_color='#444444', 
             wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
@@ -211,8 +211,8 @@ class TextBox(GUI):
             height=height, 
             border_width=0, 
             corner_radius=4, 
-            bg_color="#fff", 
-            fg_color="#eee", 
+            bg_color="#ffffff", 
+            fg_color="#eeeeee", 
             wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
         )
@@ -250,8 +250,8 @@ class DatePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=2,
-            bg_color="#fff",
-            fg_color="#ddd",
+            bg_color="#ffffff",
+            fg_color="#dddddd",
             values=self.populate_days(),
             variable=self.stringvar_day,
             font=ctk.CTkFont(family=family_medium)
@@ -269,8 +269,8 @@ class DatePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=2,
-            bg_color="#fff",
-            fg_color="#ddd",
+            bg_color="#ffffff",
+            fg_color="#dddddd",
             values=self.populate_months(),
             variable=self.stringvar_month,
             command=self.repopulate_days,
@@ -285,8 +285,8 @@ class DatePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=2,
-            bg_color="#fff",
-            fg_color="#ddd",
+            bg_color="#ffffff",
+            fg_color="#dddddd",
             values=self.populate_years(populate_years_with),
             variable=self.stringvar_year,
             command=self.repopulate_days,
@@ -354,15 +354,15 @@ class DatePicker(GUI):
     # set the date picker back to the current date
     def reset(self) -> None:
         self.stringvar_month.set(self.today.strftime("%b"))
-        self.stringvar_day.set(self.today.strftime("%d"))
+        self.stringvar_day.set(f'{int(self.today.strftime("%d"))}')
         self.stringvar_year.set(self.today.strftime("%Y"))
 
 
     # return a formatted date
     def get(self) -> str:
         m = self.stringvar_month.get()
-        d = self.stringvar_day.get()
-        y = self.stringvar_year.get()
+        d = int(self.stringvar_day.get())
+        y = int(self.stringvar_year.get())
 
         if self.show_day is True:
             return f"{m} {d}, {y}"
@@ -486,21 +486,21 @@ class PaymentSplitter(GUI):
                     year=dt_object.strftime("%Y")
                 )
 
-                component_obj.label.configure(text_color="#000")
-                component_obj.pay_amount.component.configure(fg_color="light green", text_color="#000")
-                component_obj.pay_date.component_day.configure(fg_color="light green", text_color="#000")
-                component_obj.pay_date.component_month.configure(fg_color="light green", text_color="#000")
-                component_obj.pay_date.component_year.configure(fg_color="light green", text_color="#000")
+                component_obj.label.configure(text_color="#000000")
+                component_obj.pay_amount.component.configure(fg_color="light green", text_color="#000000")
+                component_obj.pay_date.component_day.configure(fg_color="light green", text_color="#000000")
+                component_obj.pay_date.component_month.configure(fg_color="light green", text_color="#000000")
+                component_obj.pay_date.component_year.configure(fg_color="light green", text_color="#000000")
 
                 curr_month += 1
 
             if months < curr_month:
                 component_obj.reset()
                 component_obj.label.configure(text_color="#bbb")
-                component_obj.pay_amount.component.configure(fg_color="#ddd", text_color="#aaa")
-                component_obj.pay_date.component_day.configure(fg_color="#ddd", text_color="#aaa")
-                component_obj.pay_date.component_month.configure(fg_color="#ddd", text_color="#aaa")
-                component_obj.pay_date.component_year.configure(fg_color="#ddd", text_color="#aaa")
+                component_obj.pay_amount.component.configure(fg_color="#dddddd", text_color="#aaa")
+                component_obj.pay_date.component_day.configure(fg_color="#dddddd", text_color="#aaa")
+                component_obj.pay_date.component_month.configure(fg_color="#dddddd", text_color="#aaa")
+                component_obj.pay_date.component_year.configure(fg_color="#dddddd", text_color="#aaa")
 
             if curr_month == 12:
                 break
@@ -512,7 +512,7 @@ class PaymentInfo(GUI):
         super().__init__(master, label_text, left_offset, top_offset)
 
         self.pay_amount = Entry(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
-        self.pay_amount.component.configure(width=70, fg_color="#ddd")
+        self.pay_amount.component.configure(width=70, fg_color="#dddddd")
         self.pay_amount.stringvar.set(value="$")
         self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=1)
 
@@ -533,11 +533,11 @@ class PaymentInfo(GUI):
 
 
     def reset(self) -> None:
-        self.label.configure(text_color="black")
-        self.pay_amount.component.configure(fg_color="#ddd", text_color="#000")
-        self.pay_date.component_day.configure(fg_color="#ddd", text_color="#000")
-        self.pay_date.component_month.configure(fg_color="#ddd", text_color="#000")
-        self.pay_date.component_year.configure(fg_color="#ddd", text_color="#000")
+        self.label.configure(text_color="#000000")
+        self.pay_amount.component.configure(fg_color="#dddddd", text_color="#000000")
+        self.pay_date.component_day.configure(fg_color="#dddddd", text_color="#000000")
+        self.pay_date.component_month.configure(fg_color="#dddddd", text_color="#000000")
+        self.pay_date.component_year.configure(fg_color="#dddddd", text_color="#000000")
         self.pay_amount.stringvar.set("$")
         self.pay_date.reset()
 
@@ -661,7 +661,11 @@ class ActionButton():
                 doc = Document(resource_path("assets\\templates\\retainer.docx"))
                 response = write_retainer(doc, app.get_all_components())
 
-                if response == True and datetime.datetime.now().strftime('%b %d, %Y') == app.components.get('payment 1').get('date'):
+                date_now = datetime.datetime.now()
+                date_today = f"{date_now.strftime('%b')} {int(date_now.strftime('%d'))}, {date_now.strftime('%Y')}"
+                date_of_first_payment = app.components.get('payment 1').get('date')
+
+                if response == True and date_today == date_of_first_payment:
                     PromptPopup("The first payment is to be made today. Create receipt?", func=lambda: app.components['Receipts'].lift_app(app.subapp_components['Receipts']))
                     app.focus()
             except Exception as e:
@@ -763,7 +767,7 @@ class TabView():
         self.component = ctk.CTkTabview(
             master=master, 
             corner_radius=4, 
-            fg_color="white", 
+            fg_color="#ffffff", 
             width=parent_width, 
             height=height, 
             segmented_button_fg_color='white', 
@@ -864,7 +868,7 @@ class WindowView():
 
 
 class CellWidget():
-    def __init__(self, master=None, width=0, height=0, text="", text_color="black", fg_color="#fff", info=[], font=None, type='label', command=None, hover_color=None, on_enter=None, on_leave=None) -> None:
+    def __init__(self, master=None, width=0, height=0, text="", text_color="#000000", fg_color="#ffffff", info=[], font=None, type='label', command=None, hover_color=None, on_enter=None, on_leave=None) -> None:
         self.info = info
         self.width = width
         self.height = height
@@ -918,7 +922,7 @@ class CellWidget():
 
 
 class RowWidget():
-    def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_info=None, row_color="#eee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
+    def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_info=None, row_color="#eeeeee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
 
         # no parent means nowhere to put this
         if parent_frame is None:
@@ -930,7 +934,7 @@ class RowWidget():
             else:
                 row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"]
 
-        self.container = ctk.CTkFrame(master=parent_frame, fg_color="white", border_width=0, width=parent_width, height=30)
+        self.container = ctk.CTkFrame(master=parent_frame, fg_color="#ffffff", border_width=0, width=parent_width, height=30)
         self.buttons = []
         self.contents = []
         self.info = {}
@@ -952,12 +956,7 @@ class RowWidget():
             if self.selectable and is_blank is False:
                 table_obj.selected_row = row_contents
                 table_obj.selected_row_info = row_info
-                # table_obj.update()
-                table_obj.unhighlight()
-
-                for c in self.contents:
-                    ic(c.cell.cget('text'))
-                    c.cell.configure(fg_color='#ffd07a')
+                table_obj.update(table_obj.page)
 
         # setup the grid system
         for i in range(len(row_contents)+1):
@@ -970,10 +969,10 @@ class RowWidget():
                 ctk.CTkButton(
                     master=self.container,
                     text=row_contents[i],
-                    text_color="white", 
+                    text_color="#ffffff", 
                     border_width=0,
                     corner_radius=0,
-                    fg_color="black" if row_contents[i] != "" else "light gray",
+                    fg_color="#000000" if row_contents[i] != "" else "light gray",
                     width=(parent_width-61)/table_width,
                     height=38,
                     font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
@@ -995,10 +994,10 @@ class RowWidget():
                         width=(parent_width-61)/table_width, 
                         height=38, 
                         text=content, 
-                        text_color="white" if mode == "header" else "black", 
-                        fg_color="#000" if mode == "header" else row_color, 
+                        text_color="#ffffff" if mode == "header" else "#000000", 
+                        fg_color="#000000" if mode == "header" else row_color, 
                         font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode == "header" else ctk.CTkFont(family=family_medium, size=12),
-                        command=lambda: select_row(),
+                        command=lambda *args: select_row(),
                         on_enter=lambda *args: highlight_row(),
                         on_leave=lambda *args: unhighlight_row(),
                     )
@@ -1067,7 +1066,7 @@ class TableWidget():
 
         self.header_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="white", 
+            fg_color="#ffffff", 
             border_width=0, 
             width=self.parent_width, 
             height=self.parent_height*0.05, 
@@ -1084,7 +1083,7 @@ class TableWidget():
 
         self.table_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="white", 
+            fg_color="#ffffff", 
             border_width=1, 
             width=self.parent_width, 
             height=self.parent_height*0.90, 
@@ -1092,7 +1091,7 @@ class TableWidget():
 
         self.tools_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="white", 
+            fg_color="#ffffff", 
             border_width=0, 
             width=self.parent_width, 
             height=self.parent_height*0.05
@@ -1132,30 +1131,19 @@ class TableWidget():
     def navigate(self, page=0):
 
         if (page == 1):
-            self.tools.buttons[0].configure(fg_color="white", state="disabled", text="")
-            self.tools.buttons[1].configure(fg_color="black", state="normal", text=f"page {page+1} ▶")
+            self.tools.buttons[0].configure(fg_color="#ffffff", state="disabled", text="")
+            self.tools.buttons[1].configure(fg_color="#000000", state="normal", text=f"page {page+1} ▶")
 
         elif (page == math.ceil(len(self.rows)/self.rows_per_page)-1):
-            self.tools.buttons[0].configure(fg_color="black", state="normal", text=f"◀ page {page-1}")
-            self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
+            self.tools.buttons[0].configure(fg_color="#000000", state="normal", text=f"◀ page {page-1}")
+            self.tools.buttons[1].configure(fg_color="#ffffff", state="disabled", text="")
 
         else:
-            self.tools.buttons[0].configure(fg_color="black", state="normal", text=f"◀ page {page-1}")
-            self.tools.buttons[1].configure(fg_color="black", state="normal", text=f"page {page+1} ▶")
-
-        for row in self.rows_rendered:
-            row.cleanup()
+            self.tools.buttons[0].configure(fg_color="#000000", state="normal", text=f"◀ page {page-1}")
+            self.tools.buttons[1].configure(fg_color="#000000", state="normal", text=f"page {page+1} ▶")
 
         self.page=page
-        self.refresh()
         self.update(page=page)
-
-
-    def unhighlight(self):
-        for i, r in enumerate(self.rows_rendered):
-            for c in r.contents:
-                ic(c.cell.cget('text'))
-                c.cell.configure(fg_color="#dddddd" if i % 2==0 else "#eeeeee")
 
 
     def refresh(self):
@@ -1166,7 +1154,7 @@ class TableWidget():
         self.table_frame.destroy()
         self.table_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="white", 
+            fg_color="#ffffff", 
             border_width=1, 
             width=self.parent_width, 
             height=self.parent_height*0.90, 
@@ -1182,7 +1170,7 @@ class TableWidget():
 
         for index in range(self.rows_per_page):
             if (index + page_offset) < len(self.rows):
-                row_colr = "#ddd" if ((index + page_offset) % 2 == 0) else "#eee"
+                row_colr = "#dddddd" if ((index + page_offset) % 2 == 0) else "#eeeeee"
 
                 if (self.rows[index + page_offset].get('row_contents') == self.selected_row):
                     row_colr = '#ffd07a'
@@ -1203,16 +1191,16 @@ class TableWidget():
 
                 # set the next button to be active if the next row is not a blank
                 if (index + page_offset) == len(self.rows) - 1:
-                    self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
+                    self.tools.buttons[1].configure(fg_color="#ffffff", state="disabled", text="")
                 else:
-                    self.tools.buttons[1].configure(fg_color="black", state="normal", text=f"page {page+1} ▶")
+                    self.tools.buttons[1].configure(fg_color="#000000", state="normal", text=f"page {page+1} ▶")
 
             else:
                 RowWidget(
                     parent_frame=self.table_frame, 
                     parent_width=self.parent_width, 
                     row_number=index + page_offset, 
-                    row_color="#ddd" if ((index + page_offset) % 2 == 0) else "#eee",
+                    row_color="#dddddd" if ((index + page_offset) % 2 == 0) else "#eeeeee",
                     is_blank = True,
                     row_contents=[''] * len(self.headers),
                     mode='table', 
@@ -1221,7 +1209,7 @@ class TableWidget():
                 )
 
                 # set the next button to be active if the last row was blank
-                self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
+                self.tools.buttons[1].configure(fg_color="#ffffff", state="disabled", text="")
 
 
     def reset(self) -> None:
@@ -1231,7 +1219,7 @@ class TableWidget():
         self.table_frame.destroy()
         self.table_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="white", 
+            fg_color="#ffffff", 
             border_width=1, 
             width=self.parent_width, 
             height=self.parent_height*0.90, 
@@ -1249,17 +1237,17 @@ class TableWidget():
                 parent_frame=self.table_frame,
                 parent_width=self.parent_width,
                 is_blank=True,
-                row_color="#ddd" if i % 2==0 else "#eee",
+                row_color="#dddddd" if i % 2==0 else "#eeeeee",
                 row_number=i,
                 mode="table",
                 table_obj=self,
                 app=self.app, 
             )
 
-        self.tools.buttons[0].configure(fg_color="white", state="disabled", text="")
+        self.tools.buttons[0].configure(fg_color="#ffffff", state="disabled", text="")
 
         if len(self.rows) <= self.rows_per_page:
-            self.tools.buttons[1].configure(fg_color="white", state="disabled", text="")
+            self.tools.buttons[1].configure(fg_color="#ffffff", state="disabled", text="")
 
 
     def add(self, row_info=None, row_contents=None, row_index=None) -> None:
@@ -1274,7 +1262,7 @@ class TableWidget():
                     'row_number': row_to_update, 
                     'mode': "table", 
                     'row_contents': current_row_contents if not None else [''] * len(self.headers),
-                    'row_color': "#ddd" if (row_to_update % 2 == 0) else "#eee",
+                    'row_color': "#dddddd" if (row_to_update % 2 == 0) else "#eeeeee",
                     'info': current_row_info,
                 }
             )
@@ -1299,7 +1287,8 @@ class TableWidget():
         self.rows = rows_after_removal
         self.next_empty_index -= 1
         self.selected_row = None
-        self.tools.buttons[0].configure(fg_color="white", state="disabled", text="")
+        self.selected_row_info = None
+        self.tools.buttons[0].configure(fg_color="#ffffff", state="disabled", text="")
         self.navigate(page=1)
         self.update()
 

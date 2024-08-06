@@ -1,4 +1,5 @@
 import threading
+from datetime import datetime as dt
 import customtkinter as ctk
 import os
 import names
@@ -145,16 +146,17 @@ def test_button(app):
 
     total_amount = 0
     total_months = random.randint(1,12)
+    now = dt.now()
     for i in range(total_months):
         total_amount += 100
-        app.components[f'payment {i+1}'].set("100", "2024", "Jul", 22+i)
+        app.components[f'payment {i+1}'].set("100", dt.strftime(now, "%Y"), dt.strftime(now, "%b"), int(dt.strftime(now, "%d"))+i)
 
     app.components['application fee'].set(f"${total_amount}", total_months)
 
     random_row_contents = []
     random_row_infos = []
 
-    for i in range(random.randint(5,10)):
+    for i in range(random.randint(15,20)):
         new_row, new_row_info = generate_row_contents(
             app_components=app.components, 
             override_row_content={
@@ -312,8 +314,6 @@ def remove_item_button(app):
         return
 
     cart.remove()
-    cart.selected_row = None
-    cart.selected_row_info = None
     # cart.unhighlight()
 
     update_total_row(cart=cart)
