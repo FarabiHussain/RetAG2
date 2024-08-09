@@ -311,6 +311,16 @@
         }
     },
 
+    "Calendar": {
+        "column_weights": [1,2,0],
+
+        "break 0": {"column": 0, "type": "break", "heading": "FILTERS"},
+        "payment for case ID": {"column": 0, "type": "entry"},
+        "break 1": {"column": 0, "type": "break", "heading": "PURCHASE"},
+        "service": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
+        "calendar": {"column": 1, "type": "table", "headers": ["service", "quantity", "rate", "taxes", "total price"]}
+    },
+
     "Init": {
         "init_app_agreements": "/assets/functions/Agreements.py",
         "init_app_receipts": "/assets/functions/Receipts.py",
