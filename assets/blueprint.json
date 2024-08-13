@@ -311,6 +311,15 @@
         }
     },
 
+    "Payment Dates": {
+        "column_weights": [1,2,0],
+
+        "break 0": {"column": 0, "type": "break", "heading": "SEARCH PAYMENTS BY FILTERS"},
+        "show payments on date": {"column": 0, "type": "datepicker", "show_day":"true"},
+
+        "due payments": {"column": 1, "type": "table", "headers": ["client name", "case type", "contact info", "case ID", "payment made"]}
+    },
+
     "Init": {
         "init_app_agreements": "/assets/functions/Agreements.py",
         "init_app_receipts": "/assets/functions/Receipts.py",
