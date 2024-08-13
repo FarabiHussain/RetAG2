@@ -201,7 +201,7 @@ def write_retainer(doc, components):
     style = doc.styles['Normal']
     font = style.font
     font.name = 'Poppins'
-    font.size = PT(8)
+    font.size = PT(7)
 
     # formats the list of data so that it can be displayed on the output document
     def format_payments():
