@@ -75,33 +75,32 @@ def read_case_id(get_next=True):
     heading_line = []
     indexes = {}
 
+    if os.path.exists(records_file):
+        try:
+            with open(records_file, 'r') as log_file:
+                readlines = log_file.readlines()
 
-    # fix this to use CSV columns instead of split()
-    try:
-        with open(records_file, 'r') as log_file:
-            readlines = log_file.readlines()
+                if len(readlines) == 1:
+                    return case_id
 
-            if len(readlines) == 1:
-                return case_id
+                heading_line = readlines[0]
+                prev_case_id = readlines[-1]
 
-            heading_line = readlines[0]
-            prev_case_id = readlines[-1]
+            for i, column_name in enumerate(heading_line.split(',')):
+                indexes[column_name] = i
 
-        for i, column_name in enumerate(heading_line.split(',')):
-            indexes[column_name] = i
+            prev_case_id = prev_case_id.split(",")[indexes['case_id']]
+            prev_timestamp = (prev_case_id.split('-')[0])
+            prev_number = (prev_case_id.split('-')[1])
 
-        prev_case_id = prev_case_id.split(",")[indexes['case_id']]
-        prev_timestamp = (prev_case_id.split('-')[0])
-        prev_number = (prev_case_id.split('-')[1])
+            if curr_timestamp == prev_timestamp:
+                curr_number = "{:03}".format(int(prev_number) + (1 if get_next else 0))
+            else:
+                curr_number = "001"
 
-        if curr_timestamp == prev_timestamp:
-            curr_number = "{:03}".format(int(prev_number) + (1 if get_next else 0))
-        else:
-            curr_number = "001"
+            case_id = f"{curr_timestamp}-{curr_number}"
 
-        case_id = f"{curr_timestamp}-{curr_number}"
-
-    except Exception as e:
-        print(f"Error when reading ID, returning {case_id}\n\n{e}")
+        except Exception as e:
+            print(f"Error when reading ID, returning {case_id}\n\n{e}")
 
     return case_id
