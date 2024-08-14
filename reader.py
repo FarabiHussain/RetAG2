@@ -50,6 +50,7 @@ def import_function(function_path=None, function_name=None) -> str:
 
     return getattr(module_name, function_name, lambda: None)
 
+
 # read records.csv to retrieve the last created receipt id
 def read_receipt_id():
     records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\receipts')
@@ -66,6 +67,7 @@ def read_receipt_id():
         print("no existing IDs - starting with ID 1")
 
     return 0
+
 
 # read agreements.csv to retrieve the last created id
 def read_case_id(get_next=True):
