@@ -20,7 +20,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
-        self.version = "v2.0.18"
+        self.version = "v2.0.19"
         self.root.title(f"AMCAIM Toolbox {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}

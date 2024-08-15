@@ -25,6 +25,9 @@ def write_payments(doc, components):
     font.name = 'Poppins'
     font.size = PT(8)
 
+    case_id = components['case ID'].get().strip()
+    case_type = components['application type'].get().strip()
+
     client_info_top = [
         {
             "label": "first name",
@@ -83,14 +86,27 @@ def write_payments(doc, components):
     ]
 
     payment_info = []
+    payment_rows = []
+
     for i in range(12):
         curr_amount = "N/A"
         curr_date = "N/A"
 
-        if (components[f"payment {i+1}"].get('amount')) > 0:
+        if components[f"payment {i+1}"].get('amount') > 0:
             curr_amount = float(components[f"payment {i+1}"].get('amount')) * tax_multiplier
             curr_amount = "${:.2f}".format(curr_amount)
             curr_date = components[f"payment {i+1}"].get('date')
+
+            payment_rows.append(
+                {
+                    'case_id': case_id,
+                    'client_1_name': f'{components["client 1 first name"].get()} {components["client 1 last name"].get()}',
+                    'client_1_phone': components["client 1 phone"].get(),
+                    'payment_amount': curr_amount,
+                    'payment_date': curr_date.replace(",", "").replace(" ", "-"),
+                    'payment_made': 'Unpaid',
+                }
+            )
 
         payment_info.append(
             {
@@ -100,6 +116,8 @@ def write_payments(doc, components):
                 "info_r": curr_date,
             }
         )
+
+    ic(payment_rows)
 
     insert_2col_table(document=doc, table_heading="Client Information".upper(), table_items=client_info_top)
     insert_2col_table(document=doc, table_heading="\n\nCard Information".upper(), table_items=card_info_2col)
@@ -121,13 +139,15 @@ def write_payments(doc, components):
         installments = components['application fee'].get('months')
 
         write_file_to_history(
-            case_id=components['case ID'].get().strip(), 
+            case_id=case_id, 
             document_type='Payment Authorization', 
             timestamp=timestamp, 
             remarks=f'{application_fee} in {installments} months',
             client_name=components.get('client name').get().strip(), 
             filename=output_filename, 
         )
+
+        write_payments_to_history(payment_rows)
 
 
 def write_receipt(doc, components):
@@ -417,7 +437,7 @@ def write_invitation(doc, components):
         if f'[HOST{host_number}_NAME]' in document_data:
             insert_2col_table(
                 document=doc, 
-                table_heading="\nMy details are as follows," if "1" == host_number else f"\n\nMy {document_data.get('[HOST2_RELATION_TO_HOST1]', '')}'s details are as follows,", 
+                table_heading="\nMy details are as follows," if host_number == 1 else f"\n\nMy {document_data.get('[HOST2_RELATION_TO_HOST1]', '')}'s details are as follows,", 
                 table_items=[
                     {"label": "Full Name", "info": document_data[f'[HOST{host_number}_NAME]']},
                     {"label": "Date of Birth", "info": document_data[f'[HOST{host_number}_BIRTH]']},
@@ -615,6 +635,22 @@ def write_agreement_to_history(app_components=None):
 
         sorted_lines += ["\n" + (',').join(history_entry)]
         history.write(('').join(sorted_lines))
+
+
+def write_payments_to_history(payment_rows=[]):
+    check_history_dir_and_file(
+        check_dir=f'{os.getcwd()}\\write\\', 
+        check_file='installments.csv', 
+        csv_columns=(['case_id', 'client_name', 'contact_info', 'payment_amount', 'payment_date', 'payment_made'])
+    )
+
+    try:
+        with open(f"{os.getcwd()}\\write\\installments.csv", "a+") as history:
+            for row in payment_rows:
+                history.write((',').join(row.values()) + "\n")
+    except Exception as e:
+        print(e)
+        ErrorPopup(str(e))
 
 
 def write_receipt_to_history(doc_id="", client_name="", case_id=""):

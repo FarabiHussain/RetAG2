@@ -15,7 +15,7 @@ from reader import read_file_as_list, read_case_id
 from writer import remove_file_from_history, write_imm5476, write_invitation, write_payments, overwrite_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
-from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, reset_button, search_files_button, test_button, decrypt_button
+from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, reset_button, search_files_button, search_payments_button, test_button, decrypt_button
 import json
 
 family_medium="Roboto Bold"
@@ -716,6 +716,8 @@ class ActionButton():
         elif (action == "remove item"): remove_item_button(app)
 
         elif (action == "search files"): search_files_button(app)
+
+        elif (action == "search payments"): search_payments_button(app)
 
         elif (action == "open selected"):
             searched_filepath, searched_filename = self.find_file(app=app)

@@ -19,6 +19,7 @@ def get_recent() -> dict:
             return last_row
 
 
+# reads the passed file and returns it as a list
 def read_file_as_list(filename='agreements.csv') -> list:
     history_dir = f"{os.getcwd()}\\write\\"
     filepath = f'{history_dir}\\{filename}{'.csv' if '.csv' not in filename else ''}'
@@ -37,6 +38,7 @@ def read_file_as_list(filename='agreements.csv') -> list:
     return history
 
 
+# imports a function pointed by a path
 def import_function(function_path=None, function_name=None) -> str:
     if function_path is None or function_name is None:
         return

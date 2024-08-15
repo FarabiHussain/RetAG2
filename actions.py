@@ -234,6 +234,40 @@ def search_files_button(app):
     )
 
 
+def search_payments_button(app):
+    search_in_date = app.components['show payments on date'].get().replace(",", "").replace(" ", "-")
+    payment_status = app.components['payment status'].get()
+    payments_table = app.components.get('due payments')
+    row_contents = []
+    row_infos = []
+    payment_entries = []
+
+    if os.path.exists((f'{os.getcwd()}\\write\\installments.csv').replace('\\write\\write', '\\installments')):
+        payment_entries = read_file_as_list(filename='installments.csv')
+
+    for entry in payment_entries:
+        if entry.get('payment_date') == search_in_date:
+            new_row = {
+                'case_id': entry.get('case_id'),
+                'client_name': entry.get('client_name'),
+                'contact_info': entry.get('contact_info'),
+                'payment_amount': entry.get('payment_amount'),
+                'payment_made': entry.get('payment_made'),
+            }
+
+            if payment_status == "All" or payment_status == entry.get('payment_made'):
+                row_contents.append(new_row)
+                row_infos.append(entry)
+
+    payments_table.reset()
+    if len(row_contents) > 0:
+        for index in range(len(row_contents)):
+            payments_table.add(
+                row_contents=[row_contents[index].values()],
+                row_info=[row_infos[index]],
+            )
+
+
 def generate_row_contents(quantity_offset=None, app_components=None, override_row_content={}):
     if app_components is None:
         return (None, None)
