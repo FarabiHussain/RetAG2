@@ -1252,7 +1252,7 @@ class TableWidget():
             self.tools.buttons[1].configure(fg_color="#ffffff", state="disabled", text="")
 
 
-    def add(self, row_info=None, row_contents=None, row_index=None) -> None:
+    def add(self, row_info=[], row_contents=[], row_index=None) -> None:
         for current_row_info, current_row_contents in zip(row_info, row_contents):
 
             row_to_update = row_index if row_index is not None else self.next_empty_index
@@ -1275,7 +1275,6 @@ class TableWidget():
             else:
                 self.rows[row_index] = new_row
 
-        # self.update()
         self.update(page=self.page)
 
 

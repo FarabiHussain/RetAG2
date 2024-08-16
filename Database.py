@@ -5,6 +5,14 @@ class Database:
         self.database = sqlite3.connect(".\\write\\retag.db")
         self.cursor = self.database.cursor()
 
+        def dict_factory(cursor, row):
+            d = {}
+            for idx, col in enumerate(cursor.description):
+                d[col[0]] = row[idx]
+            return d
+        
+        self.dict_factory = dict_factory
+
     def close(self):
         self.database.close()
 
@@ -18,9 +26,10 @@ class Database:
                     case_id TEXT, 
                     client_name TEXT, 
                     contact_info TEXT, 
-                    payment_amount REAL, 
+                    payment_amount TEXT, 
                     payment_date TEXT, 
-                    payment_made INTEGER
+                    payment_made INTEGER,
+                    filename TEXT
                 );
             '''
         )
@@ -28,12 +37,12 @@ class Database:
         self.cursor.execute(
             '''
                 CREATE TABLE IF NOT EXISTS receipts (
+                    receipt_id TEXT,
                     case_id TEXT, 
                     created_by TEXT, 
                     client_name TEXT, 
                     created_date INTEGER, 
-                    document_type TEXT, 
-                    document_id TEXT
+                    filename TEXT
                 );
             '''
         )
@@ -68,7 +77,8 @@ class Database:
                     application_fee REAL, 
                     created_date INTEGER, 
                     date_on_document INTEGER, 
-                    add_taxes INTEGER
+                    add_taxes INTEGER,
+                    filename TEXT
                 );
             '''
         )

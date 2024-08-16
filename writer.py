@@ -28,6 +28,12 @@ def write_payments(doc, components):
 
     case_id = components['case ID'].get().strip()
     case_type = components['application type'].get().strip()
+    timestamp_obj = datetime.datetime.now()
+    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
+    formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
+    client_name = f'{components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()}'
+    output_filename = f"[{formatted_timestamp}] {components['case ID'].get().strip()} - Payments - {client_name}"
+    tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
 
     client_info_top = [
         {
@@ -75,8 +81,6 @@ def write_payments(doc, components):
         },
     ]
 
-    tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
-
     payment_summary = [
         {
             "label_l": "Total of".rjust(10),
@@ -103,9 +107,10 @@ def write_payments(doc, components):
                     'case_id': case_id,
                     'client_1_name': f'{components["client 1 first name"].get()} {components["client 1 last name"].get()}',
                     'client_1_phone': components["client 1 phone"].get(),
-                    'payment_amount': curr_amount_float,
-                    'payment_date': datetime.datetime.strftime(datetime.datetime.strptime(curr_date, "%b %d, %Y"), "%Y%B%d"),
-                    'payment_made': '0',
+                    'payment_amount': curr_amount,
+                    'payment_date': datetime.datetime.strftime(datetime.datetime.strptime(curr_date, "%b %d, %Y"), "%Y%m%d"),
+                    'payment_made': 0,
+                    'filename': output_filename,
                 }
             )
 
@@ -124,29 +129,30 @@ def write_payments(doc, components):
     insert_4col_table(document=doc, table_heading="Payment Information (including applicable GST and PST)".upper(), table_items=payment_summary)
     insert_4col_table(document=doc, table_heading="", table_items=payment_info)
 
-    client_name = f'{components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()}'
-
-    timestamp_obj = datetime.datetime.now()
-    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
-    formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
-
-    output_filename = f"[{formatted_timestamp}] {components['case ID'].get().strip()} - Payments - {client_name}"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
         application_fee = "${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)
         installments = components['application fee'].get('months')
 
-        write_file_to_history(
-            case_id=case_id, 
-            document_type='Payment Authorization', 
-            timestamp=timestamp, 
-            remarks=f'{application_fee} in {installments} months',
-            client_name=components.get('client name').get().strip(), 
-            filename=output_filename, 
+        write_to_database(
+            'files',
+            (
+                case_id, 
+                os.environ['COMPUTERNAME'],
+                components.get('client name').get().strip(), 
+                formatted_timestamp, 
+                'Payment Authorization', 
+                output_filename, 
+                f'{application_fee} in {installments} months'
+            )
         )
 
-        write_payments_to_history(payment_rows)
+        rows_to_write = []
+        for row in payment_rows:
+            rows_to_write.append(tuple(row.values()))
+
+        write_to_database('installments', rows_to_write)
 
 
 def write_receipt(doc, components):
@@ -177,12 +183,10 @@ def write_receipt(doc, components):
 
     receipt_id = "{:010}".format((read_receipt_id() + 1))
     client_name = components.get('client name').get().strip()
-
     timestamp_obj = datetime.datetime.now()
     timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
-
-    filename = f"[{formatted_timestamp}] {case_id} - Receipt {receipt_id} - {client_name}"
+    output_filename = f"[{formatted_timestamp}] {case_id} - Receipt {receipt_id} - {client_name}"
 
     printed_rows = 0
     rows_per_page = 7
@@ -196,19 +200,24 @@ def write_receipt(doc, components):
             doc.add_page_break()
 
     insert_totals_table(doc, cart_items)
-    response = save_doc(doc=doc, components=components, folder_name='receipts', override_output_filename=filename)
+    response = save_doc(doc=doc, components=components, folder_name='receipts', override_output_filename=output_filename)
 
     if response:
-        write_receipt_to_history(receipt_id, client_name, components.get('case ID').get())
 
-        write_file_to_history(
-            case_id=case_id if len(case_id) > 0 else "000000-000", 
-            document_type='Payment Receipt', 
-            timestamp=timestamp, 
-            remarks=f'#{receipt_id} ({"${:.2f}".format(total)})',
-            client_name=components.get('client name').get().strip(),
-            filename=filename
+        write_to_database(
+            'files',
+            (
+                case_id, 
+                os.environ['COMPUTERNAME'],
+                components.get('client name').get().strip(), 
+                formatted_timestamp, 
+                'Payment Receipt', 
+                output_filename, 
+                f'#{receipt_id} ({"${:.2f}".format(total)})'
+            )
         )
+
+        write_to_database('receipts', (receipt_id, case_id, os.environ['COMPUTERNAME'], client_name, formatted_timestamp, output_filename))
 
 
 def write_retainer(doc, components):
@@ -289,13 +298,17 @@ def write_retainer(doc, components):
     if response:
         write_agreement_to_history(components)
 
-        write_file_to_history(
-            case_id=case_id, 
-            document_type='Retainer Agreement', 
-            timestamp=timestamp, 
-            remarks=f'{components['application type'].get()} ({"${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)})',
-            client_name=components.get('client name').get().strip(), 
-            filename=output_filename, 
+        write_to_database(
+            'files',
+            (
+                case_id, 
+                os.environ['COMPUTERNAME'],
+                components.get('client name').get().strip(), 
+                formatted_timestamp, 
+                'Retainer Agreement', 
+                output_filename, 
+                f'{components['application type'].get()} ({"${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)})'
+            )
         )
 
         components['service'].set(components['application type'].get())
@@ -347,13 +360,18 @@ def write_conduct(doc, components):
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
-        write_file_to_history(
-            case_id=components['case ID'].get().strip(), 
-            document_type='Code of Conduct', 
-            timestamp=timestamp, 
-            remarks=components['application type'].get(),
-            client_name=components.get('client name').get().strip(),
-            filename=output_filename, 
+
+        write_to_database(
+            'files',
+            (
+                case_id, 
+                os.environ['COMPUTERNAME'],
+                components.get('client name').get().strip(), 
+                formatted_timestamp, 
+                'Code of Conduct', 
+                output_filename, 
+                components['application type'].get()
+            )
         )
 
 
@@ -495,13 +513,17 @@ def write_invitation(doc, components):
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='invitations')
 
     if response:
-        write_file_to_history(
-            case_id='000000-000', 
-            document_type='Invitation Letter', 
-            timestamp=timestamp, 
-            remarks=components['application type'].get(),
-            client_name = components.get('client name').get().strip(),
-            filename=output_filename, 
+        write_to_database(
+            'files',
+            (
+                '000000-000', 
+                os.environ['COMPUTERNAME'],
+                components.get('client name').get().strip(), 
+                formatted_timestamp, 
+                'Invitation Letter', 
+                output_filename, 
+                components['application type'].get()
+            )
         )
 
 
@@ -554,13 +576,17 @@ def write_imm5476(doc, components):
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='imm5476')
 
     if response:
-        write_file_to_history(
-            case_id=components['case ID'].get().strip(), 
-            document_type='Use of Representative', 
-            timestamp=timestamp, 
-            remarks=components['application type'].get(),
-            client_name = components.get('client name').get().strip(),
-            filename=output_filename, 
+        write_to_database(
+            'files',
+            (
+                case_id, 
+                os.environ['COMPUTERNAME'],
+                components.get('client name').get().strip(), 
+                formatted_timestamp, 
+                'Use of Representative', 
+                output_filename, 
+                components['application type'].get()
+            )
         )
 
 
@@ -664,6 +690,20 @@ def get_prompt_response(prompt="") -> str:
 # =========================================================================================================================================
 
 
+def questionmarks(rows):
+    columns = len(rows[0])
+    temp = []
+
+    if isinstance(rows, tuple):
+        columns = len(rows)
+
+    for _ in range(columns):
+        temp.append("?")
+
+    temp = f"({(', ').join(temp)})"
+    return temp
+
+
 def write_agreement_to_history(app_components=None):
 
     if app_components is None:
@@ -724,73 +764,20 @@ def write_agreement_to_history(app_components=None):
         history.write(('').join(sorted_lines))
 
 
-def write_payments_to_history(payment_rows=[]):
-    try:
-        rows_to_write = []
-        for row in payment_rows:
-            rows_to_write.append(tuple(row.values()))
+def write_to_database(table_name, rows_to_write):
+    query_to_execute = f"INSERT INTO {table_name} VALUES {questionmarks(rows_to_write)}"
 
+    try:
         db = Database()
-        db.cursor.executemany("INSERT INTO installments VALUES (?, ?, ?, ?, ?, ?)", rows_to_write)
+
+        if isinstance(rows_to_write, list):
+            db.cursor.executemany(query_to_execute, rows_to_write)
+
+        elif isinstance(rows_to_write, tuple):
+            db.cursor.execute(query_to_execute, rows_to_write)
+
         db.commit()
         db.close()
-
     except Exception as e:
         print(e)
         ErrorPopup(str(e))
-
-
-def write_receipt_to_history(doc_id="", client_name="", case_id=""):
-    client_name = client_name.strip()
-
-    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'receipts.csv', (['case_id', 'created_by', 'created_date', 'document_id', 'client_name']))
-
-    records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\receipts')
-    doc_id = str('[{:010}]'.format(doc_id))
-    timestamp = datetime.datetime.now().strftime("[%d/%m/%Y-%H:%M:%I]")
-
-    try:
-        with open(records_file, 'a') as log_file:
-            log_file.write((",").join([case_id, os.environ['COMPUTERNAME'], timestamp, doc_id, client_name]))
-            log_file.write("\n")
-    except Exception as e:
-        print(e)
-
-
-def write_file_to_history(case_id="", document_type="", timestamp="", remarks="", client_name="", filename="") -> bool:
-    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
-    records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
-
-    try:
-        with open(records_file, 'r') as log_file:
-            all_lines = log_file.readlines()
-            prev_entry_list = all_lines[-1].strip().split(',')
-
-            new_entry_list = [case_id, document_type, os.environ['COMPUTERNAME'], timestamp, remarks, client_name, filename]
-            header_columns = all_lines[0].strip().split(',')
-            new_entry_dict = {}
-            prev_entry_dict = {}
-
-            for idx, col in enumerate(header_columns):
-                if col == 'created_date':
-                    continue
-
-                new_entry_dict[col] = new_entry_list[idx]
-                prev_entry_dict[col] = prev_entry_list[idx]
-
-            new_entry_string = (",").join(new_entry_list)
-
-        if(new_entry_dict == prev_entry_dict):
-            with open(records_file, 'w') as log_file:
-                all_lines = all_lines[0:-1]
-                log_file.writelines(all_lines)
-                log_file.write(new_entry_string+'\n')
-
-        else:
-            with open(records_file, 'a') as log_file:
-                log_file.write(new_entry_string+'\n')
-    except Exception as e:
-        print(e)
-        return False
-
-    return True

@@ -56,13 +56,17 @@ for i, subapp_name in enumerate(blueprint):
 
 if "--test" in sys.argv:
     test_button(app)
-    subapp_components[4]['subapp_obj'].lift_app(subapp_components)
+    # subapp_components[4]['subapp_obj'].lift_app(subapp_components)
     pass
 
 
 def on_closing():
-    if messagebox.askokcancel("Quit", "Do you want to quit?"):
-        Database.close()
+    if "--test" in sys.argv:
+        Database().close()
+        app.root.destroy()
+    
+    elif messagebox.askokcancel("Quit", "Do you want to quit?"):
+        Database().close()
         app.root.destroy()
 
 
