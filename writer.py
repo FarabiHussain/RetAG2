@@ -9,6 +9,7 @@ from Doc import *
 from icecream import ic
 from base64 import urlsafe_b64encode as b64e, urlsafe_b64decode as b64d
 from reader import read_case_id, read_receipt_id
+from Database import Database
 
 
 def obscure(unobscured: str) -> str:
@@ -93,8 +94,8 @@ def write_payments(doc, components):
         curr_date = "N/A"
 
         if components[f"payment {i+1}"].get('amount') > 0:
-            curr_amount = float(components[f"payment {i+1}"].get('amount')) * tax_multiplier
-            curr_amount = "${:.2f}".format(curr_amount)
+            curr_amount_float = float(components[f"payment {i+1}"].get('amount')) * tax_multiplier
+            curr_amount = "${:.2f}".format(curr_amount_float)
             curr_date = components[f"payment {i+1}"].get('date')
 
             payment_rows.append(
@@ -102,9 +103,9 @@ def write_payments(doc, components):
                     'case_id': case_id,
                     'client_1_name': f'{components["client 1 first name"].get()} {components["client 1 last name"].get()}',
                     'client_1_phone': components["client 1 phone"].get(),
-                    'payment_amount': curr_amount,
-                    'payment_date': curr_date.replace(",", "").replace(" ", "-"),
-                    'payment_made': 'Unpaid',
+                    'payment_amount': curr_amount_float,
+                    'payment_date': datetime.datetime.strftime(datetime.datetime.strptime(curr_date, "%b %d, %Y"), "%Y%B%d"),
+                    'payment_made': '0',
                 }
             )
 
@@ -116,8 +117,6 @@ def write_payments(doc, components):
                 "info_r": curr_date,
             }
         )
-
-    ic(payment_rows)
 
     insert_2col_table(document=doc, table_heading="Client Information".upper(), table_items=client_info_top)
     insert_2col_table(document=doc, table_heading="\n\nCard Information".upper(), table_items=card_info_2col)
@@ -577,140 +576,6 @@ def overwrite_placeholders(doc, document_data):
         print(e)
 
 
-def write_agreement_to_history(app_components=None):
-
-    if app_components is None:
-        return
-
-    csv_columns = ['case_id', 'created_by', 'created_date', 'document_type', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
-
-    # set up csv_columns
-    for i in range(1,13):
-        csv_columns.append(f"amount_{str(i)}")
-        csv_columns.append(f"date_{str(i)}")
-
-    check_history_dir_and_file(f"{os.getcwd()}\\write", "agreements.csv", csv_columns)
-
-    # things to enter into the new entry
-    history_entry = [app_components['case ID'].get().strip()]
-    history_entry.append(os.environ['COMPUTERNAME'])
-    history_entry.append(str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")))
-    history_entry.append('Retainer Agreement')
-    history_entry.append(app_components.get('date on document').get())
-    history_entry.append(f"{app_components.get('client 1 first name').get().strip()} {app_components.get('client 1 last name').get().strip()}".strip())
-    history_entry.append(app_components.get('client 1 email').get().strip())
-    history_entry.append(app_components.get('client 1 phone').get().strip())
-    history_entry.append(f"{app_components.get('client 2 first name').get().strip()} {app_components.get('client 2 last name').get().strip()}".strip())
-    history_entry.append(app_components.get('client 2 email').get().strip())
-    history_entry.append(app_components.get('client 2 phone').get().strip())
-    history_entry.append(app_components.get('application type').get())
-    history_entry.append(app_components.get('application fee').get('amount'))
-    history_entry.append(app_components.get('add taxes').get())
-
-    for i in range(1,13):
-        current_amount = (app_components.get(f'payment {i}').get('amount'))
-        current_date = (app_components.get(f'payment {i}').get('date'))
-
-        if int(current_amount) == 0:
-            history_entry.append("")
-            history_entry.append("")
-            continue
-
-        history_entry.append(str(current_amount))
-        history_entry.append(str(current_date))
-
-    # remove commas from strings as it interferes with the csv
-    for index, col in enumerate(history_entry):
-        history_entry[index] = re.sub("[,]\\s*", "_", str(col))
-
-    with open(f"{os.getcwd()}\\write\\agreements.csv", "r") as history:
-        readlines = history.readlines()
-
-    with open(f"{os.getcwd()}\\write\\agreements.csv", "a+") as history:
-        readlines = history.readlines()
-        sorted_lines = []
-
-        if len(readlines) > 1:
-            sorted_lines = [readlines[0]] + sorted(readlines[1:])
-
-        sorted_lines += ["\n" + (',').join(history_entry)]
-        history.write(('').join(sorted_lines))
-
-
-def write_payments_to_history(payment_rows=[]):
-    check_history_dir_and_file(
-        check_dir=f'{os.getcwd()}\\write\\', 
-        check_file='installments.csv', 
-        csv_columns=(['case_id', 'client_name', 'contact_info', 'payment_amount', 'payment_date', 'payment_made'])
-    )
-
-    try:
-        with open(f"{os.getcwd()}\\write\\installments.csv", "a+") as history:
-            for row in payment_rows:
-                history.write((',').join(row.values()) + "\n")
-    except Exception as e:
-        print(e)
-        ErrorPopup(str(e))
-
-
-def write_receipt_to_history(doc_id="", client_name="", case_id=""):
-    client_name = client_name.strip()
-
-    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'receipts.csv', (['case_id', 'created_by', 'created_date', 'document_id', 'client_name']))
-
-    records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\receipts')
-    doc_id = str('[{:010}]'.format(doc_id))
-    timestamp = datetime.datetime.now().strftime("[%d/%m/%Y-%H:%M:%I]")
-
-    try:
-        with open(records_file, 'a') as log_file:
-            log_file.write((",").join([case_id, os.environ['COMPUTERNAME'], timestamp, doc_id, client_name]))
-            log_file.write("\n")
-
-    except Exception as e:
-        print(e)
-
-
-def write_file_to_history(case_id="", document_type="", timestamp="", remarks="", client_name="", filename="") -> bool:
-    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
-    records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
-
-    try:
-        with open(records_file, 'r') as log_file:
-            all_lines = log_file.readlines()
-            prev_entry_list = all_lines[-1].strip().split(',')
-
-            new_entry_list = [case_id, document_type, os.environ['COMPUTERNAME'], timestamp, remarks, client_name, filename]
-            header_columns = all_lines[0].strip().split(',')
-            new_entry_dict = {}
-            prev_entry_dict = {}
-
-            for idx, col in enumerate(header_columns):
-                if col == 'created_date':
-                    continue
-
-                new_entry_dict[col] = new_entry_list[idx]
-                prev_entry_dict[col] = prev_entry_list[idx]
-
-            new_entry_string = (",").join(new_entry_list)
-
-        if(new_entry_dict == prev_entry_dict):
-            with open(records_file, 'w') as log_file:
-                all_lines = all_lines[0:-1]
-                log_file.writelines(all_lines)
-                log_file.write(new_entry_string+'\n')
-
-        else:
-            with open(records_file, 'a') as log_file:
-                log_file.write(new_entry_string+'\n')
-
-    except Exception as e:
-        print(e)
-        return False
-
-    return True
-
-
 def remove_file_from_history(filename) -> bool:
     check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
     records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
@@ -792,3 +657,140 @@ def get_prompt_response(prompt="") -> str:
     response = chat_session.send_message(prompt)
 
     return(response.text)
+
+
+# =========================================================================================================================================
+# =========================================================================================================================================
+# =========================================================================================================================================
+
+
+def write_agreement_to_history(app_components=None):
+
+    if app_components is None:
+        return
+
+    csv_columns = ['case_id', 'created_by', 'created_date', 'document_type', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
+
+    # set up csv_columns
+    for i in range(1,13):
+        csv_columns.append(f"amount_{str(i)}")
+        csv_columns.append(f"date_{str(i)}")
+
+    check_history_dir_and_file(f"{os.getcwd()}\\write", "agreements.csv", csv_columns)
+
+    # things to enter into the new entry
+    history_entry = [app_components['case ID'].get().strip()]
+    history_entry.append(os.environ['COMPUTERNAME'])
+    history_entry.append(str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")))
+    history_entry.append('Retainer Agreement')
+    history_entry.append(app_components.get('date on document').get())
+    history_entry.append(f"{app_components.get('client 1 first name').get().strip()} {app_components.get('client 1 last name').get().strip()}".strip())
+    history_entry.append(app_components.get('client 1 email').get().strip())
+    history_entry.append(app_components.get('client 1 phone').get().strip())
+    history_entry.append(f"{app_components.get('client 2 first name').get().strip()} {app_components.get('client 2 last name').get().strip()}".strip())
+    history_entry.append(app_components.get('client 2 email').get().strip())
+    history_entry.append(app_components.get('client 2 phone').get().strip())
+    history_entry.append(app_components.get('application type').get())
+    history_entry.append(app_components.get('application fee').get('amount'))
+    history_entry.append(app_components.get('add taxes').get())
+
+    for i in range(1,13):
+        current_amount = (app_components.get(f'payment {i}').get('amount'))
+        current_date = (app_components.get(f'payment {i}').get('date'))
+
+        if int(current_amount) == 0:
+            history_entry.append("")
+            history_entry.append("")
+            continue
+
+        history_entry.append(str(current_amount))
+        history_entry.append(str(current_date))
+
+    # remove commas from strings as it interferes with the csv
+    for index, col in enumerate(history_entry):
+        history_entry[index] = re.sub("[,]\\s*", "_", str(col))
+
+    with open(f"{os.getcwd()}\\write\\agreements.csv", "r") as history:
+        readlines = history.readlines()
+
+    with open(f"{os.getcwd()}\\write\\agreements.csv", "a+") as history:
+        readlines = history.readlines()
+        sorted_lines = []
+
+        if len(readlines) > 1:
+            sorted_lines = [readlines[0]] + sorted(readlines[1:])
+
+        sorted_lines += ["\n" + (',').join(history_entry)]
+        history.write(('').join(sorted_lines))
+
+
+def write_payments_to_history(payment_rows=[]):
+    try:
+        rows_to_write = []
+        for row in payment_rows:
+            rows_to_write.append(tuple(row.values()))
+
+        db = Database()
+        db.cursor.executemany("INSERT INTO installments VALUES (?, ?, ?, ?, ?, ?)", rows_to_write)
+        db.commit()
+        db.close()
+
+    except Exception as e:
+        print(e)
+        ErrorPopup(str(e))
+
+
+def write_receipt_to_history(doc_id="", client_name="", case_id=""):
+    client_name = client_name.strip()
+
+    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'receipts.csv', (['case_id', 'created_by', 'created_date', 'document_id', 'client_name']))
+
+    records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\receipts')
+    doc_id = str('[{:010}]'.format(doc_id))
+    timestamp = datetime.datetime.now().strftime("[%d/%m/%Y-%H:%M:%I]")
+
+    try:
+        with open(records_file, 'a') as log_file:
+            log_file.write((",").join([case_id, os.environ['COMPUTERNAME'], timestamp, doc_id, client_name]))
+            log_file.write("\n")
+    except Exception as e:
+        print(e)
+
+
+def write_file_to_history(case_id="", document_type="", timestamp="", remarks="", client_name="", filename="") -> bool:
+    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
+    records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
+
+    try:
+        with open(records_file, 'r') as log_file:
+            all_lines = log_file.readlines()
+            prev_entry_list = all_lines[-1].strip().split(',')
+
+            new_entry_list = [case_id, document_type, os.environ['COMPUTERNAME'], timestamp, remarks, client_name, filename]
+            header_columns = all_lines[0].strip().split(',')
+            new_entry_dict = {}
+            prev_entry_dict = {}
+
+            for idx, col in enumerate(header_columns):
+                if col == 'created_date':
+                    continue
+
+                new_entry_dict[col] = new_entry_list[idx]
+                prev_entry_dict[col] = prev_entry_list[idx]
+
+            new_entry_string = (",").join(new_entry_list)
+
+        if(new_entry_dict == prev_entry_dict):
+            with open(records_file, 'w') as log_file:
+                all_lines = all_lines[0:-1]
+                log_file.writelines(all_lines)
+                log_file.write(new_entry_string+'\n')
+
+        else:
+            with open(records_file, 'a') as log_file:
+                log_file.write(new_entry_string+'\n')
+    except Exception as e:
+        print(e)
+        return False
+
+    return True

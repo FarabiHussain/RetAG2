@@ -6,6 +6,8 @@ from App import *
 from Subapps import *
 from reader import *
 from RenderFont import RenderFont
+from tkinter import messagebox
+from Database import Database
 
 imgs = Img("md")
 app = App()
@@ -57,4 +59,12 @@ if "--test" in sys.argv:
     subapp_components[4]['subapp_obj'].lift_app(subapp_components)
     pass
 
+
+def on_closing():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        Database.close()
+        app.root.destroy()
+
+
+app.root.protocol("WM_DELETE_WINDOW", on_closing)
 app.start()

@@ -2,11 +2,9 @@ import customtkinter as ctk
 import os
 import json
 import GUI
-from dotenv import load_dotenv
+from Database import Database
 from Path import *
 from icecream import ic
-from pprint import pprint
-from tkinter import font
 
 
 
@@ -28,6 +26,9 @@ class App():
         self.buttons = {}
         self.windows = {}
         self.app_icon_passed = self.__check_app_ico()
+
+        db = Database()
+        db.init_tables()
 
 
     def __check_app_ico(self) -> bool:
