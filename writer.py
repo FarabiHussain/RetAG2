@@ -20,16 +20,15 @@ def unobscure(obscured: str) -> str:
     return zlib.decompress(b64d(str.encode(obscured))).decode()
 
 
-def write_payments(doc, components):
+def write_payment_auth(doc, components):
     style = doc.styles['Normal']
     font = style.font
     font.name = 'Poppins'
     font.size = PT(8)
 
+    payment_info = []
     case_id = components['case ID'].get().strip()
-    case_type = components['application type'].get().strip()
     timestamp_obj = datetime.datetime.now()
-    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
     client_name = f'{components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()}'
     output_filename = f"[{formatted_timestamp}] {components['case ID'].get().strip()} - Payments - {client_name}"
@@ -90,9 +89,6 @@ def write_payments(doc, components):
         }
     ]
 
-    payment_info = []
-    payment_rows = []
-
     for i in range(12):
         curr_amount = "N/A"
         curr_date = "N/A"
@@ -101,18 +97,6 @@ def write_payments(doc, components):
             curr_amount_float = float(components[f"payment {i+1}"].get('amount')) * tax_multiplier
             curr_amount = "${:.2f}".format(curr_amount_float)
             curr_date = components[f"payment {i+1}"].get('date')
-
-            payment_rows.append(
-                {
-                    'case_id': case_id,
-                    'client_1_name': f'{components["client 1 first name"].get()} {components["client 1 last name"].get()}',
-                    'client_1_phone': components["client 1 phone"].get(),
-                    'payment_amount': curr_amount,
-                    'payment_date': datetime.datetime.strftime(datetime.datetime.strptime(curr_date, "%b %d, %Y"), "%Y%m%d"),
-                    'payment_made': 0,
-                    'filename': output_filename,
-                }
-            )
 
         payment_info.append(
             {
@@ -136,10 +120,10 @@ def write_payments(doc, components):
         installments = components['application fee'].get('months')
 
         write_to_database(
-            'files',
+            'files', 
             (
                 case_id, 
-                os.environ['COMPUTERNAME'],
+                os.environ['COMPUTERNAME'], 
                 components.get('client name').get().strip(), 
                 formatted_timestamp, 
                 'Payment Authorization', 
@@ -147,12 +131,6 @@ def write_payments(doc, components):
                 f'{application_fee} in {installments} months'
             )
         )
-
-        rows_to_write = []
-        for row in payment_rows:
-            rows_to_write.append(tuple(row.values()))
-
-        write_to_database('installments', rows_to_write)
 
 
 def write_receipt(doc, components):
@@ -204,19 +182,7 @@ def write_receipt(doc, components):
 
     if response:
 
-        write_to_database(
-            'files',
-            (
-                case_id, 
-                os.environ['COMPUTERNAME'],
-                components.get('client name').get().strip(), 
-                formatted_timestamp, 
-                'Payment Receipt', 
-                output_filename, 
-                f'#{receipt_id} ({"${:.2f}".format(total)})'
-            )
-        )
-
+        write_to_database('files', (case_id, os.environ['COMPUTERNAME'],components.get('client name').get().strip(), formatted_timestamp, 'Payment Receipt', output_filename, f'#{receipt_id} ({"${:.2f}".format(total)})'))
         write_to_database('receipts', (receipt_id, case_id, os.environ['COMPUTERNAME'], client_name, formatted_timestamp, output_filename))
 
 
@@ -257,7 +223,7 @@ def write_retainer(doc, components):
         '[EMAIL2]': components["client 2 email"].get(),
         '[PHONE2]': components["client 2 phone"].get(),
         '[APP_TYPE]': components["application type"].get(),
-        '[APP_FEE]': "${:.2f}".format(components["application fee"].get('amount') * tax_multiplier),
+        '[APP_FEE]': "${:.2f}".format(components['application fee'].get('amount') * tax_multiplier),
         '[PAY_PLAN]': format_payments(),
     }
 
@@ -289,27 +255,63 @@ def write_retainer(doc, components):
     insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
 
     timestamp_obj = datetime.datetime.now()
-    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
-
     output_filename = f"[{formatted_timestamp}] {case_id} - Retainer - {document_data['[CLIENT1]']}"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
-        write_agreement_to_history(components)
+        new_payments = []
+        tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
 
-        write_to_database(
-            'files',
-            (
-                case_id, 
-                os.environ['COMPUTERNAME'],
-                components.get('client name').get().strip(), 
-                formatted_timestamp, 
-                'Retainer Agreement', 
-                output_filename, 
-                f'{components['application type'].get()} ({"${:.2f}".format(components['application fee'].get('amount') * tax_multiplier)})'
-            )
+        for i in range(12):
+            if components[f"payment {i+1}"].get('amount') > 0:
+                curr_amount_float = float(components[f"payment {i+1}"].get('amount')) * tax_multiplier
+                curr_amount = "${:.2f}".format(curr_amount_float)
+                curr_date = components[f"payment {i+1}"].get('date')
+
+                new_payments.append(
+                    (
+                        components['case ID'].get(),
+                        f'{components["client 1 first name"].get()} {components["client 1 last name"].get()}',
+                        components["client 1 phone"].get(),
+                        curr_amount,
+                        datetime.datetime.strftime(datetime.datetime.strptime(curr_date, "%b %d, %Y"), "%Y%m%d"),
+                        0,
+                        output_filename
+                    )
+                )
+
+        new_agreement = (
+            components['case ID'].get(),
+            os.environ['COMPUTERNAME'],
+            str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")),
+            'Retainer Agreement',
+            components['date on document'].get(),
+            f"{components['client 1 first name'].get()} {components['client 1 last name'].get()}",
+            components['client 1 email'].get(),
+            components['client 1 phone'].get(),
+            f"{components['client 2 first name'].get()} {components['client 2 last name'].get()}",
+            components['client 2 email'].get(),
+            components['client 2 phone'].get(),
+            components['application type'].get(),
+            components['application fee'].get('amount'),
+            components['add taxes'].get(),
+            output_filename
         )
+
+        new_file = (
+            case_id, 
+            os.environ['COMPUTERNAME'], 
+            document_data['[CLIENT1]'], 
+            formatted_timestamp, 
+            'Retainer Agreement', 
+            output_filename, 
+            f'{document_data['[APP_TYPE]']} ({document_data['[APP_FEE]']})'
+        )
+
+        write_to_database('agreements', new_agreement)
+        write_to_database('payments', new_payments)
+        write_to_database('files', new_file)
 
         components['service'].set(components['application type'].get())
         components['quantity'].set('1')
@@ -353,14 +355,11 @@ def write_conduct(doc, components):
     overwrite_placeholders(doc, document_data)
 
     timestamp_obj = datetime.datetime.now()
-    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
-
     output_filename = f"[{formatted_timestamp}] {case_id} - Conduct - {document_data['[CLIENT1]']}"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='agreements')
 
     if response:
-
         write_to_database(
             'files',
             (
@@ -370,7 +369,7 @@ def write_conduct(doc, components):
                 formatted_timestamp, 
                 'Code of Conduct', 
                 output_filename, 
-                components['application type'].get()
+                f"for {components['application type'].get()}"
             )
         )
 
@@ -602,28 +601,41 @@ def overwrite_placeholders(doc, document_data):
         print(e)
 
 
-def remove_file_from_history(filename) -> bool:
-    check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
-    records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
-    keep_lines = []
-    matched_line = None
-    filename  = filename.replace('.docx', '')
+def remove_from_database(filename) -> bool:
+    # check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
+    # records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
+    # keep_lines = []
+    # matched_line = None
+    filename = filename.replace('.docx', '')
+    # query_to_execute = f"DELETE FROM {table_name} VALUES {questionmarks(rows_to_write)}"
 
     try:
-        with open(records_file, 'r') as log_file:
-            all_lines = log_file.readlines()
+        # with open(records_file, 'r') as log_file:
+        #     all_lines = log_file.readlines()
 
-        for curr_line in all_lines:
-            if filename in curr_line.strip():
-                matched_line = curr_line.strip()
-            else:
-                keep_lines.append(curr_line)
+        # for curr_line in all_lines:
+        #     if filename in curr_line.strip():
+        #         matched_line = curr_line.strip()
+        #     else:
+        #         keep_lines.append(curr_line)
 
-        if matched_line is not None:
-            with open(records_file, 'w') as log_file:
-                log_file.writelines(keep_lines)
-        else:
-            return False
+        # if matched_line is not None:
+        #     with open(records_file, 'w') as log_file:
+        #         log_file.writelines(keep_lines)
+        # else:
+        #     return False
+
+        # db = Database()
+
+        # if isinstance(rows_to_write, list):
+        #     db.cursor.executemany(query_to_execute, rows_to_write)
+
+        # elif isinstance(rows_to_write, tuple):
+        #     db.cursor.execute(query_to_execute, rows_to_write)
+
+        # db.commit()
+        # db.close()
+        pass
 
     except Exception as e:
         print(e)
@@ -685,11 +697,6 @@ def get_prompt_response(prompt="") -> str:
     return(response.text)
 
 
-# =========================================================================================================================================
-# =========================================================================================================================================
-# =========================================================================================================================================
-
-
 def questionmarks(rows):
     columns = len(rows[0])
     temp = []
@@ -702,66 +709,6 @@ def questionmarks(rows):
 
     temp = f"({(', ').join(temp)})"
     return temp
-
-
-def write_agreement_to_history(app_components=None):
-
-    if app_components is None:
-        return
-
-    csv_columns = ['case_id', 'created_by', 'created_date', 'document_type', 'date_on_document', 'client_1_name', 'client_1_email', 'client_1_phone', 'client_2_name', 'client_2_email', 'client_2_phone', 'application_type', 'application_fee', 'add_taxes']
-
-    # set up csv_columns
-    for i in range(1,13):
-        csv_columns.append(f"amount_{str(i)}")
-        csv_columns.append(f"date_{str(i)}")
-
-    check_history_dir_and_file(f"{os.getcwd()}\\write", "agreements.csv", csv_columns)
-
-    # things to enter into the new entry
-    history_entry = [app_components['case ID'].get().strip()]
-    history_entry.append(os.environ['COMPUTERNAME'])
-    history_entry.append(str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")))
-    history_entry.append('Retainer Agreement')
-    history_entry.append(app_components.get('date on document').get())
-    history_entry.append(f"{app_components.get('client 1 first name').get().strip()} {app_components.get('client 1 last name').get().strip()}".strip())
-    history_entry.append(app_components.get('client 1 email').get().strip())
-    history_entry.append(app_components.get('client 1 phone').get().strip())
-    history_entry.append(f"{app_components.get('client 2 first name').get().strip()} {app_components.get('client 2 last name').get().strip()}".strip())
-    history_entry.append(app_components.get('client 2 email').get().strip())
-    history_entry.append(app_components.get('client 2 phone').get().strip())
-    history_entry.append(app_components.get('application type').get())
-    history_entry.append(app_components.get('application fee').get('amount'))
-    history_entry.append(app_components.get('add taxes').get())
-
-    for i in range(1,13):
-        current_amount = (app_components.get(f'payment {i}').get('amount'))
-        current_date = (app_components.get(f'payment {i}').get('date'))
-
-        if int(current_amount) == 0:
-            history_entry.append("")
-            history_entry.append("")
-            continue
-
-        history_entry.append(str(current_amount))
-        history_entry.append(str(current_date))
-
-    # remove commas from strings as it interferes with the csv
-    for index, col in enumerate(history_entry):
-        history_entry[index] = re.sub("[,]\\s*", "_", str(col))
-
-    with open(f"{os.getcwd()}\\write\\agreements.csv", "r") as history:
-        readlines = history.readlines()
-
-    with open(f"{os.getcwd()}\\write\\agreements.csv", "a+") as history:
-        readlines = history.readlines()
-        sorted_lines = []
-
-        if len(readlines) > 1:
-            sorted_lines = [readlines[0]] + sorted(readlines[1:])
-
-        sorted_lines += ["\n" + (',').join(history_entry)]
-        history.write(('').join(sorted_lines))
 
 
 def write_to_database(table_name, rows_to_write):

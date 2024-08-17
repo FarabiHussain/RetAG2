@@ -12,7 +12,7 @@ from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
 from reader import read_file_as_list, read_case_id
-from writer import remove_file_from_history, write_imm5476, write_invitation, write_payments, overwrite_placeholders, write_conduct, write_receipt, write_retainer
+from writer import remove_from_database, write_imm5476, write_invitation, write_payment_auth, overwrite_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, reset_button, search_files_button, search_payments_button, test_button, decrypt_button
@@ -36,7 +36,7 @@ class GUI:
 
     def get(self) -> str:
         field = self.component
-        return field.get()
+        return field.get().strip()
 
     def set(self, new_text: str = "") -> None:
         self.stringvar.set(new_text)
@@ -124,7 +124,7 @@ class ComboBox(GUI):
         if self.component.get() == self.default_string:
             return self.options[0]
         else:
-            return self.component.get()
+            return self.component.get().strip()
 
     def set(self, opt) -> None:
         self.stringvar.set(opt)
@@ -224,7 +224,7 @@ class TextBox(GUI):
         self.component.delete('0.0', 'end')
 
     def get(self):
-        return self.component.get('0.0', 'end')
+        return (self.component.get('0.0', 'end')).strip()
 
     def set(self, text):
         self.reset()
@@ -652,7 +652,7 @@ class ActionButton():
         elif (action == "payments"):
             try:
                 doc = Document(resource_path("assets\\templates\\payments.docx"))
-                write_payments(doc, app.get_all_components())
+                write_payment_auth(doc, app.get_all_components())
             except Exception as e:
                 ErrorPopup(msg=f'Exception while writing payment authorization:\n\n{str(e)}')
 
@@ -749,7 +749,7 @@ class ActionButton():
             if confirmation:
                 try:
                     os.remove(searched_filepath)
-                    successfully_removed = remove_file_from_history(filename=searched_filename)
+                    successfully_removed = remove_from_database(filename=searched_filename)
                     if not successfully_removed:
                         ErrorPopup(msg=f'Could not remove {searched_filename}.')
                     else:

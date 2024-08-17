@@ -1,4 +1,6 @@
 import customtkinter as ctk
+import glob
+import os
 from Path import *
 from Img import *
 from GUI import *
@@ -17,11 +19,11 @@ rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
 blueprint = app.get_blueprint()
 subapp_components = []
 
+
 # first initialize the subapp frames and buttons so that we can control their visibilty and active status
 for subapp_name in blueprint:
 
     new_subapp = {"name": subapp_name, "frame": None, "button": None}
-
     new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="white", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
     new_subapp['frame'].place(x=170, y=0)
 
@@ -40,6 +42,7 @@ for subapp_name in blueprint:
 
     subapp_components.append(new_subapp)
 
+
 # use the above components and render each subapp
 for i, subapp_name in enumerate(blueprint):
     subapp_components[i]['subapp_obj'] = Subapp(
@@ -54,21 +57,27 @@ for i, subapp_name in enumerate(blueprint):
 
     app.add_component(subapp_name, subapp_components[i]['subapp_obj'])
 
-if "--test" in sys.argv:
-    test_button(app)
-    # subapp_components[4]['subapp_obj'].lift_app(subapp_components)
-    pass
+
+def on_startup():
+    if "--test" in sys.argv:
+        test_button(app)
+        # subapp_components[4]['subapp_obj'].lift_app(subapp_components)
 
 
 def on_closing():
     if "--test" in sys.argv:
         Database().close()
+
+        for dir in ['write', 'output/agreements','output/receipts','output/invitations','output/imm5476']:
+            for f in glob.glob(f"./{dir}/*"):
+                os.remove(f)
+
         app.root.destroy()
-    
+
     elif messagebox.askokcancel("Quit", "Do you want to quit?"):
         Database().close()
         app.root.destroy()
 
-
+on_startup()
 app.root.protocol("WM_DELETE_WINDOW", on_closing)
 app.start()

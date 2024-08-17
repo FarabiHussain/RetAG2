@@ -22,7 +22,7 @@ class Database:
     def init_tables(self):
         self.cursor.execute(
             '''
-                CREATE TABLE IF NOT EXISTS installments (
+                CREATE TABLE IF NOT EXISTS payments (
                     case_id TEXT, 
                     client_name TEXT, 
                     contact_info TEXT, 
@@ -53,7 +53,7 @@ class Database:
                     case_id TEXT, 
                     created_by TEXT, 
                     client_name TEXT, 
-                    created_date INTEGER, 
+                    created_date TEXT, 
                     document_type TEXT, 
                     filename TEXT, 
                     remarks TEXT
@@ -66,6 +66,7 @@ class Database:
                 CREATE TABLE IF NOT EXISTS agreements (
                     case_id TEXT, 
                     created_by TEXT, 
+                    created_date TEXT, 
                     document_type TEXT, 
                     client_1_name TEXT, 
                     client_1_email TEXT, 
@@ -74,9 +75,8 @@ class Database:
                     client_2_email TEXT, 
                     client_2_phone TEXT, 
                     application_type TEXT, 
-                    application_fee REAL, 
-                    created_date INTEGER, 
-                    date_on_document INTEGER, 
+                    application_fee TEXT, 
+                    date_on_document TEXT, 
                     add_taxes INTEGER,
                     filename TEXT
                 );
