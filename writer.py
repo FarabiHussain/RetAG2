@@ -505,9 +505,7 @@ def write_invitation(doc, components):
     insert_4col_table(document=doc, table_heading="", table_items=client_signatures)
 
     timestamp_obj = datetime.datetime.now()
-    timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
-
     output_filename = f"[{formatted_timestamp}] - {components[f"host 1 name"].get().strip()} - Invitation Letter"
     response = save_doc(doc=doc, components=components, override_output_filename=output_filename, folder_name='invitations')
 
@@ -601,60 +599,54 @@ def overwrite_placeholders(doc, document_data):
         print(e)
 
 
-def remove_from_database(filename) -> bool:
-    # check_history_dir_and_file(f'{os.getcwd()}\\write\\', 'files.csv', (['case_id', 'document_type', 'created_by', 'created_date', 'remarks', 'client_name', 'filename']))
-    # records_file = (f'{os.getcwd()}\\write\\files.csv').replace('\\write\\write', '\\files')
-    # keep_lines = []
-    # matched_line = None
-    filename = filename.replace('.docx', '')
-    # query_to_execute = f"DELETE FROM {table_name} VALUES {questionmarks(rows_to_write)}"
+def write_to_database(table_name, rows_to_write):
+
+    def questionmarks(rows):
+        columns = len(rows[0])
+        temp = []
+
+        if isinstance(rows, tuple):
+            columns = len(rows)
+
+        for _ in range(columns):
+            temp.append("?")
+
+        temp = f"({(', ').join(temp)})"
+        return temp
+
+    query_to_execute = f"INSERT INTO {table_name} VALUES {questionmarks(rows_to_write)}"
 
     try:
-        # with open(records_file, 'r') as log_file:
-        #     all_lines = log_file.readlines()
+        db = Database()
 
-        # for curr_line in all_lines:
-        #     if filename in curr_line.strip():
-        #         matched_line = curr_line.strip()
-        #     else:
-        #         keep_lines.append(curr_line)
+        if isinstance(rows_to_write, list):
+            db.cursor.executemany(query_to_execute, rows_to_write)
 
-        # if matched_line is not None:
-        #     with open(records_file, 'w') as log_file:
-        #         log_file.writelines(keep_lines)
-        # else:
-        #     return False
+        elif isinstance(rows_to_write, tuple):
+            db.cursor.execute(query_to_execute, rows_to_write)
 
-        # db = Database()
+        db.commit()
+        db.close()
+    except Exception as e:
+        print(e)
+        ErrorPopup(str(e))
 
-        # if isinstance(rows_to_write, list):
-        #     db.cursor.executemany(query_to_execute, rows_to_write)
 
-        # elif isinstance(rows_to_write, tuple):
-        #     db.cursor.execute(query_to_execute, rows_to_write)
+def remove_from_database(filename) -> bool:
+    filename = filename.replace('.docx', '')
+    query_to_execute = f"DELETE FROM files WHERE filename = '{filename}'"
 
-        # db.commit()
-        # db.close()
-        pass
+    try:
+        db = Database()
+        db.cursor.execute(query_to_execute)
+        db.commit()
+        db.close()
 
     except Exception as e:
         print(e)
         return False
 
     return True
-
-
-def check_history_dir_and_file(check_dir, check_file, csv_columns):
-    # set up write directory
-    if not os.path.exists(check_dir):
-        os.makedirs(check_dir)
-
-    if not os.path.exists(f"{check_dir}\\{check_file}"):
-        # write the header csv_columns to file
-        with open(f"{check_dir}\\{check_file}", "x") as history:
-            history.write(",".join(csv_columns))
-            history.write("\n")
-            history.close()
 
 
 def check_case_id_before_submit(components):
@@ -696,35 +688,3 @@ def get_prompt_response(prompt="") -> str:
 
     return(response.text)
 
-
-def questionmarks(rows):
-    columns = len(rows[0])
-    temp = []
-
-    if isinstance(rows, tuple):
-        columns = len(rows)
-
-    for _ in range(columns):
-        temp.append("?")
-
-    temp = f"({(', ').join(temp)})"
-    return temp
-
-
-def write_to_database(table_name, rows_to_write):
-    query_to_execute = f"INSERT INTO {table_name} VALUES {questionmarks(rows_to_write)}"
-
-    try:
-        db = Database()
-
-        if isinstance(rows_to_write, list):
-            db.cursor.executemany(query_to_execute, rows_to_write)
-
-        elif isinstance(rows_to_write, tuple):
-            db.cursor.execute(query_to_execute, rows_to_write)
-
-        db.commit()
-        db.close()
-    except Exception as e:
-        print(e)
-        ErrorPopup(str(e))

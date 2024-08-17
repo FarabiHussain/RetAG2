@@ -3,21 +3,6 @@ import os, csv, sys, datetime
 from icecream import ic
 from Path import resource_path
 
-## read the csv and return as a list
-def get_recent() -> dict:
-    history_dir = os.getcwd() + "\\write\\"
-
-    if not os.path.exists(history_dir):
-        print("path does not exist")
-        return None
-    elif not os.path.exists(history_dir + "\\agreements.csv"):
-        print("file does not exist")
-        return None
-    else:
-        with open(history_dir + "\\agreements.csv", mode='r') as infile:
-            last_row = list(csv.DictReader(infile))[-1]
-            return last_row
-
 
 # reads the passed file and returns it as a list
 def read_file_as_list(filename='agreements.csv') -> list:

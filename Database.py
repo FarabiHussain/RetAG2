@@ -2,7 +2,7 @@ import sqlite3
 
 class Database:
     def __init__(self):
-        self.database = sqlite3.connect(".\\write\\retag.db")
+        self.database = sqlite3.connect(".\\write\\retag.sqlite3")
         self.cursor = self.database.cursor()
 
         def dict_factory(cursor, row):

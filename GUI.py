@@ -749,13 +749,13 @@ class ActionButton():
             if confirmation:
                 try:
                     os.remove(searched_filepath)
-                    successfully_removed = remove_from_database(filename=searched_filename)
+                    successfully_removed = remove_from_database(searched_filename)
                     if not successfully_removed:
                         ErrorPopup(msg=f'Could not remove {searched_filename}.')
                     else:
                         search_files_button(app)
                 except Exception as e:
-                    ErrorPopup(msg=f'Could not remove {searched_filename}.')
+                    ErrorPopup(msg=f'Exception while attempting to remove {searched_filename}: {e}')
 
         else:
             InfoPopup(msg='This feature is still under construction.')

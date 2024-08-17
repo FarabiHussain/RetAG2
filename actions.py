@@ -184,91 +184,79 @@ def test_button(app):
 
 
 def search_files_button(app):
-    created_files = read_file_as_list(filename='files.csv')
-    search_id = app.components['search case ID'].get().strip()
-    search_name = app.components['search client name'].get().strip()
-    search_category = app.components['search category'].get().strip()
+    search_case_id = app.components['search case ID'].get()
+    search_name = app.components['search client name'].get()
+    search_category = app.components['search category'].get()
     search_table = app.components['search results']
-
     search_table.reset()
 
-    row_info_list = []
     row_contents_list = []
-    created_files_filtered = []
+    row_info_list = []
 
-    # filter by category
-    if search_category != 'All':
-        for row in created_files:
-            if row['document_type'] == search_category:
-                created_files_filtered.append(row)
-    else:
-        created_files_filtered = created_files
-
-    # filter by ID
-    if len(search_id) > 0:
-        temp = []
-        for row in created_files_filtered:
-            if search_id in row['case_id']:
-                temp.append(row)
-        created_files_filtered = temp
-
-    # filter by name
-    if len(search_name) > 0:
-        temp = []
-        for row in created_files_filtered:
-            if search_name.lower() in row['client_name'].lower():
-                temp.append(row)
-        created_files_filtered = temp
-
-    # no filter applied for ID or name
-    for row in created_files_filtered:
-        row_info_list.append(row)
-        row_contents_list.append([
-            row['document_type'],
-            row['client_name'],
-            row['created_date'],
-            row['created_by'],
-            row['remarks'],
-        ])
-
-    search_table.add(
-        row_contents=row_contents_list,
-        row_info=row_info_list,
-    )
-
-
-def search_payments_button(app):
     db = Database()
     db.database.row_factory = db.dict_factory
 
-    search_in_date = app.components['show payments on date'].get()
-    payment_status = app.components['payment status'].get()
-    payments_table = app.components.get('due payments')
-    row_contents = []
-    row_infos = []
-
-    payment_entries = db.database.execute(
+    retrieved_entries = db.database.execute(
         f'''
         SELECT
             *
         FROM
-            installments
+            files
         WHERE
-            payment_date = {datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}
+            case_id = '{search_case_id}'
+            {f"AND client_name LIKE '%{search_name}%'" if len(search_name) > 0 else ""}
+            {f"AND document_type = '{search_category}'" if search_category.lower() != "all" else ""}
+        '''
+    ).fetchall()
+
+    db.close()
+
+    for entry in retrieved_entries:
+        new_row = [entry.get('document_type'), entry.get('client_name'), entry.get('created_date'), entry.get('created_by'), entry.get('remarks')]
+        row_contents_list.append(new_row)
+        row_info_list.append(entry)
+
+    if len(retrieved_entries) > 0:
+        search_table.add(
+            row_contents=row_contents_list,
+            row_info=row_info_list,
+        )
+
+
+def search_payments_button(app):
+    search_in_date = app.components['show payments on date'].get()
+    payment_status = app.components['payment status'].get()
+    payments_table = app.components.get('due payments')
+    row_contents_list = []
+    row_info_list = []
+    payments_table.reset()
+
+    db = Database()
+    db.database.row_factory = db.dict_factory
+
+    retrieved_entries = db.database.execute(
+        f'''
+        SELECT
+            *
+        FROM
+            payments
+        WHERE
+            payment_date = '{datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}'
             {'' if payment_status.lower() == "all" else ('AND payment_made = 1' if payment_status.lower() == "paid" else 'AND payment_made = 0')}
         '''
     ).fetchall()
 
-    for entry in payment_entries:
-        new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
-        row_contents.append(new_row)
-        row_infos.append(entry)
+    db.close()
 
-    payments_table.reset()
-    if len(row_contents) > 0:
+    for entry in retrieved_entries:
+        new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
+        row_contents_list.append(new_row)
+        row_info_list.append(entry)
+
+    if len(row_contents_list) > 0:
         payments_table.add(
-            row_contents=row_contents,
-            row_info=row_infos,
+            row_contents=row_contents_list,
+            row_info=row_info_list,
         )
 
 
