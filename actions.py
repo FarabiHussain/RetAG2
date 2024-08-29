@@ -1,6 +1,7 @@
 import datetime
 import threading
 from datetime import datetime as dt
+from dateutil import relativedelta as rd
 import customtkinter as ctk
 import sqlite3
 import os
@@ -150,9 +151,16 @@ def test_button(app):
     total_amount = 0
     total_months = random.randint(1,12)
     now = dt.now()
+
     for i in range(total_months):
         total_amount += 100
-        app.components[f'payment {i+1}'].set("100", dt.strftime(now, "%Y"), dt.strftime(now, "%b"), int(dt.strftime(now, "%d"))+i)
+
+        dt_object = now + rd.relativedelta(days=i)
+        year = (datetime.datetime.strftime(dt_object, "%Y"))
+        month = (datetime.datetime.strftime(dt_object, "%b"))
+        day = (datetime.datetime.strftime(dt_object, "%d"))
+
+        app.components[f'payment {i+1}'].set("100", year, month, day)
 
     app.components['application fee'].set(f"${total_amount}", total_months)
 
