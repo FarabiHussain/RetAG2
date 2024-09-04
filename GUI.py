@@ -15,7 +15,7 @@ from reader import read_file_as_list, read_case_id
 from writer import remove_from_database, write_imm5476, write_invitation, write_payment_auth, overwrite_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
-from actions import HistoryViewer, ReceiptFinder, add_item_button, remove_item_button, reset_button, search_files_button, search_payments_button, test_button, decrypt_button
+from actions import HistoryViewer, ReceiptFinder, add_item_button, handle_action, remove_item_button, reset_button, search_files_button, search_payments_button, test_button, decrypt_button
 import json
 
 family_medium="Roboto Bold"
@@ -615,150 +615,14 @@ class ActionButton():
             border_width=0,
             corner_radius=0,
             fg_color=btn_color,
-            command=lambda:self.assign_action(app, action, blueprint, subapp_name),
+            command=lambda:handle_action(app=app, action=action, blueprint=blueprint),
             width=width,
             height=height,
             state='disabled' if 'spacer' in action else 'normal',
             hover_color="dark gray"
         )
-        
+
         self.component.grid(row=row, column=col, pady=[20,5], padx=4)
-
-    def find_file(self, app):
-        search_table = app.components['search results']
-        filename = (search_table.get_selected_info().get('filename', None))
-        document_type = (search_table.get_selected_info().get('document_type', None))
-
-        if filename is None or document_type is None:
-            ErrorPopup(msg="Select table item to perform action.")
-            return (None, None)
-
-        folder_paths = {
-            'Payment Receipt': (f'{os.getcwd()}\\output\\receipts\\'),
-            'Use of Representative': (f'{os.getcwd()}\\output\\imm5476\\'),
-            'Code of Conduct': (f'{os.getcwd()}\\output\\agreements\\'),
-            'Retainer Agreement': (f'{os.getcwd()}\\output\\agreements\\'),
-            'Payment Authorization': (f'{os.getcwd()}\\output\\agreements\\'),
-        }
-
-        return (
-            f'{folder_paths.get(document_type)}\\{filename}.docx'.replace('\\\\', '\\'),
-            f'{filename}.docx'
-        )
-
-    def assign_action(self, app=None, action="", blueprint={}, subapp_name="") -> None:
-        if ("reset" in action): PromptPopup(msg="Are you sure you want to reset all fields?", func=lambda: reset_button(app, blueprint, action))
-
-        elif (action == "payments"):
-            try:
-                doc = Document(resource_path("assets\\templates\\payments.docx"))
-                write_payment_auth(doc, app.get_all_components())
-            except Exception as e:
-                ErrorPopup(msg=f'Exception while writing payment authorization:\n\n{str(e)}')
-
-        elif (action == "retainer"):
-            try:
-                doc = Document(resource_path("assets\\templates\\retainer.docx"))
-                response = write_retainer(doc, app.get_all_components())
-
-                date_now = datetime.datetime.now()
-                date_today = f"{date_now.strftime('%b')} {int(date_now.strftime('%d'))}, {date_now.strftime('%Y')}"
-                date_of_first_payment = app.components.get('payment 1').get('date')
-
-                if response == True and date_today == date_of_first_payment:
-                    PromptPopup("The first payment is to be made today. Create receipt?", func=lambda: app.components['Receipts'].lift_app(app.subapp_components['Receipts']))
-                    app.focus()
-            except Exception as e:
-                ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')
-
-        elif (action == "conduct"):
-            try:
-                doc = Document(resource_path("assets\\templates\\conduct.docx"))
-                write_conduct(doc, app.get_all_components())
-            except Exception as e:
-                ErrorPopup(msg=f'Exception while writing code of conduct:\n\n{str(e)}')
-
-        elif (action == "create receipt"):
-            try:
-                doc = Document(resource_path("assets\\templates\\receipt.docx"))
-                write_receipt(doc, app.get_all_components())
-            except Exception as e:
-                ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
-
-        elif (action == "create letter"):
-
-            if len(app.components['conclusion content'].get().strip()) == 0:
-                if PromptPopup("No conclusion was written. Create letter without one?", func=lambda: None).get() is False:
-                    return
-
-            elif app.components['conclusion content'].get().strip() == 'loading...':
-                InfoPopup('Conclusion content is still loading. Please wait.')
-                return
-
-            try:
-                doc = Document(resource_path("assets\\templates\\invitation_1.docx"))
-                write_invitation(doc, app.get_all_components())
-            except Exception as e:
-                ErrorPopup(msg=f'Exception while writing invitation:\n\n{str(e)}')
-
-        elif (action == "generate case ID"): app.components.get('case ID').set(read_case_id())
-
-        elif (action == "retainer history"): HistoryViewer(app)
-
-        elif (action == "find receipt"): ReceiptFinder(app)
-
-        elif (action == "test"): test_button(app)
-
-        elif (action == "decrypt"): decrypt_button(app)
-
-        elif (action == "add item"): add_item_button(app)
-
-        elif (action == "remove item"): remove_item_button(app)
-
-        elif (action == "search files"): search_files_button(app)
-
-        elif (action == "search payments"): search_payments_button(app)
-
-        elif (action == "open selected"):
-            searched_filepath, searched_filename = self.find_file(app=app)
-
-            try:
-                os.startfile(searched_filepath)
-            except Exception as e:
-                print(e)
-                ErrorPopup(msg=f"Could not open {searched_filename}")
-
-        elif ("output" in action):
-            try:
-                os.startfile(f'{os.getcwd()}\\output\\{action.split(' ')[0]}\\')
-            except Exception as e:
-                ErrorPopup(msg=f'Output folder not found')
-
-        elif (action == 'representative'):
-            try:
-                doc = Document(resource_path("assets\\templates\\imm5476.docx"))
-                write_imm5476(doc, app.get_all_components())
-            except Exception as e:
-                ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
-
-        elif (action == "cancel selected"):
-            searched_filepath, searched_filename = self.find_file(app=app)
-
-            confirmation = PromptPopup(msg=f'Would you like to cancel {searched_filename}', func=lambda:None).get()
-
-            if confirmation:
-                try:
-                    os.remove(searched_filepath)
-                    successfully_removed = remove_from_database(searched_filename)
-                    if not successfully_removed:
-                        ErrorPopup(msg=f'Could not remove {searched_filename}.')
-                    else:
-                        search_files_button(app)
-                except Exception as e:
-                    ErrorPopup(msg=f'Exception while attempting to remove {searched_filename}: {e}')
-
-        else:
-            InfoPopup(msg='This feature is still under construction.')
 
 
 class TabView():
