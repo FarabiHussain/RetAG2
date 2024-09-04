@@ -1,6 +1,7 @@
 import importlib.util
 import os, csv, sys, datetime
 from icecream import ic
+from Database import Database
 from Path import resource_path
 
 
@@ -40,56 +41,32 @@ def import_function(function_path=None, function_name=None) -> str:
 
 # read records.csv to retrieve the last created receipt id
 def read_receipt_id():
-    records_file = (f'{os.getcwd()}\\write\\receipts.csv').replace('\\write\\write', '\\receipts')
 
-    try:
-        with open(records_file, 'r') as log_file:
-            doc_id = log_file.readlines()[-1]
-            doc_id = doc_id.split(",")[3]
-            doc_id = doc_id.replace("[","").replace("]","")
+    receipt_id = 0
 
-            return int(doc_id)
+    db = Database()
+    retrieved_ids = db.cursor.execute('SELECT receipt_id FROM receipts ORDER BY receipt_id DESC LIMIT 1').fetchall()
+    db.close()
 
-    except Exception as e:
-        print("no existing IDs - starting with ID 1")
+    if len(retrieved_ids) > 0:
+        receipt_id = int(retrieved_ids[0][0])
 
-    return 0
+    return receipt_id
 
 
 # read agreements.csv to retrieve the last created id
 def read_case_id(get_next=True):
-    records_file = (f'{os.getcwd()}\\write\\agreements.csv').replace('\\write\\write', '\\agreements')
     curr_timestamp = str(datetime.datetime.now().strftime('%Y%m'))
-    case_id = f'{curr_timestamp}-001'
-    heading_line = []
-    indexes = {}
+    case_id = f'{curr_timestamp}-000'
 
-    if os.path.exists(records_file):
-        try:
-            with open(records_file, 'r') as log_file:
-                readlines = log_file.readlines()
+    db = Database()
+    retrieved_ids = db.cursor.execute('SELECT case_id FROM agreements WHERE document_type = "Retainer Agreement" ORDER BY case_id DESC LIMIT 1').fetchall()
+    db.close()
 
-                if len(readlines) == 1:
-                    return case_id
+    if len(retrieved_ids) > 0:
+        case_id = retrieved_ids[0][0]
 
-                heading_line = readlines[0]
-                prev_case_id = readlines[-1]
-
-            for i, column_name in enumerate(heading_line.split(',')):
-                indexes[column_name] = i
-
-            prev_case_id = prev_case_id.split(",")[indexes['case_id']]
-            prev_timestamp = (prev_case_id.split('-')[0])
-            prev_number = (prev_case_id.split('-')[1])
-
-            if curr_timestamp == prev_timestamp:
-                curr_number = "{:03}".format(int(prev_number) + (1 if get_next else 0))
-            else:
-                curr_number = "001"
-
-            case_id = f"{curr_timestamp}-{curr_number}"
-
-        except Exception as e:
-            print(f"Error when reading ID, returning {case_id}\n\n{e}")
+    if get_next:
+        case_id = f'{case_id.split("-")[0]}-{"{:03}".format(int(case_id.split("-")[1]) + 1)}'
 
     return case_id

@@ -316,8 +316,8 @@
 
         "break 0": {"column": 0, "type": "break", "heading": "SEARCH PAYMENTS BY FILTERS"},
         "show payments on date": {"column": 0, "type": "datepicker", "show_day":"true"},
-        "yesterday": {"column": 0, "type": "rowbutton", "label": "Yesterday", "method": "/assets/functions/yesterday.py"},
-        "tomorrow": {"column": 0, "type": "rowbutton", "label": "Tomorrow", "method": "/assets/functions/tomorrow.py"},
+        "yesterday": {"column": 0, "type": "rowbutton", "label": "Previous Day", "method": "/assets/functions/yesterday.py"},
+        "tomorrow": {"column": 0, "type": "rowbutton", "label": "Following Day", "method": "/assets/functions/tomorrow.py"},
         "payment status": {"column": 0, "type": "combo", "default": "All", "options": ["All", "Paid", "Unpaid"]},
 
         "due payments": {"column": 1, "type": "table", "headers": ["case ID", "client name", "contact info", "payment amount", "payment made"]},

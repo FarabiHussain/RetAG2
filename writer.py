@@ -286,7 +286,6 @@ def write_retainer(doc, components):
             os.environ['COMPUTERNAME'],
             str(datetime.datetime.now().strftime("%Y-%b-%d %I:%M %p")),
             'Retainer Agreement',
-            components['date on document'].get(),
             f"{components['client 1 first name'].get()} {components['client 1 last name'].get()}",
             components['client 1 email'].get(),
             components['client 1 phone'].get(),
@@ -295,6 +294,7 @@ def write_retainer(doc, components):
             components['client 2 phone'].get(),
             components['application type'].get(),
             components['application fee'].get('amount'),
+            components['date on document'].get(),
             components['add taxes'].get(),
             output_filename
         )
@@ -634,11 +634,18 @@ def write_to_database(table_name, rows_to_write):
 
 def remove_from_database(filename) -> bool:
     filename = filename.replace('.docx', '')
-    query_to_execute = f"DELETE FROM files WHERE filename = '{filename}'"
+    filetype_match = re.search(r'\b[0-1]{3}\b\s*-\s*(\w+)', filename)
+    delete_from_files = f"DELETE FROM files WHERE filename = '{filename}'"
+    delete_from_payments = ''
+
+    if filetype_match:
+        if filetype_match.group(1) == 'Retainer':
+            delete_from_payments = f"DELETE FROM payments WHERE filename = '{filename}'"
 
     try:
         db = Database()
-        db.cursor.execute(query_to_execute)
+        db.cursor.execute(delete_from_files)
+        db.cursor.execute(delete_from_payments)
         db.commit()
         db.close()
 

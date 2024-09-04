@@ -13,7 +13,7 @@ class Subapp():
         self.subapp_name = subapp_name
 
         if subapp_name.lower() != 'init':
-            self.button.place(x=0, y=(50*button_position) + 3 + (3*button_position))
+            self.button.place(x=0, y=(100*button_position) + 3 + (3*button_position))
 
         self.blueprint = blueprint
 

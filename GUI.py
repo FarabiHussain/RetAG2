@@ -354,9 +354,9 @@ class DatePicker(GUI):
     # set the date picker back to the current date
     def reset(self) -> None:
         self.stringvar_month.set(self.today.strftime("%b"))
-        self.stringvar_day.set(f'{int(self.today.strftime("%d"))}')
+        self.stringvar_day.set(("{:02}").format(int(self.today.strftime("%d"))))
         self.stringvar_year.set(self.today.strftime("%Y"))
-
+ 
 
     # return a formatted date
     def get(self) -> str:

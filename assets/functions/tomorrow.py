@@ -1,6 +1,7 @@
 import datetime
 from dateutil import relativedelta as rd
 from icecream import ic
+from actions import search_payments_button
 
 def callback(app=None):
 
@@ -17,3 +18,5 @@ def callback(app=None):
     day = (datetime.datetime.strftime(dt_object, "%d"))
 
     app.components['show payments on date'].set(y=year, m=month, d=day)
+
+    search_payments_button(app)

@@ -22,5 +22,5 @@ def callback(app_components=None):
     except Exception as e:
         app_components.get("price").set("")
         app_components.get("price").component.configure(fg_color="#dddddd", text_color="#aaaaaa")
-        ErrorPopup(e)
+        # ErrorPopup(f'error when setting price: {e}')
 

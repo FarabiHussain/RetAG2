@@ -265,6 +265,9 @@ def search_payments_button(app):
         row_info_list.append(entry)
 
     if len(row_contents_list) > 0:
+        payments_table.selected_row = None
+        payments_table.selected_row_info = None
+
         payments_table.add(
             row_contents=row_contents_list,
             row_info=row_info_list,

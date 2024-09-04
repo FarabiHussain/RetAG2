@@ -35,7 +35,7 @@ for subapp_name in blueprint:
         corner_radius=0,
         fg_color="lightgray",
         width=170,
-        height=50,
+        height=100,
         font=ctk.CTkFont(family="Roboto Bold"),
         hover_color='#ddd'
     )
