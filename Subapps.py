@@ -1,6 +1,6 @@
+# from RenderFont import RenderFont
 import customtkinter as ctk
 from GUI import *
-from RenderFont import RenderFont
 from reader import import_function
 
 class Subapp():
@@ -13,7 +13,7 @@ class Subapp():
         self.subapp_name = subapp_name
 
         if subapp_name.lower() != 'init':
-            self.button.place(x=0, y=(100*button_position) + 3 + (3*button_position))
+            self.button.place(x=0, y=(70*button_position) + 3 + (3*button_position))
 
         self.blueprint = blueprint
 

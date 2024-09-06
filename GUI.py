@@ -1,22 +1,20 @@
+# import shutil
+# import glob
+# import json
+# from RenderFont import RenderFont
+# from docx import Document
 import math
-import shutil
 import customtkinter as ctk
 import datetime
 import os
-import glob
 from Popups import ErrorPopup, InfoPopup, PromptPopup
-from RenderFont import RenderFont
 from Path import *
-from docx import Document
 from tkinter import StringVar
 from icecream import ic
 from subprocess import DEVNULL, STDOUT, check_call
-from reader import read_file_as_list, read_case_id
-from writer import remove_from_database, write_imm5476, write_invitation, write_payment_auth, overwrite_placeholders, write_conduct, write_receipt, write_retainer
 from dateutil import relativedelta as rd
 from typing import Literal
-from actions import HistoryViewer, ReceiptFinder, add_item_button, handle_action, remove_item_button, reset_button, search_files_button, search_payments_button, test_button, decrypt_button
-import json
+from actions import handle_action
 
 family_medium="Roboto Bold"
 family_bold="Roboto Bold"

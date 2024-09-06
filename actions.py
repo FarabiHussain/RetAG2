@@ -1,9 +1,9 @@
+# import threading
+# import sqlite3
 import datetime
-import threading
 from datetime import datetime as dt
 from dateutil import relativedelta as rd
 import customtkinter as ctk
-import sqlite3
 import os
 import names
 import random
@@ -14,7 +14,7 @@ from icecream import ic
 from Popups import ErrorPopup
 from dotenv import load_dotenv
 from writer import obscure, unobscure, remove_from_database, write_conduct, write_imm5476, write_invitation, write_payment_auth, write_receipt, write_retainer
-from reader import read_file_as_list, read_case_id
+from reader import read_case_id
 from docx import Document
 from Path import resource_path
 from Popups import ErrorPopup, InfoPopup, PromptPopup
@@ -170,7 +170,7 @@ def test_button(app):
     random_row_contents = []
     random_row_infos = []
 
-    for i in range(random.randint(15,20)):
+    for i in range(random.randint(2,6)):
         new_row, new_row_info = generate_row_contents(
             app_components=app.components, 
             override_row_content={
@@ -387,7 +387,17 @@ class HistoryViewer():
 
         # check whether history entries exist
         if entries == []:
-            imported_history = read_file_as_list()
+            db = Database()
+            imported_history = db.cursor.execute(
+                '''
+                    SELECT 
+                        client_1_name, created_by, created_date, application_type, application_fee
+                    FROM 
+                        agreements
+                '''
+            ).fetchall()
+
+            print(imported_history)
 
             if len(imported_history) == 0:
                 ErrorPopup(msg="No entries in history.")
@@ -461,13 +471,8 @@ class HistoryViewer():
         current_page_rows = entries[(page_number*18):((page_number+1)*18)]
         for i in range(18 - len(current_page_rows)):
             current_page_rows.append(
-                {
-                    'client_1_name': '',
-                    'created_by': '',
-                    'created_date': '',
-                    'application_type': '',
-                    'application_fee': '',
-                }
+                # client_1_name, created_by, created_date, application_type, application_fee,
+                ('', '', '', '', '')
             )
 
         for index, entry in enumerate(current_page_rows):
@@ -478,11 +483,11 @@ class HistoryViewer():
                     row_number=index, 
                     mode="table", 
                     row_contents=[
-                        f"{entry.get('client_1_name').title().split(";")[0][0:32]}{"..." if len(entry.get('client_1_name').split(";")[0]) > 32 else ""}",
-                        entry.get('created_by'),
-                        entry.get('created_date'),
-                        f"{entry.get('application_type')[0:32]}{"..." if len(entry.get('application_type')) > 32 else ""}",
-                        f"{"${:,.2f}".format(float(entry.get('application_fee')))}" if entry.get('application_fee') != "" else entry.get('application_fee'),
+                        f"{entry[0].title().split(";")[0][0:32]}{"..." if len(entry[0].split(";")[0]) > 32 else ""}",
+                        entry[1],
+                        entry[2],
+                        f"{entry[3][0:32]}{"..." if len(entry[3]) > 32 else ""}",
+                        f"{"${:,.2f}".format(float(entry[4]))}" if entry[4] != "" else entry[4],
                     ],
                     row_color="#ddd" if index%2==0 else "#eee",
                 )

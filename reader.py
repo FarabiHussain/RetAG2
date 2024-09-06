@@ -1,28 +1,11 @@
+# import csv
+# import sys
 import importlib.util
-import os, csv, sys, datetime
+import os
+import datetime
 from icecream import ic
 from Database import Database
 from Path import resource_path
-
-
-# reads the passed file and returns it as a list
-def read_file_as_list(filename='agreements.csv') -> list:
-    history_dir = f"{os.getcwd()}\\write\\"
-    filepath = f'{history_dir}\\{filename}{'.csv' if '.csv' not in filename else ''}'
-    history = []
-
-    if not os.path.exists(history_dir):
-        print("path does not exist")
-    elif not os.path.exists(filepath):
-        print("file does not exist")
-    else:
-        with open(filepath, mode='r') as infile:
-            temp = list(csv.DictReader(infile))
-            temp.reverse()
-            history = temp
-
-    return history
-
 
 # imports a function pointed by a path
 def import_function(function_path=None, function_name=None) -> str:

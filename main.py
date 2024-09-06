@@ -6,6 +6,7 @@ from Img import *
 from GUI import *
 from App import *
 from Subapps import *
+from actions import test_button
 from reader import *
 from RenderFont import RenderFont
 from tkinter import messagebox
@@ -35,7 +36,7 @@ for subapp_name in blueprint:
         corner_radius=0,
         fg_color="lightgray",
         width=170,
-        height=100,
+        height=70,
         font=ctk.CTkFont(family="Roboto Bold"),
         hover_color='#ddd'
     )
