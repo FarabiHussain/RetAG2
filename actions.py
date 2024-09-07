@@ -274,6 +274,24 @@ def search_payments_button(app):
         )
 
 
+def switch_payment_status_button(app):
+    payments_table = app.components.get('due payments')
+    selected_payment_info = payments_table.get_selected_info()
+
+    db = Database()
+    db.cursor.execute(
+        f'''
+        UPDATE payments 
+        SET payment_made = {0 if selected_payment_info['payment_made'] == 1 else 1} 
+        WHERE filename = '{selected_payment_info['filename']}' and payment_date = '{selected_payment_info['payment_date']}'
+        '''
+    )
+    db.commit()
+    db.close()
+
+    search_payments_button(app)
+
+
 def generate_row_contents(quantity_offset=None, app_components=None, override_row_content={}):
     if app_components is None:
         return (None, None)
@@ -743,6 +761,9 @@ def handle_action(app=None, action="", blueprint={}):
 
     elif (action == "search payments"):
         search_payments_button(app)
+
+    elif (action == "switch payment status"):
+        switch_payment_status_button(app)
 
     elif (action == "open selected"):
         searched_filepath, searched_filename = find_file(app=app)

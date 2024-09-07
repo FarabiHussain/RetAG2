@@ -1,5 +1,6 @@
 # from RenderFont import RenderFont
 import customtkinter as ctk
+from Img import *
 from GUI import *
 from reader import import_function
 
@@ -9,13 +10,26 @@ class Subapp():
         self.frame = subapp_components[button_position]['frame']
         self.button = subapp_components[button_position]['button']
         self.button.configure(command=lambda:self.lift_app(subapp_components))
-
         self.subapp_name = subapp_name
+        self.blueprint = blueprint
+
+        if button_position == 0:
+            lg_img = Img("lg")
+
+            ctk.CTkButton(
+                master=app.root,
+                text='',
+                border_width=0,
+                corner_radius=0,
+                fg_color="black",
+                width=170,
+                height=70,
+                hover_color='black',
+                image=lg_img.get("a&m.png")
+            ).place(x=0, y=1)
 
         if subapp_name.lower() != 'init':
-            self.button.place(x=0, y=(70*button_position) + 3 + (3*button_position))
-
-        self.blueprint = blueprint
+            self.button.place(x=0, y=(70*(button_position+1)) + 12 + (1*button_position))
 
         app.subapp_components[subapp_name] = subapp_components
         self.render_app(self.frame, blueprint, app, imgs, columns_weights, subapp_components)
@@ -48,9 +62,9 @@ class Subapp():
 
         if master is None:
             self.page_columns = [
-                ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
-                ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
-                ctk.CTkFrame(master=frame, fg_color="white", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="#ffffff", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="#ffffff", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="#ffffff", height=728, width=460, border_width=0),
             ]
 
             if columns_weights == [1,1,1]:
@@ -67,6 +81,10 @@ class Subapp():
                 self.page_columns[0].configure(width=940)
                 self.page_columns[0].place(x=25, y=25)
                 self.page_columns[1].place(x=965, y=25)
+
+            elif columns_weights == [1,0,0] or columns_weights == [2,0,0] or columns_weights == [3,0,0]:
+                self.page_columns[0].configure(width=1300)
+                self.page_columns[0].place(x=25, y=25)
 
 
         offset = 0

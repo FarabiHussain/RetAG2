@@ -670,16 +670,22 @@ class TabView():
 
                 elif comp_type == "combo":
                     self.tab_contents[comp] = ComboBox(
-                    master=self.tabs[new_tabs[index]], 
-                    app=app, 
-                    label_text=comp, 
-                    left_offset=10, 
-                    top_offset=offset, 
-                    options=each_tab[comp]['options'], 
-                    default_option=(None if 'default' not in each_tab[comp] else each_tab[comp]['default']),
-                )
+                        master=self.tabs[new_tabs[index]], 
+                        app=app, 
+                        label_text=comp, 
+                        left_offset=10, 
+                        top_offset=offset, 
+                        options=each_tab[comp]['options'], 
+                        default_option=(None if 'default' not in each_tab[comp] else each_tab[comp]['default']),
+                    )
 
-                if comp in self.tab_contents:
+                elif comp_type == "break":
+                   self.tab_contents[comp] = RowBreak(
+                        master=self.tabs[new_tabs[index]], 
+                        heading=each_tab[comp]['heading']
+                    )
+
+                if comp in self.tab_contents and comp_type != 'break':
                     self.tab_contents[comp].label.configure(width=180)
 
                 app.add_component(comp, self.tab_contents[comp])

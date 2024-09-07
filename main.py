@@ -70,7 +70,7 @@ def on_closing():
         Database().close()
 
         for dir in ['write', 'output/agreements','output/receipts','output/invitations','output/imm5476']:
-            for f in glob.glob(f"./{dir}/*"):
+            for f in glob(f"./{dir}/*"):
                 os.remove(f)
 
         app.root.destroy()
