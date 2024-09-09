@@ -1,7 +1,8 @@
-# import threading
+import threading
 # import sqlite3
 import datetime
 from datetime import datetime as dt
+import time
 from dateutil import relativedelta as rd
 import customtkinter as ctk
 import os
@@ -87,8 +88,8 @@ def reset_button(app=None, blueprint={}, action=""):
                 app.components.get('case ID').set(read_case_id())
 
     if ("receipt" in action):
-        app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-        app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+        app.components.get('cart').tools.buttons[3].configure(fg_color='white', text_color="white", state='disabled', text="$0.00")
+        app.components.get('cart').tools.buttons[4].configure(fg_color='white', text_color="white", state='disabled', text="$0.00")
 
 
 def test_button(app):
@@ -235,6 +236,7 @@ def search_files_button(app):
 
 
 def search_payments_button(app):
+
     search_in_date = app.components['show payments on date'].get()
     payment_status = app.components['payment status'].get()
     payments_table = app.components.get('due payments')
@@ -284,41 +286,43 @@ def search_attendance(app):
     row_info_list = []
     table.reset()
 
-    table.set_table_title(new_title = f'Showing entries made on {datetime.datetime.strftime(dt_object, '%b %d, %Y')}')
+    try:
+        db = Database()
+        db.database.row_factory = db.dict_factory
 
-    db = Database()
-    db.database.row_factory = db.dict_factory
+        retrieved_entries = db.database.execute(
+            f'''
+            SELECT *
+            FROM attendance
+            WHERE date = '{search_in_date}'
+            LIMIT 15
+            '''
+        ).fetchall()
 
-    retrieved_entries = db.database.execute(
-        f'''
-        SELECT *
-        FROM attendance
-        WHERE date = '{search_in_date}'
-        LIMIT 15
-        '''
-    ).fetchall()
+        db.close()
 
-    db.close()
+        for entry in reversed(retrieved_entries):
+            new_row = [
+                entry.get('staff_name'), 
+                datetime.datetime.strftime(dt_object, '%b %d, %Y'), 
+                datetime.datetime.strftime(datetime.datetime.strptime(entry.get('time'), '%H:%M:%S'), '%I:%M %p'),
+                'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
+            ]
 
-    for entry in reversed(retrieved_entries):
-        new_row = [
-            entry.get('staff_name'), 
-            datetime.datetime.strftime(dt_object, '%b %d, %Y'), 
-            entry.get('time'), 
-            'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
-        ]
+            row_contents_list.append(new_row)
+            row_info_list.append(entry)
 
-        row_contents_list.append(new_row)
-        row_info_list.append(entry)
+        if len(row_contents_list) > 0:
+            table.selected_row = None
+            table.selected_row_info = None
 
-    if len(row_contents_list) > 0:
-        table.selected_row = None
-        table.selected_row_info = None
+            table.add(
+                row_contents=row_contents_list,
+                row_info=row_info_list,
+            )
+    except Exception as e:
+        ErrorPopup(f'Error when searching for attendance\n{e}')
 
-        table.add(
-            row_contents=row_contents_list,
-            row_info=row_info_list,
-        )
 
 
 def switch_payment_status_button(app):

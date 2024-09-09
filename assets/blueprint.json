@@ -337,11 +337,7 @@
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
-        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": [
-                "A",
-                "B",
-                "C"
-            ]
+        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": []
         },
 
         "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
@@ -350,7 +346,7 @@
             ]
         },
 
-        "clocked in today": {"column": 1, "title_text": "recent clock-ins", "type": "table", "headers": [
+        "clocked in today": {"column": 1, "title_text": "recent entries", "type": "table", "headers": [
                 "staff name", 
                 "date", 
                 "time", 

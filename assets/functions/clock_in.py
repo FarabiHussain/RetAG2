@@ -1,7 +1,7 @@
 import os
 from icecream import ic
 from Database import Database
-from Popups import ErrorPopup
+from Popups import ErrorPopup, PromptPopup
 from actions import search_attendance
 from writer import write_to_database
 from datetime import datetime as dt
@@ -26,32 +26,26 @@ def callback(app=None):
     ).fetchall()
     db.close()
 
-    ic(retrieved_entries)
-
     if len(retrieved_entries) > 0 and (retrieved_entries[0]['type'] == 1):
         prev_time = retrieved_entries[0]['time']
         prev_date = dt.strptime(retrieved_entries[0]['date'], "%Y%m%d")
-        ErrorPopup(f'{staff_name} has previously clocked in at {prev_time} on {dt.strftime(prev_date, '%b %d, %Y')}')
+        ErrorPopup(f'{staff_name} has previously clocked in at {prev_time} on {dt.strftime(prev_date, '%b %d, %Y')}. Must be clocked out to be able to clock in.')
         return
+    
 
     dt_object = dt.now()
-    year = (dt.strftime(dt_object, "%Y"))
-    month = (dt.strftime(dt_object, "%m"))
-    day = (dt.strftime(dt_object, "%d"))
-    hour = (dt.strftime(dt_object, "%H"))
-    minute = (dt.strftime(dt_object, "%M"))
-    sec = (dt.strftime(dt_object, "%S"))
 
-    write_to_database(
-        table_name='attendance', 
-        rows_to_write=(
-            staff_name,
-            dt_object.timestamp(),
-            os.environ['COMPUTERNAME'],
-            f'{year}{month}{day}',
-            f'{hour}.{minute}.{sec}',
-            1,
+    if PromptPopup(f'Clock in {staff_name} at {(dt.strftime(dt_object, "%H:%I %p, %b %d, %Y"))}?').get():
+        write_to_database(
+            table_name='attendance', 
+            rows_to_write=(
+                staff_name,
+                dt_object.timestamp(),
+                os.environ['COMPUTERNAME'],
+                dt.strftime(dt_object, "%Y%m%d"),
+                dt.strftime(dt_object, "%H:%M:%S"),
+                1,
+            )
         )
-    )
 
-    search_attendance(app)
+        search_attendance(app)

@@ -875,7 +875,7 @@ class RowWidget():
                     text_color="#ffffff", 
                     border_width=0,
                     corner_radius=0,
-                    fg_color="#000000" if row_contents[i] != "" else "light gray",
+                    fg_color="#000000" if row_contents[i] != "" else "#ffffff",
                     width=(parent_width-61)/table_width,
                     height=38,
                     font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
@@ -1059,12 +1059,12 @@ class TableWidget():
     def navigate(self, page=0):
 
         if (page == 1):
-            self.tools.buttons[0].configure(fg_color="#ffffff", state="disabled", text="")
+            self.tools.buttons[0].configure(fg_color="#eeeeee", state="disabled", text="")
             self.tools.buttons[1].configure(fg_color="#000000", state="normal", text=f"page {page+1} ▶")
 
         elif (page == math.ceil(len(self.rows)/self.rows_per_page)-1):
             self.tools.buttons[0].configure(fg_color="#000000", state="normal", text=f"◀ page {page-1}")
-            self.tools.buttons[1].configure(fg_color="#ffffff", state="disabled", text="")
+            self.tools.buttons[1].configure(fg_color="#eeeeee", state="disabled", text="")
 
         else:
             self.tools.buttons[0].configure(fg_color="#000000", state="normal", text=f"◀ page {page-1}")

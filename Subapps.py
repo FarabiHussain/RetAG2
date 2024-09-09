@@ -2,14 +2,22 @@
 import customtkinter as ctk
 from Img import *
 from GUI import *
+from actions import search_attendance, search_payments_button
 from reader import import_function
 
 class Subapp():
     def __init__(self, subapp_components=None, blueprint=None, app=None, imgs=None, subapp_name="Subapp", button_position=0, columns_weights=[1,1,1]) -> None:
 
+        if (subapp_name.lower() == "attendance"):
+            callback_function = search_attendance
+        elif (subapp_name.lower() == "payment dates"):
+            callback_function = search_payments_button
+        else:
+            callback_function = None
+
         self.frame = subapp_components[button_position]['frame']
         self.button = subapp_components[button_position]['button']
-        self.button.configure(command=lambda:self.lift_app(subapp_components))
+        self.button.configure(command=lambda:self.lift_app(subapp_components, callback_function, app))
         self.subapp_name = subapp_name
         self.blueprint = blueprint
 
@@ -45,16 +53,20 @@ class Subapp():
             setup_function = import_function(function_path, "callback")
             setup_function(self, app, subapp_components)
 
+
     def reset(self):
         return
 
 
-    def lift_app(self, subapp_components):
+    def lift_app(self, subapp_components=[], callback_function=None, app=None):
         for curr_subapp in subapp_components:
             curr_subapp['button'].configure(text_color="white", fg_color="gray", hover_color="light gray")
 
         self.button.configure(text_color="black", fg_color="white", hover_color="white")
         self.frame.lift()
+
+        if callback_function is not None and app is not None:
+            callback_function(app)
 
 
     def render_app(self, frame, blueprint, app, imgs, columns_weights, subapp_components, master=None):

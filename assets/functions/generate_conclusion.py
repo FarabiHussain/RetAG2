@@ -32,7 +32,8 @@ def callback(app=None):
 
 
     def run_model():
-        app.components['generate conclusion'].component.configure(state='disabled', fg_color='light gray')
+        generate_conclusion_button = app.components['generate conclusion'].component[0]
+        generate_conclusion_button.configure(state='disabled', fg_color='light gray')
         app.components['conclusion content'].set('loading...')
 
         prompt=[f'Write a closing paragraph for an invitation letter to be submitted to IRCC including the following information:\nI am inviting the following people:']
@@ -61,7 +62,7 @@ def callback(app=None):
         prompt_response = get_prompt_response("\n".join(prompt))
 
         app.components['conclusion content'].set(prompt_response)
-        app.components['generate conclusion'].component.configure(state='normal', fg_color='#33008B')
+        generate_conclusion_button.configure(state='normal', fg_color='#33008B')
 
 
     child_thread_1 = threading.Thread(target=run_model)
