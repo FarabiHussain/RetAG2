@@ -19,7 +19,7 @@ class App():
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
         self.version = "v2.0.22"
-        self.root.title(f"AMCAIM Toolbox {self.version}")
+        self.root.title(f"RETAG {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}
         self.components = {}

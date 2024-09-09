@@ -62,7 +62,7 @@ for i, subapp_name in enumerate(blueprint):
 def on_startup():
     if "--test" in sys.argv:
         test_button(app)
-        # subapp_components[4]['subapp_obj'].lift_app(subapp_components)
+        subapp_components[5]['subapp_obj'].lift_app(subapp_components)
 
 
 def on_closing():

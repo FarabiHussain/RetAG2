@@ -105,7 +105,7 @@
         "PST percentage": {"column": 0, "type": "entry", "default": "7.0"},
         "price": {"column": 0, "type": "entry", "default": "$560.00"},
         "adjust rate": {"column": 0, "type": "rowbutton", "label": "Adjust Rate", "method": "/assets/functions/adjust_rate.py"},
-        "cart": {"column": 1, "type": "table", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
+        "cart": {"column": 1, "type": "table", "title_text": "items in cart", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
 
         "callbacks": {
             "service": "/assets/functions/service.py",
@@ -141,11 +141,15 @@
 
         "break 0": {"column": 0, "type": "break", "heading": "SEARCH PAYMENTS BY FILTERS"},
         "show payments on date": {"column": 0, "type": "datepicker", "show_day":"true"},
-        "yesterday": {"column": 0, "type": "rowbutton", "label": "Previous Day", "method": "/assets/functions/yesterday.py"},
-        "tomorrow": {"column": 0, "type": "rowbutton", "label": "Following Day", "method": "/assets/functions/tomorrow.py"},
+        "day buttons": {"column": 0, "type": "rowbutton", "label": ["Previous Day", "Today", "Following Day"], "method": [
+                "/assets/functions/yesterday.py", 
+                "/assets/functions/today.py", 
+                "/assets/functions/tomorrow.py"
+            ]
+        },
         "payment status": {"column": 0, "type": "combo", "default": "All", "options": ["All", "Paid", "Unpaid"]},
 
-        "due payments": {"column": 1, "type": "table", "headers": ["case ID", "client name", "contact info", "payment amount", "payment made"]},
+        "due payments": {"column": 1, "type": "table", "title_text": "payments due", "headers": ["case ID", "client name", "contact info", "payment amount", "payment made"]},
 
         "buttons": {
             "search payments": "#383FBC",
@@ -167,7 +171,8 @@
                 "Use of Representative"
             ]
         },
-        "search results": {"column": 1, "type": "table", "headers": [
+
+        "search results": {"column": 1, "type": "table", "title_text": "search results", "headers": [
                 "document type", 
                 "client name", 
                 "created date", 
@@ -328,24 +333,29 @@
         }
     },
 
-    "Affidavits": {
-        "column_weights": [3,0,0],
+    "Attendance": {
+        "column_weights": [1,2,0],
 
-        "affidavit information": {"column": 0, "type": "tabview", "tabs": ["sponsorship endorsement"], 
-            "tab_components": [
-                {
-                    "break 0": {"column": 0, "type": "break", "heading": "AFFIANT (DECLARER) INFORMATION"},
-                    "affiant name": {"column": 0, "type": "entry"},
-                    "affiant date of birth": {"column": 0, "type": "datepicker", "show_day":"true"},
-                    "affiant residential address": {"column": 0, "type": "entry"},
-                    "affiant email address": {"column": 0, "type": "entry"},
-                    "affiant phone number": {"column": 0, "type": "entry"}
-                }
+        "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
+        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": [
+                "A",
+                "B",
+                "C"
             ]
         },
 
-        "buttons": {
-            "create": "#1A8405"
+        "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
+                "/assets/functions/clock_in.py", 
+                "/assets/functions/clock_out.py"
+            ]
+        },
+
+        "clocked in today": {"column": 1, "title_text": "recent clock-ins", "type": "table", "headers": [
+                "staff name", 
+                "date", 
+                "time", 
+                "type"
+            ]
         }
     },
 

@@ -15,6 +15,7 @@ from subprocess import DEVNULL, STDOUT, check_call
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import handle_action
+from reader import import_function
 
 family_medium="Roboto Bold"
 family_bold="Roboto Bold"
@@ -44,16 +45,16 @@ class GUI:
 
 
 class RowBreak():
-    def __init__(self, master=None, left_offset=0, top_offset=0, heading="") -> None:
+    def __init__(self, master=None, left_offset=0, top_offset=0, heading="", height=32, width=450, fg_color="#808080", text_color="#ffffff") -> None:
         self.breakline = ctk.CTkLabel(
             master, 
             text=heading.upper(), 
-            height=32, 
-            width=450, 
-            fg_color="#808080", 
-            text_color="#ffffff", 
+            height=height, 
+            width=width, 
+            fg_color=fg_color, 
+            text_color=text_color, 
             corner_radius=2, 
-            font=ctk.CTkFont(family=family_bold, weight='bold')
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
 
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
@@ -64,19 +65,51 @@ class RowBreak():
 
 class RowButton(GUI):
     def __init__(self, master=None, app=None, left_offset=0, top_offset=0, label="", method=None) -> None:
-        self.component = ctk.CTkButton(
-            master, 
-            text=label.upper(), 
-            height=32, 
-            width=450, 
-            fg_color="#33008B", 
-            text_color="#ffffff", 
-            corner_radius=2, 
-            font=ctk.CTkFont(family=family_bold, weight='bold'), 
-            command=lambda: method(app), 
-        )
 
-        self.component.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
+        if type(label) != list:
+            label = [label]
+
+        if type(method) != list:
+            method = [method]
+
+        if len([label]) > 2:
+            print("button count can only be 1, 2, or 3")
+
+        btn_count = len(label)
+        self.component = []
+        column_offset = 1 if (btn_count % 2 == 0) else 0 # offset needs to be 1 if len(column) is even for the math to work
+        column_span = (btn_count*btn_count) - (6*btn_count) + 10
+        self.button_frame = ctk.CTkFrame(master=master, fg_color="#ffffff", border_width=0, height=32)
+
+        for curr_label in label:
+            current_component = ctk.CTkButton(
+                self.button_frame, 
+                text=curr_label.upper(), 
+                height=30, 
+                width=(450/btn_count)-5, 
+                fg_color="#33008B", 
+                text_color="#ffffff", 
+                corner_radius=3, 
+                font=ctk.CTkFont(family=family_bold, weight='bold'), 
+            )
+
+            self.component.append(current_component)
+
+        for i in range(btn_count):
+            self.component[i].grid(row=top_offset, column=(btn_count * i) + column_offset, pady=0, padx=2, columnspan=column_span)
+
+        self.assign_command(app, method, 0)
+
+        self.button_frame.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
+
+    def assign_command(self, app, all_commands, curr_command_index):
+        if curr_command_index == len(all_commands):
+            return
+
+        else:
+            self.component[curr_command_index].configure(command=lambda: import_function(all_commands[curr_command_index], "callback")(app))
+            self.assign_command(app, all_commands, curr_command_index + 1)
+            return
 
     def reset(self) -> None:
         return
@@ -916,7 +949,7 @@ class RowWidget():
 
 
 class TableWidget():
-    def __init__(self, master=None, app=None, headers:list=[], rows:list=[], parent_width=0, parent_height=0, rows_per_page=15):
+    def __init__(self, master=None, app=None, headers:list=[], rows:list=[], parent_width=0, parent_height=0, rows_per_page=15, title_text=''):
 
         self.app = app
         self.rows = rows
@@ -929,6 +962,7 @@ class TableWidget():
         self.next_empty_index = 0
         self.selected_row = None
         self.selected_row_info = None
+        self.title_text = title_text
         self.page = 1
 
         for i in range(3):
@@ -987,9 +1021,33 @@ class TableWidget():
             table_obj=self
         )
 
-        self.header_frame.grid(row=0, column=1, pady=[9,0])
-        self.table_frame.grid(row=1, column=1, pady=[0,0])
-        self.tools_frame.grid(row=2, column=1, pady=[2,0])
+        if self.title_text != '':
+            self.title_frame = ctk.CTkFrame(
+                master=self.parent_frame, 
+                fg_color="#ffffff", 
+                border_width=0, 
+                width=self.parent_width, 
+                height=self.parent_height*0.05, 
+            )
+
+            self.title = RowBreak(
+                self.title_frame,
+                heading=self.title_text,
+                width=self.parent_width*0.93,
+                fg_color="#808080",
+                text_color="#ffffff"
+            )
+
+            self.title_frame.grid(row=0, column=1, pady=[0,0])
+            self.header_frame.grid(row=1, column=1, pady=[0,0])
+            self.table_frame.grid(row=2, column=1, pady=[0,0])
+            self.tools_frame.grid(row=3, column=1, pady=[2,0])
+            self.table_row = 2
+        else:
+            self.header_frame.grid(row=0, column=1, pady=[9,0])
+            self.table_frame.grid(row=1, column=1, pady=[0,0])
+            self.tools_frame.grid(row=2, column=1, pady=[2,0])
+            self.table_row = 1
 
         self.reset()
 
@@ -1030,7 +1088,7 @@ class TableWidget():
             height=self.parent_height*0.90, 
         )
 
-        self.table_frame.grid(row=1, column=1, pady=[2,0])
+        self.table_frame.grid(row=self.table_row, column=1, pady=[2,0])
 
 
     def update(self, page=1):
@@ -1095,7 +1153,7 @@ class TableWidget():
             height=self.parent_height*0.90, 
         )
 
-        self.table_frame.grid(row=1, column=1, pady=[2,0])
+        self.table_frame.grid(row=self.table_row, column=1, pady=[2,0])
 
         self.rows = []
         self.rows_rendered = []
@@ -1192,7 +1250,14 @@ class TableWidget():
         return self.selected_row_info
 
 
-class CheckboxGroup():
-    def __init__(self) -> None:
-        
-        pass
+    def set_table_title(self, new_title=''):
+        if self.title_text != '':
+            self.title = RowBreak(
+                self.title_frame,
+                heading=new_title,
+                width=self.parent_width*0.93,
+                fg_color="#008127",
+                text_color="#ffffff"
+            )
+
+            self.title_frame.grid(row=0, column=1, pady=[0,0])

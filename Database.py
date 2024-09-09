@@ -83,4 +83,17 @@ class Database:
             '''
         )
 
+        self.cursor.execute(
+            '''
+                CREATE TABLE IF NOT EXISTS attendance (
+                    staff_name TEXT, 
+                    timestamp TEXT,
+                    device TEXT,
+                    date TEXT, 
+                    time TEXT, 
+                    type INTEGER
+                );
+            '''
+        )
+
         self.database.close()

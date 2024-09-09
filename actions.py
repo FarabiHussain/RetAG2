@@ -242,6 +242,8 @@ def search_payments_button(app):
     row_info_list = []
     payments_table.reset()
 
+    payments_table.set_table_title(new_title = f'Showing payments due on {search_in_date}')
+
     db = Database()
     db.database.row_factory = db.dict_factory
 
@@ -269,6 +271,51 @@ def search_payments_button(app):
         payments_table.selected_row_info = None
 
         payments_table.add(
+            row_contents=row_contents_list,
+            row_info=row_info_list,
+        )
+
+
+def search_attendance(app):
+    dt_object = datetime.datetime.now()
+    search_in_date = datetime.datetime.strftime(dt_object, '%Y%m%d')
+    table = app.components.get('clocked in today')
+    row_contents_list = []
+    row_info_list = []
+    table.reset()
+
+    table.set_table_title(new_title = f'Showing entries made on {datetime.datetime.strftime(dt_object, '%b %d, %Y')}')
+
+    db = Database()
+    db.database.row_factory = db.dict_factory
+
+    retrieved_entries = db.database.execute(
+        f'''
+        SELECT *
+        FROM attendance
+        WHERE date = '{search_in_date}'
+        LIMIT 15
+        '''
+    ).fetchall()
+
+    db.close()
+
+    for entry in reversed(retrieved_entries):
+        new_row = [
+            entry.get('staff_name'), 
+            datetime.datetime.strftime(dt_object, '%b %d, %Y'), 
+            entry.get('time'), 
+            'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
+        ]
+
+        row_contents_list.append(new_row)
+        row_info_list.append(entry)
+
+    if len(row_contents_list) > 0:
+        table.selected_row = None
+        table.selected_row_info = None
+
+        table.add(
             row_contents=row_contents_list,
             row_info=row_info_list,
         )
@@ -372,7 +419,6 @@ def remove_item_button(app):
         return
 
     cart.remove()
-    # cart.unhighlight()
 
     update_total_row(cart=cart)
 

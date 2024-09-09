@@ -173,9 +173,8 @@ class Subapp():
                     left_offset=10, 
                     top_offset=offset, 
                     label=specs['label'],
-                    method=import_function(specs['method'], "callback")
+                    method=specs['method']
                 )
-
 
             elif specs['type'] == "table":
                 new_component = TableWidget(
@@ -183,6 +182,7 @@ class Subapp():
                     headers=specs['headers'],
                     parent_width=column_widths[blueprint['column_weights'][specs['column']]],
                     app=app, 
+                    title_text=('' if 'title_text' not in specs else specs['title_text'])
                 )
 
             elif specs['type'] == "tabview":
