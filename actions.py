@@ -15,7 +15,7 @@ from icecream import ic
 from Popups import ErrorPopup
 from dotenv import load_dotenv
 from writer import obscure, unobscure, remove_from_database, write_conduct, write_imm5476, write_invitation, write_payment_auth, write_receipt, write_retainer
-from reader import read_case_id
+from reader import import_function, read_case_id
 from docx import Document
 from Path import resource_path
 from Popups import ErrorPopup, InfoPopup, PromptPopup
@@ -66,11 +66,55 @@ def decrypt_button(app):
                 plain_text = unobscure(cipher_text)
                 decryptor_window.__decrypted_strvar.set(plain_text)
             else:
-                ErrorPopup(msg=f'Wrong password')
+                ErrorPopup(msg=f'Incorrect password')
 
     # bring the window forward if found
     else:
         decryptor_window.show()
+
+
+def adjust_time_button(app):
+    from GUI import WindowView, DatePicker, TimePicker, RowBreak, Entry, ComboBox
+    from datetime import datetime as dt
+    load_dotenv()
+
+    # retrieve object from app.components
+    adjust_time_window = app.get_window("adjust time")
+
+    # check whether the object contains a window
+    if (adjust_time_window is not None) and (not adjust_time_window.body.winfo_exists()):
+        adjust_time_window = None
+
+    # create a new object if None was found
+    if adjust_time_window is None:
+        adjust_time_window = WindowView(app=app, window_name="Adjusted clock in/out", width=500, height=360)
+        app.add_window("adjust time", adjust_time_window)
+
+        frame = ctk.CTkFrame(master=adjust_time_window.body, fg_color='#ffffff')
+        frame.place(x=20, y=20)
+
+        RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
+        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(os.getenv('staff_names').split(',')))
+        timepicker = TimePicker(frame, label_text="time (24-hour format)", top_offset=2)
+        datepicker = DatePicker(frame, label_text="date", top_offset=3)
+        adminpass = Entry(frame, label_text="admin password", top_offset=4, is_password=True)
+
+        ctk.CTkButton(frame, text="CLOCK IN", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:run_decryptor("/assets/functions/clock_in.py"), width=180, height=36).grid(row=5, column=0, columnspan=2, pady=10)
+        ctk.CTkButton(frame, text="CLOCK OUT", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:run_decryptor("/assets/functions/clock_out.py"), width=180, height=36).grid(row=5, column=1, columnspan=3, pady=10)
+
+        def run_decryptor(functionpath) -> str:
+            input_password = adminpass.get()
+
+            if os.getenv('PW') == obscure(input_password):
+                staff_name = staffpicker.get()
+                adjusted_time = f'{dt.strftime(dt.strptime(datepicker.get(), "%b %d, %Y"), "%Y%m%d")}_{dt.strftime(dt.strptime(timepicker.get(), "%H:%M"), "%H%M")}'
+                import_function(functionpath, "callback")(app, adjusted_time, staff_name)
+            else:
+                ErrorPopup(msg='Incorrect password')
+
+    # bring the window forward if found
+    else:
+        adjust_time_window.show()
 
 
 def reset_button(app=None, blueprint={}, action=""):
@@ -322,7 +366,6 @@ def search_attendance(app):
             )
     except Exception as e:
         ErrorPopup(f'Error when searching for attendance\n{e}')
-
 
 
 def switch_payment_status_button(app):
@@ -814,6 +857,9 @@ def handle_action(app=None, action="", blueprint={}):
 
     elif (action == "switch payment status"):
         switch_payment_status_button(app)
+
+    elif (action == "adjust time"):
+        adjust_time_button(app)
 
     elif (action == "open selected"):
         searched_filepath, searched_filename = find_file(app=app)

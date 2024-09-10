@@ -60,9 +60,9 @@ class Subapp():
 
     def lift_app(self, subapp_components=[], callback_function=None, app=None):
         for curr_subapp in subapp_components:
-            curr_subapp['button'].configure(text_color="white", fg_color="gray", hover_color="light gray")
+            curr_subapp['button'].configure(text_color="white", fg_color="gray", hover_color="light gray", state='normal')
 
-        self.button.configure(text_color="black", fg_color="white", hover_color="white")
+        self.button.configure(text_color="black", fg_color="white", hover_color="white", state='disabled')
         self.frame.lift()
 
         if callback_function is not None and app is not None:
@@ -97,7 +97,6 @@ class Subapp():
             elif columns_weights == [1,0,0] or columns_weights == [2,0,0] or columns_weights == [3,0,0]:
                 self.page_columns[0].configure(width=1300)
                 self.page_columns[0].place(x=25, y=25)
-
 
         offset = 0
 

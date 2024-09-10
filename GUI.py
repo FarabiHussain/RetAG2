@@ -7,6 +7,8 @@ import math
 import customtkinter as ctk
 import datetime
 import os
+
+from dotenv import load_dotenv
 from Popups import ErrorPopup, InfoPopup, PromptPopup
 from Path import *
 from tkinter import StringVar
@@ -121,6 +123,14 @@ class ComboBox(GUI):
 
         super().__init__(master, label_text, left_offset, top_offset)
 
+        if type(options) != list:
+            if type(options) == str and 'env.' in options:
+                print('searching env for option')
+                load_dotenv()
+                options = sorted(os.getenv(options.replace('env.','')).split(','))
+            else:
+                options=[]
+
         self.options = options
         self.default_string = default_string
         self.stringvar = StringVar(value="no options added" if options is None else self.default_string)
@@ -176,7 +186,7 @@ class ComboBox(GUI):
 
 
 class Entry(GUI):
-    def __init__(self, master=None, app=None, width=250, label_text="", left_offset=0, top_offset=0, placeholder="", default_text=None) -> None:
+    def __init__(self, master=None, app=None, width=250, label_text="", left_offset=0, top_offset=0, placeholder="", default_text=None, is_password=False) -> None:
         """create a new GUI Entry object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
@@ -195,6 +205,9 @@ class Entry(GUI):
             textvariable=self.stringvar,
             font=ctk.CTkFont(family=family_medium),
         )
+
+        if is_password:
+            self.component.configure(show="*")
 
         self.reset()
         self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
@@ -418,6 +431,79 @@ class DatePicker(GUI):
 
         self.stringvar_day.set(str(d))
         self.stringvar_year.set(str(y))
+
+        return self.get()
+
+
+class TimePicker(GUI):
+    def __init__(self, master=None, label_text="", left_offset=0, top_offset=0) -> None:
+        """create a new GUI TimePicker object"""
+
+        super().__init__(master, label_text, left_offset, top_offset)
+
+        self.today = datetime.datetime.now()
+        self.stringvar_hour = StringVar(value=self.today.strftime("%H"))
+        self.stringvar_min = StringVar(value=self.today.strftime("%M"))
+
+        ctk.CTkLabel(master, height=32, width=70, text="").grid(row=top_offset, column=1, pady=10, padx=5)
+
+        def populate_upto(upperlimit):
+            populate_with = []
+            for i in range(upperlimit):
+                populate_with.append(("{:02}").format(i))
+            return populate_with
+
+        self.component_hour = ctk.CTkComboBox(
+            master,
+            width=80,
+            height=32,
+            border_width=0,
+            corner_radius=2,
+            bg_color="#ffffff",
+            fg_color="#dddddd",
+            values=populate_upto(24),
+            variable=self.stringvar_hour,
+            font=ctk.CTkFont(family=family_medium),
+        )
+
+        self.component_hour.grid(row=top_offset, column=2, pady=10, padx=5)
+
+        self.component_min = ctk.CTkComboBox(
+            master,
+            width=80,
+            height=32,
+            border_width=0,
+            corner_radius=2,
+            bg_color="#ffffff",
+            fg_color="#dddddd",
+            values=populate_upto(60),
+            variable=self.stringvar_min,
+            font=ctk.CTkFont(family=family_medium),
+        )
+
+        self.component_min.grid(row=top_offset, column=3, pady=10, padx=5)
+
+    # set the date picker back to the current date
+    def reset(self) -> None:
+        self.stringvar_hour.set(self.today.strftime("%H"))
+        self.stringvar_min.set(self.today.strftime("%M"))
+
+    # return a formatted date
+    def get(self) -> str:
+        hr = self.stringvar_hour.get()
+        min = int(self.stringvar_min.get())
+
+        return f"{hr}:{min}"
+
+    # set the date 
+    def set(self, hr: str|int = None, min: str|int = None) -> str:
+        if hr is None:
+            hr = self.today.strftime("%H")
+        if min is None:
+            min = self.today.strftime("%M")
+
+        self.stringvar_hour.set(str(hr))
+        self.stringvar_min.set(str(min))
 
         return self.get()
 
