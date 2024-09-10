@@ -61,6 +61,7 @@ for i, subapp_name in enumerate(blueprint):
 
 def on_startup():
     if "--test" in sys.argv:
+        app.root.configure(fg_color='#000000')
         # test_button(app)
         subapp_components[5]['subapp_obj'].lift_app(subapp_components)
         pass
@@ -70,9 +71,9 @@ def on_closing():
     if "--test" in sys.argv:
         Database().close()
 
-        for dir in ['write', 'output/agreements','output/receipts','output/invitations','output/imm5476']:
-            for f in glob(f"./{dir}/*"):
-                os.remove(f)
+        # for dir in ['write', 'output/agreements','output/receipts','output/invitations','output/imm5476']:
+        #     for f in glob(f"./{dir}/*"):
+        #         os.remove(f)
 
         app.root.destroy()
 

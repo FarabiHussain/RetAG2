@@ -94,7 +94,7 @@ def adjust_time_button(app):
         frame.place(x=20, y=20)
 
         RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
-        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(os.getenv('staff_names').split(',')))
+        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(os.getenv('STAFF').split(',')))
         timepicker = TimePicker(frame, label_text="time (24-hour format)", top_offset=2)
         datepicker = DatePicker(frame, label_text="date", top_offset=3)
         adminpass = Entry(frame, label_text="admin password", top_offset=4, is_password=True)
@@ -324,7 +324,6 @@ def search_payments_button(app):
 
 def search_attendance(app):
     dt_object = datetime.datetime.now()
-    search_in_date = datetime.datetime.strftime(dt_object, '%Y%m%d')
     table = app.components.get('clocked in today')
     row_contents_list = []
     row_info_list = []
@@ -338,17 +337,17 @@ def search_attendance(app):
             f'''
             SELECT *
             FROM attendance
-            WHERE date = '{search_in_date}'
+            ORDER BY rowid DESC
             LIMIT 15
             '''
         ).fetchall()
 
         db.close()
 
-        for entry in reversed(retrieved_entries):
+        for entry in (retrieved_entries):
             new_row = [
                 entry.get('staff_name'), 
-                datetime.datetime.strftime(dt_object, '%b %d, %Y'), 
+                datetime.datetime.strftime(datetime.datetime.strptime(entry.get('date'), '%Y%m%d'), '%b %d, %Y'), 
                 datetime.datetime.strftime(datetime.datetime.strptime(entry.get('time'), '%H:%M:%S'), '%I:%M %p'),
                 'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
             ]

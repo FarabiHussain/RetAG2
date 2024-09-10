@@ -337,7 +337,7 @@
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
-        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": "env.staff_names"},
+        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": "env.STAFF"},
 
         "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
                 "/assets/functions/clock_in.py", 
