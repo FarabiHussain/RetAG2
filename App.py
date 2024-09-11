@@ -27,6 +27,10 @@ class App():
         self.windows = {}
         self.app_icon_passed = self.__check_app_ico()
 
+        if "--test" in sys.argv:
+            ctk.set_appearance_mode("dark")
+            self.root.configure(fg_color='#222222')
+
         db = Database()
         db.init_tables()
 

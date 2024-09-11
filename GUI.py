@@ -32,7 +32,7 @@ class GUI:
         self.stringvar = StringVar(value="")
         self.component = None
 
-        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_bold))
+        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_bold), text_color="white" if "--test" in sys.argv else "black")
         self.label.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=1)
 
     def get(self) -> str:
@@ -54,8 +54,9 @@ class RowBreak():
             height=height, 
             width=width, 
             fg_color=fg_color, 
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444", 
             text_color=text_color, 
-            corner_radius=2, 
+            corner_radius=3, 
             font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
 
@@ -81,7 +82,7 @@ class RowButton(GUI):
         self.component = []
         column_offset = 1 if (btn_count % 2 == 0) else 0 # offset needs to be 1 if len(column) is even for the math to work
         column_span = (btn_count*btn_count) - (6*btn_count) + 10
-        self.button_frame = ctk.CTkFrame(master=master, fg_color="#ffffff", border_width=0, height=32)
+        self.button_frame = ctk.CTkFrame(master=master, fg_color="white" if "--test" not in sys.argv else "#444444", border_width=0, height=32)
 
         for curr_label in label:
             current_component = ctk.CTkButton(
@@ -93,6 +94,7 @@ class RowButton(GUI):
                 text_color="#ffffff", 
                 corner_radius=3, 
                 font=ctk.CTkFont(family=family_bold, weight='bold'), 
+                bg_color="white" if "--test" not in sys.argv else "#444444"
             )
 
             self.component.append(current_component)
@@ -141,9 +143,9 @@ class ComboBox(GUI):
             width=250,
             height=32,
             border_width=0,
-            corner_radius=2,
-            bg_color="#ffffff",
-            fg_color="#dddddd",
+            corner_radius=3,
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             values=options,
             variable=self.stringvar,
             font=ctk.CTkFont(family=family_medium),
@@ -199,9 +201,9 @@ class Entry(GUI):
             width=width,
             height=32,
             border_width=0,
-            corner_radius=2,
-            bg_color="#ffffff",
-            fg_color="#dddddd",
+            corner_radius=3,
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             textvariable=self.stringvar,
             font=ctk.CTkFont(family=family_medium),
         )
@@ -237,9 +239,9 @@ class TextBox(GUI):
             master=master,
             width=width,
             height=lines*20,
-            bg_color="#ffffff", 
-            fg_color="#ffffff", 
-            text_color='#444444', 
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#444444",
+            text_color='#444444' if "--test" not in sys.argv else "#666666", 
             wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
         )
@@ -255,8 +257,8 @@ class TextBox(GUI):
             height=height, 
             border_width=0, 
             corner_radius=4, 
-            bg_color="#ffffff", 
-            fg_color="#eeeeee", 
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
         )
@@ -293,9 +295,9 @@ class DatePicker(GUI):
             width=70,
             height=32,
             border_width=0,
-            corner_radius=2,
-            bg_color="#ffffff",
-            fg_color="#dddddd",
+            corner_radius=3,
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             values=self.populate_days(),
             variable=self.stringvar_day,
             font=ctk.CTkFont(family=family_medium)
@@ -312,9 +314,9 @@ class DatePicker(GUI):
             width=80,
             height=32,
             border_width=0,
-            corner_radius=2,
-            bg_color="#ffffff",
-            fg_color="#dddddd",
+            corner_radius=3,
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             values=self.populate_months(),
             variable=self.stringvar_month,
             command=self.repopulate_days,
@@ -328,9 +330,9 @@ class DatePicker(GUI):
             width=80,
             height=32,
             border_width=0,
-            corner_radius=2,
-            bg_color="#ffffff",
-            fg_color="#dddddd",
+            corner_radius=3,
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             values=self.populate_years(populate_years_with),
             variable=self.stringvar_year,
             command=self.repopulate_days,
@@ -458,9 +460,9 @@ class TimePicker(GUI):
             width=80,
             height=32,
             border_width=0,
-            corner_radius=2,
-            bg_color="#ffffff",
-            fg_color="#dddddd",
+            corner_radius=3,
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             values=populate_upto(24),
             variable=self.stringvar_hour,
             font=ctk.CTkFont(family=family_medium),
@@ -473,9 +475,9 @@ class TimePicker(GUI):
             width=80,
             height=32,
             border_width=0,
-            corner_radius=2,
-            bg_color="#ffffff",
-            fg_color="#dddddd",
+            corner_radius=3,
+            bg_color="#ffffff" if "--test" not in sys.argv else "#444444",
+            fg_color="#dddddd" if "--test" not in sys.argv else "#222222",
             values=populate_upto(60),
             variable=self.stringvar_min,
             font=ctk.CTkFont(family=family_medium),
@@ -603,21 +605,25 @@ class PaymentSplitter(GUI):
                     year=dt_object.strftime("%Y")
                 )
 
-                component_obj.label.configure(text_color="#000000")
-                component_obj.pay_amount.component.configure(fg_color="light green", text_color="#000000")
-                component_obj.pay_date.component_day.configure(fg_color="light green", text_color="#000000")
-                component_obj.pay_date.component_month.configure(fg_color="light green", text_color="#000000")
-                component_obj.pay_date.component_year.configure(fg_color="light green", text_color="#000000")
+                set_text_color = "#000000"
+                component_obj.label.configure(text_color="#000000" if "--test" not in sys.argv else "#ffffff")
+                component_obj.pay_amount.component.configure(fg_color="light green", text_color=set_text_color)
+                component_obj.pay_date.component_day.configure(fg_color="light green", text_color=set_text_color)
+                component_obj.pay_date.component_month.configure(fg_color="light green", text_color=set_text_color)
+                component_obj.pay_date.component_year.configure(fg_color="light green", text_color=set_text_color)
 
                 curr_month += 1
 
             if months < curr_month:
+                set_fg_color = "#dddddd" if "--test" not in sys.argv else "#222222"
+                set_text_color = "#aaaaaa" if "--test" not in sys.argv else "#ffffff"
+
                 component_obj.reset()
                 component_obj.label.configure(text_color="#bbb")
-                component_obj.pay_amount.component.configure(fg_color="#dddddd", text_color="#aaa")
-                component_obj.pay_date.component_day.configure(fg_color="#dddddd", text_color="#aaa")
-                component_obj.pay_date.component_month.configure(fg_color="#dddddd", text_color="#aaa")
-                component_obj.pay_date.component_year.configure(fg_color="#dddddd", text_color="#aaa")
+                component_obj.pay_amount.component.configure(fg_color=set_fg_color, text_color=set_text_color)
+                component_obj.pay_date.component_day.configure(fg_color=set_fg_color, text_color=set_text_color)
+                component_obj.pay_date.component_month.configure(fg_color=set_fg_color, text_color=set_text_color)
+                component_obj.pay_date.component_year.configure(fg_color=set_fg_color, text_color=set_text_color)
 
             if curr_month == 12:
                 break
@@ -629,7 +635,7 @@ class PaymentInfo(GUI):
         super().__init__(master, label_text, left_offset, top_offset)
 
         self.pay_amount = Entry(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
-        self.pay_amount.component.configure(width=70, fg_color="#dddddd")
+        self.pay_amount.component.configure(width=70, fg_color="#dddddd" if "--test" not in sys.argv else "#222222")
         self.pay_amount.stringvar.set(value="$")
         self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=1)
 
@@ -650,11 +656,14 @@ class PaymentInfo(GUI):
 
 
     def reset(self) -> None:
-        self.label.configure(text_color="#000000")
-        self.pay_amount.component.configure(fg_color="#dddddd", text_color="#000000")
-        self.pay_date.component_day.configure(fg_color="#dddddd", text_color="#000000")
-        self.pay_date.component_month.configure(fg_color="#dddddd", text_color="#000000")
-        self.pay_date.component_year.configure(fg_color="#dddddd", text_color="#000000")
+        set_fg_color = "#dddddd" if "--test" not in sys.argv else "#222222"
+        set_text_color = "#aaaaaa" if "--test" not in sys.argv else "#ffffff"
+
+        self.label.configure(text_color="#000000" if "--test" not in sys.argv else "#ffffff")
+        self.pay_amount.component.configure(fg_color=set_fg_color, text_color=set_text_color)
+        self.pay_date.component_day.configure(fg_color=set_fg_color, text_color=set_text_color)
+        self.pay_date.component_month.configure(fg_color=set_fg_color, text_color=set_text_color)
+        self.pay_date.component_year.configure(fg_color=set_fg_color, text_color=set_text_color)
         self.pay_amount.stringvar.set("$")
         self.pay_date.reset()
 
@@ -686,7 +695,7 @@ class AppButton():
             text="",
             image=image,
             border_width=0,
-            corner_radius=2,
+            corner_radius=3,
             fg_color="transparent",
             command=lambda:self.__open_app(app_name=app_name, app=app),
             width=width,
@@ -725,6 +734,9 @@ class AppButton():
 class ActionButton():
     def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=81, height=40, row=0, col=0, blueprint={}, subapp_name="") -> None:
 
+        if btn_color == '#ffffff':
+            btn_color = "#444444" if "--test" in sys.argv else "#ffffff"
+
         self.component = ctk.CTkButton(
             master=master,
             text=btn_text,
@@ -736,7 +748,7 @@ class ActionButton():
             width=width,
             height=height,
             state='disabled' if 'spacer' in action else 'normal',
-            hover_color="dark gray"
+            hover_color="dark gray" if "--test" not in sys.argv else "#222222"
         )
 
         self.component.grid(row=row, column=col, pady=[20,5], padx=4)
@@ -750,7 +762,8 @@ class TabView():
         self.component = ctk.CTkTabview(
             master=master, 
             corner_radius=4, 
-            fg_color="#ffffff", 
+            bg_color="#dddddd" if "--test" not in sys.argv else "#444444",
+            fg_color="#ffffff" if "--test" not in sys.argv else "#444444",
             width=parent_width, 
             height=height, 
             segmented_button_fg_color='white', 
@@ -872,6 +885,7 @@ class CellWidget():
                 text=f'{str(text[0:22])}...{str(text[-4:])}' if len(str(text)) > 28 else text,
                 text_color=text_color, 
                 fg_color=fg_color, 
+                bg_color='transparent',
                 font=font,
             )
 
@@ -883,6 +897,7 @@ class CellWidget():
                 text=f'{str(text[0:22])}...{str(text[-4:])}' if len(str(text)) > 28 else text, 
                 text_color=text_color, 
                 fg_color=fg_color, 
+                bg_color='transparent',
                 font=font,
                 corner_radius=0,
                 command=command,
@@ -911,7 +926,7 @@ class CellWidget():
 
 
 class RowWidget():
-    def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_info=None, row_color="#eeeeee", row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
+    def __init__(self, app=None, parent_frame=None, table_obj=None, row_contents=[], row_info=None, row_color="#eeeeee" , row_content_methods=[None, None, None], parent_width=0, row_number=0, mode:Literal["header", "tools", "table"]="table", is_blank = False):
 
         # no parent means nowhere to put this
         if parent_frame is None:
@@ -923,7 +938,15 @@ class RowWidget():
             else:
                 row_contents=["col_0", "col_1", "col_2", "col_3", "col_4"]
 
-        self.container = ctk.CTkFrame(master=parent_frame, fg_color="#ffffff", border_width=0, width=parent_width, height=30)
+        if mode == "header":
+            set_fg_color = "#000000"
+        elif mode == "tools":
+            set_fg_color = "#ffffff" if "--test" not in sys.argv else "#444444"
+        else:
+            inverted_colors = {"#eeeeee": "#222222", "#dddddd": "#333333", "#ffd07a": "#cb6600"}
+            set_fg_color = row_color if "--test" not in sys.argv else inverted_colors[row_color]
+
+        self.container = ctk.CTkFrame(master=parent_frame, fg_color=set_fg_color, bg_color='transparent', border_width=0, width=parent_width, height=30)
         self.buttons = []
         self.contents = []
         self.info = {}
@@ -935,11 +958,13 @@ class RowWidget():
             if self.selectable and (row_contents != table_obj.selected_row) and is_blank is False:
                 for c in self.contents:
                     c.cell.configure(fg_color='#7ac8ff')
+                self.container.configure(fg_color='#7ac8ff')
 
         def unhighlight_row():
             if self.selectable and (row_contents != table_obj.selected_row) and is_blank is False:
                 for c in self.contents:
-                    c.cell.configure(fg_color=row_color)
+                    c.cell.configure(fg_color=set_fg_color)
+                self.container.configure(fg_color=set_fg_color)
 
         def select_row():
             if self.selectable and is_blank is False:
@@ -961,7 +986,8 @@ class RowWidget():
                     text_color="#ffffff", 
                     border_width=0,
                     corner_radius=0,
-                    fg_color="#000000" if row_contents[i] != "" else "#ffffff",
+                    fg_color=set_fg_color,
+                    bg_color='transparent',
                     width=(parent_width-61)/table_width,
                     height=38,
                     font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
@@ -983,8 +1009,8 @@ class RowWidget():
                         width=(parent_width-61)/table_width, 
                         height=38, 
                         text=content, 
-                        text_color="#ffffff" if mode == "header" else "#000000", 
-                        fg_color="#000000" if mode == "header" else row_color, 
+                        text_color="#ffffff" if (mode == "header" or "--test" in sys.argv) else "#000000", 
+                        fg_color="#000000" if mode == "header" else set_fg_color, 
                         font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode == "header" else ctk.CTkFont(family=family_medium, size=12),
                         command=lambda *args: select_row(),
                         on_enter=lambda *args: highlight_row(),
@@ -1056,7 +1082,8 @@ class TableWidget():
 
         self.header_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="#ffffff", 
+            bg_color='transparent',
+            fg_color="#ffffff" if "--test" not in sys.argv else "#444444",
             border_width=0, 
             width=self.parent_width, 
             height=self.parent_height*0.05, 
@@ -1073,7 +1100,8 @@ class TableWidget():
 
         self.table_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="#ffffff", 
+            bg_color='transparent',
+            fg_color="#ffffff" if "--test" not in sys.argv else "#444444",
             border_width=1, 
             width=self.parent_width, 
             height=self.parent_height*0.90, 
@@ -1081,7 +1109,8 @@ class TableWidget():
 
         self.tools_frame = ctk.CTkFrame(
             master=self.parent_frame, 
-            fg_color="#ffffff", 
+            bg_color='transparent',
+            fg_color="#ffffff" if "--test" not in sys.argv else "#444444",
             border_width=0, 
             width=self.parent_width, 
             height=self.parent_height*0.05
@@ -1110,7 +1139,8 @@ class TableWidget():
         if self.title_text != '':
             self.title_frame = ctk.CTkFrame(
                 master=self.parent_frame, 
-                fg_color="#ffffff", 
+                bg_color='transparent',
+                fg_color="#ffffff" if "--test" not in sys.argv else "#444444",
                 border_width=0, 
                 width=self.parent_width, 
                 height=self.parent_height*0.05, 
@@ -1144,13 +1174,15 @@ class TableWidget():
 
     def navigate(self, page=0):
 
+        set_fg_color = "#eeeeee" if "--test" not in sys.argv else "#444444"
+
         if (page == 1):
-            self.tools.buttons[0].configure(fg_color="#eeeeee", state="disabled", text="")
+            self.tools.buttons[0].configure(fg_color=set_fg_color, state="disabled", text="")
             self.tools.buttons[1].configure(fg_color="#000000", state="normal", text=f"page {page+1} ▶")
 
         elif (page == math.ceil(len(self.rows)/self.rows_per_page)-1):
             self.tools.buttons[0].configure(fg_color="#000000", state="normal", text=f"◀ page {page-1}")
-            self.tools.buttons[1].configure(fg_color="#eeeeee", state="disabled", text="")
+            self.tools.buttons[1].configure(fg_color=set_fg_color, state="disabled", text="")
 
         else:
             self.tools.buttons[0].configure(fg_color="#000000", state="normal", text=f"◀ page {page-1}")
@@ -1258,10 +1290,12 @@ class TableWidget():
                 app=self.app, 
             )
 
-        self.tools.buttons[0].configure(fg_color="#ffffff", state="disabled", text="")
+        set_fg_color = "#ffffff" if "--test" not in sys.argv else "#444444"
+
+        self.tools.buttons[0].configure(fg_color=set_fg_color, state="disabled", text="")
 
         if len(self.rows) <= self.rows_per_page:
-            self.tools.buttons[1].configure(fg_color="#ffffff", state="disabled", text="")
+            self.tools.buttons[1].configure(fg_color=set_fg_color, state="disabled", text="")
 
 
     def add(self, row_info=[], row_contents=[], row_index=None) -> None:

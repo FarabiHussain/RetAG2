@@ -25,7 +25,7 @@ subapp_components = []
 for subapp_name in blueprint:
 
     new_subapp = {"name": subapp_name, "frame": None, "button": None}
-    new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="white", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
+    new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="white" if "--test" not in sys.argv else "#444444", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
     new_subapp['frame'].place(x=170, y=0)
 
     new_subapp['button'] = ctk.CTkButton(
@@ -61,9 +61,8 @@ for i, subapp_name in enumerate(blueprint):
 
 def on_startup():
     if "--test" in sys.argv:
-        app.root.configure(fg_color='#000000')
         # test_button(app)
-        subapp_components[5]['subapp_obj'].lift_app(subapp_components)
+        # subapp_components[5]['subapp_obj'].lift_app(subapp_components)
         pass
 
 
