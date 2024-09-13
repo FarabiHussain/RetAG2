@@ -556,10 +556,10 @@ class HistoryViewer():
                     lambda:None,
                 ])
 
-            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if "--test" not in sys.argv else "#444444", state="disabled")
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
 
             if len(entries) < 19:
-                self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if "--test" not in sys.argv else "#444444", state="disabled")
+                self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
 
             self.header_frame.grid(row=0, column=1, pady=[5,0])
             self.table_frame.grid(row=1, column=1)

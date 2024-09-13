@@ -11,6 +11,7 @@ from reader import *
 from RenderFont import RenderFont
 from tkinter import messagebox
 from Database import Database
+from writer import unobscure
 
 imgs = Img("md")
 app = App()
@@ -25,7 +26,7 @@ subapp_components = []
 for subapp_name in blueprint:
 
     new_subapp = {"name": subapp_name, "frame": None, "button": None}
-    new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="white" if "--test" not in sys.argv else "#444444", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
+    new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="#444444" if "--dark" in sys.argv else "#ffffff", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
     new_subapp['frame'].place(x=170, y=0)
 
     new_subapp['button'] = ctk.CTkButton(

@@ -18,7 +18,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
-        self.version = "v2.0.29"
+        self.version = "v2.0.30"
         self.root.title(f"RETAG {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}
@@ -27,7 +27,7 @@ class App():
         self.windows = {}
         self.app_icon_passed = self.__check_app_ico()
 
-        if "--test" in sys.argv:
+        if "--dark" in sys.argv:
             ctk.set_appearance_mode("dark")
             self.root.configure(fg_color='#222222')
 

@@ -60,9 +60,9 @@ class Subapp():
 
     def lift_app(self, subapp_components=[], callback_function=None, app=None):
         for curr_subapp in subapp_components:
-            curr_subapp['button'].configure(text_color="white", fg_color="#111111" if "--test" in sys.argv else "gray", hover_color="light gray", state='normal')
+            curr_subapp['button'].configure(text_color="white", fg_color="#111111" if "--dark" in sys.argv else "gray", hover_color="light gray", state='normal')
 
-        self.button.configure(text_color="black", fg_color="#444444" if "--test" in sys.argv else "#ffffff", hover_color="white", state='disabled')
+        self.button.configure(text_color="black", fg_color="#444444" if "--dark" in sys.argv else "#ffffff", hover_color="white", state='disabled')
         self.frame.lift()
 
         if callback_function is not None and app is not None:
@@ -74,9 +74,9 @@ class Subapp():
 
         if master is None:
             self.page_columns = [
-                ctk.CTkFrame(master=frame, fg_color="white" if "--test" not in sys.argv else "#444444", height=728, width=460, border_width=0),
-                ctk.CTkFrame(master=frame, fg_color="white" if "--test" not in sys.argv else "#444444", height=728, width=460, border_width=0),
-                ctk.CTkFrame(master=frame, fg_color="white" if "--test" not in sys.argv else "#444444", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", height=728, width=460, border_width=0),
             ]
 
             if columns_weights == [1,1,1]:
@@ -211,7 +211,7 @@ class Subapp():
 
             offset += 1
 
-        btn_frame = ctk.CTkFrame(master=frame, fg_color="white" if "--test" not in sys.argv else "#444444", border_width=0, height=50, width=480)
+        btn_frame = ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", border_width=0, height=50, width=480)
         btn_frame.place(x=25, y=800)
 
         if "buttons" in blueprint.keys():

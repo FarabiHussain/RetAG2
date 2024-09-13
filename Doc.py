@@ -145,7 +145,7 @@ def save_doc(doc=None, components=None, folder_name="", prefix="", override_outp
         doc.save(f"{output_dir}{output_filename}")
 
         # open the word file
-        if "--test" not in sys.argv:
+        if "--dark" not in sys.argv:
             os.startfile(output_dir + output_filename)
         # os.startfile(output_dir + output_filename)
 
