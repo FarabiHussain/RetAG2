@@ -1,7 +1,12 @@
-import sqlite3
+
+from ast import Import
+import sys
+
 
 class Database:
     def __init__(self):
+        import sqlite3
+
         self.database = sqlite3.connect(".\\write\\retag.sqlite3")
         self.cursor = self.database.cursor()
 
@@ -97,3 +102,21 @@ class Database:
         )
 
         self.database.close()
+
+
+class Mongo:
+    def __init__(self) -> None:
+        from pymongo import MongoClient
+        from dotenv import load_dotenv
+        import os
+
+        load_dotenv()
+
+        CONNECTION_STRING = os.getenv('CONNECTION_STRING')
+        self.client = MongoClient(CONNECTION_STRING)
+
+    def get_database(self):
+        if '--test' in sys.argv:
+            return self.client['retag-test']
+
+        return self.client['retag-db']

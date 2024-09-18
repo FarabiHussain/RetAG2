@@ -4,9 +4,11 @@
 # from RenderFont import RenderFont
 # from docx import Document
 import math
+import time
 import customtkinter as ctk
 import datetime
 import os
+import pywinstyles
 
 from dotenv import load_dotenv
 from Popups import ErrorPopup, InfoPopup, PromptPopup
@@ -862,7 +864,7 @@ class WindowView():
         self.body.title(window_name)
         self.body.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.body.resizable(False, False)
-        self.body.configure(fg_color='white')
+        self.body.configure(fg_color='#ffffff' if '--dark' not in sys.argv else '#444444')
         self.body.after(300, lambda:self.show())
 
     def show(self) -> None:
@@ -1381,3 +1383,47 @@ class TableWidget():
             )
 
             self.title_frame.grid(row=0, column=1, pady=[0,0])
+
+
+class LoadingSplash():
+    def __init__(self, master=None, opacity=1.0) -> None:
+
+        set_color = '#ffffff' if '--dark' not in sys.argv else '#444444' 
+        self.opacity = opacity
+
+        self.component = ctk.CTkFrame(
+            master=master,
+            height=1010,
+            width=1540,
+            bg_color=set_color,
+            fg_color=set_color,
+        )
+
+        self.label = ctk.CTkLabel(
+            master=self.component, 
+            width=200, 
+            height=200, 
+            text="LOADING", 
+            anchor="w", 
+            font=ctk.CTkFont(family=family_bold, size=30), 
+            text_color="#666666" if "--dark" in sys.argv else "#dddddd"
+        ).place(x=(1540/2)-170, y=(1010/2)-200)
+
+
+    def show(self):
+        self.component.place(x=170, y=0)
+        self.component.lift()
+
+    def stop(self):
+        max_opacity = int(self.opacity*100)
+
+        for i in range(max_opacity):
+            pywinstyles.set_opacity(
+                widget=self.component, 
+                value=self.opacity-(self.opacity-i), 
+            )
+
+            time.sleep(0.0005)
+
+            if i == (self.opacity*100) - 1:
+                self.component.destroy()

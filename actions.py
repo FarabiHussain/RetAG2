@@ -1,16 +1,15 @@
 import sys
 import threading
-# import sqlite3
 import datetime
-from datetime import datetime as dt
 import time
-from dateutil import relativedelta as rd
 import customtkinter as ctk
 import os
 import names
 import random
 import math
-from Database import Database
+from datetime import datetime as dt
+from dateutil import relativedelta as rd
+from Database import Database, Mongo
 from glob import glob
 from icecream import ic
 from Popups import ErrorPopup
@@ -91,7 +90,7 @@ def adjust_time_button(app):
         adjust_time_window = WindowView(app=app, window_name="Adjusted clock in/out", width=500, height=360)
         app.add_window("adjust time", adjust_time_window)
 
-        frame = ctk.CTkFrame(master=adjust_time_window.body, fg_color='#ffffff')
+        frame = ctk.CTkFrame(master=adjust_time_window.body, fg_color='#ffffff' if '--dark' not in sys.argv else '#444444')
         frame.place(x=20, y=20)
 
         RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
@@ -281,90 +280,101 @@ def search_files_button(app):
 
 
 def search_payments_button(app):
+    from GUI import LoadingSplash
+    import threading
+
+    loadingsplash = LoadingSplash(app.root, opacity=1.0)
     search_in_date = app.components['show payments on date'].get()
     payment_status = app.components['payment status'].get()
     payments_table = app.components.get('due payments')
     row_contents_list = []
     row_info_list = []
-    payments_table.reset()
 
-    payments_table.set_table_title(new_title = f'Showing payments due on {search_in_date}')
+    def task():
+        payments_table.reset()
+        payments_table.set_table_title(new_title = f'Showing payments due on {search_in_date}')
 
-    db = Database()
-    db.database.row_factory = db.dict_factory
-
-    retrieved_entries = db.database.execute(
-        f'''
-        SELECT
-            *
-        FROM
-            payments
-        WHERE
-            payment_date = '{datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}'
-            {'' if payment_status.lower() == "all" else ('AND payment_made = 1' if payment_status.lower() == "paid" else 'AND payment_made = 0')}
-        '''
-    ).fetchall()
-
-    db.close()
-
-    for entry in retrieved_entries:
-        new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
-        row_contents_list.append(new_row)
-        row_info_list.append(entry)
-
-    if len(row_contents_list) > 0:
-        payments_table.selected_row = None
-        payments_table.selected_row_info = None
-
-        payments_table.add(
-            row_contents=row_contents_list,
-            row_info=row_info_list,
-        )
-
-
-def search_attendance(app):
-    dt_object = datetime.datetime.now()
-    table = app.components.get('clocked in today')
-    row_contents_list = []
-    row_info_list = []
-    table.reset()
-
-    try:
         db = Database()
         db.database.row_factory = db.dict_factory
 
         retrieved_entries = db.database.execute(
             f'''
-            SELECT *
-            FROM attendance
-            ORDER BY rowid DESC
-            LIMIT 15
+            SELECT
+                *
+            FROM
+                payments
+            WHERE
+                payment_date = '{datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}'
+                {'' if payment_status.lower() == "all" else ('AND payment_made = 1' if payment_status.lower() == "paid" else 'AND payment_made = 0')}
             '''
         ).fetchall()
 
         db.close()
 
-        for entry in (retrieved_entries):
-            new_row = [
-                entry.get('staff_name'), 
-                datetime.datetime.strftime(datetime.datetime.strptime(entry.get('date'), '%Y%m%d'), '%b %d, %Y'), 
-                datetime.datetime.strftime(datetime.datetime.strptime(entry.get('time'), '%H:%M:%S'), '%I:%M %p'),
-                'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
-            ]
-
+        for entry in retrieved_entries:
+            new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
             row_contents_list.append(new_row)
             row_info_list.append(entry)
 
         if len(row_contents_list) > 0:
-            table.selected_row = None
-            table.selected_row_info = None
+            payments_table.selected_row = None
+            payments_table.selected_row_info = None
 
-            table.add(
+            payments_table.add(
                 row_contents=row_contents_list,
                 row_info=row_info_list,
             )
-    except Exception as e:
-        ErrorPopup(f'Error when searching for attendance\n{e}')
+
+        loadingsplash.stop()
+
+    threading.Thread(target=loadingsplash.show).start()
+    threading.Thread(target=task).start()
+
+
+def search_attendance(app):
+    from GUI import LoadingSplash
+    import threading
+
+    loadingsplash = LoadingSplash(app.root, opacity=1.0)
+
+    def task():
+        table = app.components.get('clocked in today')
+        row_contents_list = []
+        row_info_list = []
+
+        db = Mongo()
+        dbname = db.get_database()
+        collection_name = dbname["attendance"]
+
+        try:
+            retrieved_entries = collection_name.find().sort({"_id":-1})
+
+            for entry in (retrieved_entries):
+                new_row = [
+                    entry.get('staff_name'), 
+                    datetime.datetime.strftime(datetime.datetime.strptime(entry.get('date'), '%Y%m%d'), '%b %d, %Y'), 
+                    datetime.datetime.strftime(datetime.datetime.strptime(entry.get('time'), '%H:%M:%S'), '%I:%M %p'),
+                    'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
+                ]
+
+                row_contents_list.append(new_row)
+                row_info_list.append(entry)
+
+            if len(row_contents_list) > 0:
+                table.selected_row = None
+                table.selected_row_info = None
+                table.reset()
+                table.add(row_contents=row_contents_list, row_info=row_info_list)
+
+            db.client.close()
+
+        except Exception as e:
+            ErrorPopup(f'Error when searching for attendance\n{e}')
+
+        loadingsplash.stop()
+
+    threading.Thread(target=loadingsplash.show).start()
+    threading.Thread(target=task).start()
 
 
 def switch_payment_status_button(app):
