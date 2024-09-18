@@ -12,7 +12,9 @@ from RenderFont import RenderFont
 from tkinter import messagebox
 from Database import Database
 from writer import unobscure
+import globals
 
+globals.init()
 imgs = Img("md")
 app = App()
 app.set_size(w=1640, h=900)
@@ -66,19 +68,22 @@ def on_startup():
         # subapp_components[5]['subapp_obj'].lift_app(subapp_components)
         pass
 
+    for curr_subapp in subapp_components:
+        curr_subapp['button'].configure(state='normal')
+
 
 def on_closing():
+
     if "--test" in sys.argv:
         Database().close()
-
-        # for dir in ['write', 'output/agreements','output/receipts','output/invitations','output/imm5476']:
-        #     for f in glob(f"./{dir}/*"):
-        #         os.remove(f)
-
+        globals.tpool.join_all()
+        print(len(globals.tpool.pool))
         app.root.destroy()
 
     elif messagebox.askokcancel("Quit", "Do you want to quit?"):
         Database().close()
+        globals.tpool.join_all()
+        print(len(globals.tpool.pool))
         app.root.destroy()
 
 on_startup()

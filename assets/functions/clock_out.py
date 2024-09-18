@@ -1,4 +1,5 @@
 import os
+import globals
 from icecream import ic
 from Database import Mongo
 from Popups import ErrorPopup, PromptPopup
@@ -7,7 +8,7 @@ from datetime import datetime as dt
 
 def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
     from GUI import LoadingSplash
-    import threading
+
     if app is None:
         print("app components not provided")
         return
@@ -60,5 +61,5 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
         loadingsplash.stop()
         db.client.close()
 
-    threading.Thread(target=loadingsplash.show).start()
-    threading.Thread(target=task).start()
+    globals.tpool.create(target=loadingsplash.show)
+    globals.tpool.create(target=task)

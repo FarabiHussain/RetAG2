@@ -338,13 +338,13 @@
 
         "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
         "staff name": {"column": 0, "type": "combo", "default": "Select", "options": "env.STAFF"},
-
+        
         "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
                 "/assets/functions/clock_in.py", 
                 "/assets/functions/clock_out.py"
             ]
         },
-
+        
         "clocked in today": {"column": 1, "title_text": "recent entries", "type": "table", "headers": [
                 "staff name", 
                 "date", 
@@ -353,15 +353,12 @@
             ]
         },
 
+        "break 1": {"column": 0, "type": "break", "heading": "SEARCH FILTERS"},
+
         "buttons": {
             "adjust time": "#383FBC"
         }
     },
 
-    "Init": {
-        "init_app_agreements": "/assets/functions/Agreements.py",
-        "init_app_receipts": "/assets/functions/Receipts.py",
-        "init_app_search": "/assets/functions/Files.py",
-        "init_app_payment_dates": "/assets/functions/Payment_Dates.py"
-    }
+    "Init": {}
 }

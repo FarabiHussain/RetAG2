@@ -1,7 +1,6 @@
 import sys
-import threading
+import globals
 import datetime
-import time
 import customtkinter as ctk
 import os
 import names
@@ -281,7 +280,6 @@ def search_files_button(app):
 
 def search_payments_button(app):
     from GUI import LoadingSplash
-    import threading
 
     loadingsplash = LoadingSplash(app.root, opacity=1.0)
     search_in_date = app.components['show payments on date'].get()
@@ -327,13 +325,12 @@ def search_payments_button(app):
 
         loadingsplash.stop()
 
-    threading.Thread(target=loadingsplash.show).start()
-    threading.Thread(target=task).start()
+    globals.tpool.create(target=loadingsplash.show)
+    globals.tpool.create(target=task)
 
 
 def search_attendance(app):
     from GUI import LoadingSplash
-    import threading
 
     loadingsplash = LoadingSplash(app.root, opacity=1.0)
 
@@ -373,8 +370,8 @@ def search_attendance(app):
 
         loadingsplash.stop()
 
-    threading.Thread(target=loadingsplash.show).start()
-    threading.Thread(target=task).start()
+    globals.tpool.create(target=loadingsplash.show)
+    globals.tpool.create(target=task)
 
 
 def switch_payment_status_button(app):
