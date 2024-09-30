@@ -67,6 +67,7 @@ class Subapp():
         self.frame.lift()
 
         if callback_function is not None and app is not None:
+            print(callback_function)
             callback_function(app)
 
 

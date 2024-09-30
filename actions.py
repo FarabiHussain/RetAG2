@@ -279,70 +279,60 @@ def search_files_button(app):
 
 
 def search_payments_button(app):
-    from GUI import LoadingSplash
-
-    loadingsplash = LoadingSplash(app.root, opacity=1.0)
     search_in_date = app.components['show payments on date'].get()
     payment_status = app.components['payment status'].get()
     payments_table = app.components.get('due payments')
     row_contents_list = []
     row_info_list = []
 
-    def task():
-        payments_table.reset()
-        payments_table.set_table_title(new_title = f'Showing payments due on {search_in_date}')
+    payments_table.reset()
+    payments_table.set_table_title(new_title = f'Showing payments due on {search_in_date}')
 
-        db = Database()
-        db.database.row_factory = db.dict_factory
+    db = Database()
+    db.database.row_factory = db.dict_factory
 
-        retrieved_entries = db.database.execute(
-            f'''
-            SELECT
-                *
-            FROM
-                payments
-            WHERE
-                payment_date = '{datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}'
-                {'' if payment_status.lower() == "all" else ('AND payment_made = 1' if payment_status.lower() == "paid" else 'AND payment_made = 0')}
-            '''
-        ).fetchall()
+    retrieved_entries = db.database.execute(
+        f'''
+        SELECT
+            *
+        FROM
+            payments
+        WHERE
+            payment_date = '{datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}'
+            {'' if payment_status.lower() == "all" else ('AND payment_made = 1' if payment_status.lower() == "paid" else 'AND payment_made = 0')}
+        '''
+    ).fetchall()
 
-        db.close()
+    db.close()
 
-        for entry in retrieved_entries:
-            new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
-            row_contents_list.append(new_row)
-            row_info_list.append(entry)
+    for entry in retrieved_entries:
+        new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
+        row_contents_list.append(new_row)
+        row_info_list.append(entry)
 
-        if len(row_contents_list) > 0:
-            payments_table.selected_row = None
-            payments_table.selected_row_info = None
+    if len(row_contents_list) > 0:
+        payments_table.selected_row = None
+        payments_table.selected_row_info = None
 
-            payments_table.add(
-                row_contents=row_contents_list,
-                row_info=row_info_list,
-            )
-
-        loadingsplash.stop()
-
-    globals.tpool.create(target=loadingsplash.show)
-    globals.tpool.create(target=task)
+        payments_table.add(
+            row_contents=row_contents_list,
+            row_info=row_info_list,
+        )
 
 
 def search_attendance(app):
     from GUI import LoadingSplash
-
     loadingsplash = LoadingSplash(app.root, opacity=1.0)
 
+    table = app.components.get('clocked in today')
+    row_contents_list = []
+    row_info_list = []
+
+    db = Mongo()
+    dbname = db.get_database()
+    collection_name = dbname["attendance"]
+
     def task():
-        table = app.components.get('clocked in today')
-        row_contents_list = []
-        row_info_list = []
-
-        db = Mongo()
-        dbname = db.get_database()
-        collection_name = dbname["attendance"]
-
         try:
             retrieved_entries = collection_name.find().sort({"_id":-1})
 
@@ -364,14 +354,12 @@ def search_attendance(app):
                 table.add(row_contents=row_contents_list, row_info=row_info_list)
 
             db.client.close()
+            loadingsplash.stop()
 
         except Exception as e:
             ErrorPopup(f'Error when searching for attendance\n{e}')
 
-        loadingsplash.stop()
-
-    globals.tpool.create(target=loadingsplash.show)
-    globals.tpool.create(target=task)
+    loadingsplash.show(task)
 
 
 def switch_payment_status_button(app):

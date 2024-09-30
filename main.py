@@ -77,7 +77,7 @@ def on_closing():
     if "--test" in sys.argv:
         Database().close()
         globals.tpool.join_all()
-        print(len(globals.tpool.pool))
+        # print(len(globals.tpool.pool))
         app.root.destroy()
 
     elif messagebox.askokcancel("Quit", "Do you want to quit?"):

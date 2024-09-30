@@ -1410,9 +1410,13 @@ class LoadingSplash():
         ).place(x=(1540/2)-170, y=(1010/2)-200)
 
 
-    def show(self):
+    def show(self, task=None):
         self.component.place(x=170, y=0)
         self.component.lift()
+
+        if task is not None:
+            self.component.after(100, task)
+
 
     def stop(self):
         max_opacity = int(self.opacity*100)
