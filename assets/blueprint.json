@@ -344,7 +344,7 @@
                 "/assets/functions/clock_out.py"
             ]
         },
-        
+
         "clocked in today": {"column": 1, "title_text": "recent entries", "type": "table", "headers": [
                 "staff name", 
                 "date", 
@@ -354,6 +354,15 @@
         },
 
         "break 1": {"column": 0, "type": "break", "heading": "SEARCH FILTERS"},
+        "attendance of staff": {"column": 0, "type": "combo", "default": "Any", "options": "env.STAFF"},
+        "attendance start date": {"column": 0, "type": "datepicker", "show_day": "true"},
+        "attendance end date": {"column": 0, "type": "datepicker", "show_day": "true"},
+        "clock type": {"column": 0, "type": "combo", "default": "Any", "options": ["Any", "Clock in", "Clock out"]},
+        "filter attendance": {"column": 0, "type": "rowbutton", "label": ["apply filters", "clear filters"], "method": [
+                "/assets/functions/filter_attendance.py", 
+                "/assets/functions/clear_attendance_filters.py"
+            ]
+        },
 
         "buttons": {
             "adjust time": "#383FBC"

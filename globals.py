@@ -1,7 +1,12 @@
-from Threadpool import Threadpool
+from datetime import datetime as dt
+from icecream import ic
 
-global tpool
+global attendance_queried_time
 
 def init():
-    global tpool
-    tpool = Threadpool()
+    global attendance_queried_time
+    attendance_queried_time = None
+
+    ic(attendance_queried_time)
+
+    return

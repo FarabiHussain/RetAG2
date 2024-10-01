@@ -65,26 +65,24 @@ for i, subapp_name in enumerate(blueprint):
 def on_startup():
     if "--test" in sys.argv:
         # test_button(app)
-        # subapp_components[5]['subapp_obj'].lift_app(subapp_components)
         pass
 
-    for curr_subapp in subapp_components:
-        curr_subapp['button'].configure(state='normal')
+    def task():
+        for curr_subapp in subapp_components:
+            curr_subapp['button'].configure(state='normal')
+        time.sleep(0.01)
+        subapp_components[0]['subapp_obj'].lift_app(subapp_components)
+
+    from GUI import LoadingSplash
+    loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="RETAG2")
+    loadingsplash.show(task=task)
 
 
 def on_closing():
-
-    if "--test" in sys.argv:
+    if "--test" in sys.argv or messagebox.askokcancel("Quit", "Do you want to quit?"):
         Database().close()
-        globals.tpool.join_all()
-        # print(len(globals.tpool.pool))
         app.root.destroy()
 
-    elif messagebox.askokcancel("Quit", "Do you want to quit?"):
-        Database().close()
-        globals.tpool.join_all()
-        print(len(globals.tpool.pool))
-        app.root.destroy()
 
 on_startup()
 app.root.protocol("WM_DELETE_WINDOW", on_closing)

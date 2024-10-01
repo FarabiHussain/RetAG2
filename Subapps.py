@@ -67,8 +67,7 @@ class Subapp():
         self.frame.lift()
 
         if callback_function is not None and app is not None:
-            print(callback_function)
-            callback_function(app)
+            callback_function(app, is_callback=True)
 
 
     def render_app(self, frame, blueprint, app, imgs, columns_weights, subapp_components, subapp_name, master=None):

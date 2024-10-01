@@ -278,55 +278,70 @@ def search_files_button(app):
         )
 
 
-def search_payments_button(app):
+def search_payments_button(app, is_callback=False):
+    from GUI import LoadingSplash
+    loadingsplash = LoadingSplash(app.root, opacity=1.0)
+
     search_in_date = app.components['show payments on date'].get()
     payment_status = app.components['payment status'].get()
     payments_table = app.components.get('due payments')
     row_contents_list = []
     row_info_list = []
 
-    payments_table.reset()
-    payments_table.set_table_title(new_title = f'Showing payments due on {search_in_date}')
+    def task():
+        payments_table.reset()
+        payments_table.set_table_title(new_title = f'Showing payments due on {search_in_date}')
 
-    db = Database()
-    db.database.row_factory = db.dict_factory
+        db = Database()
+        db.database.row_factory = db.dict_factory
 
-    retrieved_entries = db.database.execute(
-        f'''
-        SELECT
-            *
-        FROM
-            payments
-        WHERE
-            payment_date = '{datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}'
-            {'' if payment_status.lower() == "all" else ('AND payment_made = 1' if payment_status.lower() == "paid" else 'AND payment_made = 0')}
-        '''
-    ).fetchall()
+        retrieved_entries = db.database.execute(
+            f'''
+            SELECT
+                *
+            FROM
+                payments
+            WHERE
+                payment_date = '{datetime.datetime.strftime(datetime.datetime.strptime(search_in_date, "%b %d, %Y"), "%Y%m%d")}'
+                {'' if payment_status.lower() == "all" else ('AND payment_made = 1' if payment_status.lower() == "paid" else 'AND payment_made = 0')}
+            '''
+        ).fetchall()
 
-    db.close()
+        db.close()
 
-    for entry in retrieved_entries:
-        new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
-        row_contents_list.append(new_row)
-        row_info_list.append(entry)
+        for entry in retrieved_entries:
+            new_row = [entry.get('case_id'), entry.get('client_name'), entry.get('contact_info'), entry.get('payment_amount'), 'Yes' if entry.get('payment_made') == 1 else 'No']
+            row_contents_list.append(new_row)
+            row_info_list.append(entry)
 
-    if len(row_contents_list) > 0:
-        payments_table.selected_row = None
-        payments_table.selected_row_info = None
+        if len(row_contents_list) > 0:
+            payments_table.selected_row = None
+            payments_table.selected_row_info = None
 
-        payments_table.add(
-            row_contents=row_contents_list,
-            row_info=row_info_list,
-        )
+            payments_table.add(
+                row_contents=row_contents_list,
+                row_info=row_info_list,
+            )
+
+        loadingsplash.stop()
+
+    loadingsplash.show(task)
 
 
-def search_attendance(app):
-    from GUI import LoadingSplash
-    loadingsplash = LoadingSplash(app.root, opacity=1.0)
+def search_attendance(app, override_entries=None, is_callback=False):
 
-    table = app.components.get('clocked in today')
+    if is_callback:
+        if globals.attendance_queried_time is not None:
+            timediff = dt.now() - globals.attendance_queried_time
+            if timediff.total_seconds() < 30:
+                return
+
     row_contents_list = []
     row_info_list = []
+    table = app.components.get('clocked in today')
+
+    from GUI import LoadingSplash
+    loadingsplash = LoadingSplash(app.root, opacity=1.0)
 
     db = Mongo()
     dbname = db.get_database()
@@ -334,7 +349,10 @@ def search_attendance(app):
 
     def task():
         try:
-            retrieved_entries = collection_name.find().sort({"_id":-1})
+            if override_entries is not None:
+                retrieved_entries = override_entries
+            else:
+                retrieved_entries = collection_name.find().sort({"date":-1, "staff_name": 1})
 
             for entry in (retrieved_entries):
                 new_row = [
@@ -347,14 +365,17 @@ def search_attendance(app):
                 row_contents_list.append(new_row)
                 row_info_list.append(entry)
 
-            if len(row_contents_list) > 0:
+            if len(row_contents_list) > 0 or len(override_entries) == 0:
                 table.selected_row = None
                 table.selected_row_info = None
                 table.reset()
-                table.add(row_contents=row_contents_list, row_info=row_info_list)
+
+                if len(row_contents_list) > 0 and len(row_info_list) > 0:
+                    table.add(row_contents=row_contents_list, row_info=row_info_list)
 
             db.client.close()
             loadingsplash.stop()
+            globals.attendance_queried_time = dt.now()
 
         except Exception as e:
             ErrorPopup(f'Error when searching for attendance\n{e}')

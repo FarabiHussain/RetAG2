@@ -407,15 +407,26 @@ class DatePicker(GUI):
  
 
     # return a formatted date
-    def get(self) -> str:
+    def get(self, formatting="$m $d, $y") -> str:
         m = self.stringvar_month.get()
         d = int(self.stringvar_day.get())
         y = int(self.stringvar_year.get())
 
-        if self.show_day is True:
-            return f"{m} {d}, {y}"
+        if self.show_day is False:
+            return f"{m}, {y}"
 
-        return f"{m}, {y}"
+        thedate = formatting.replace("$m", str(m)).replace("$d", ("{:02}").format(d)).replace("$y", str(y))
+
+        if "%m" in formatting:
+            try:
+                m = ["padding_for_index", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].index(m)
+            except Exception as e:
+                print(e)
+
+            thedate = thedate.replace("%m", ("{:02}").format(m))
+
+        return thedate
+
 
 
     # set the date 
@@ -1386,7 +1397,7 @@ class TableWidget():
 
 
 class LoadingSplash():
-    def __init__(self, master=None, opacity=1.0) -> None:
+    def __init__(self, master=None, opacity=1.0, splash_text="loading") -> None:
 
         set_color = '#ffffff' if '--dark' not in sys.argv else '#444444' 
         self.opacity = opacity
@@ -1401,21 +1412,27 @@ class LoadingSplash():
 
         self.label = ctk.CTkLabel(
             master=self.component, 
-            width=200, 
-            height=200, 
-            text="LOADING", 
-            anchor="w", 
-            font=ctk.CTkFont(family=family_bold, size=30), 
-            text_color="#666666" if "--dark" in sys.argv else "#dddddd"
-        ).place(x=(1540/2)-170, y=(1010/2)-200)
+            height=300, 
+            width=1500, 
+            text=splash_text, 
+            font=ctk.CTkFont(family=family_bold, size=300), 
+            text_color="#4e4e4e" if "--dark" in sys.argv else "#dddddd"
+        ).place(x=0, y=205)
 
 
-    def show(self, task=None):
+    def show(self, task=None, waitfor=0.1):
         self.component.place(x=170, y=0)
         self.component.lift()
 
         if task is not None:
-            self.component.after(100, task)
+            import threading
+
+            print(task)
+            newThread = threading.Thread(target=task)
+            newThread.start()
+
+            while not newThread.is_alive():
+                newThread.join(waitfor)
 
 
     def stop(self):
