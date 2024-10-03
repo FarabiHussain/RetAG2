@@ -24,5 +24,5 @@ def callback(app_components=None):
 
     app_components.get("rate").set(f"{"${:,.2f}".format(service_rates.get(service_name))}")
     app_components.get("price").set(f"{"${:,.2f}".format(price)}")
-    app_components.get("price").component.configure(fg_color="#ddd", text_color="#000")
+    app_components.get("price").component.configure(fg_color="#dddddd", text_color="#000000")
 

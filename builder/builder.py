@@ -41,9 +41,9 @@ else:
         for i in range(len(ver)):
             ver[i] = unformat(ver[i])
 
-        try: 
+        try:
             kb = kb.decode(encoding='utf-8')
-        except: 
+        except:
             pass
 
         if kb == "a":

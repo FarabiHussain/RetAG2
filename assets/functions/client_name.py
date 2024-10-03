@@ -10,8 +10,8 @@ def callback(app_components=None):
         full_name = f"{first_name} {last_name}"
 
         app_components.get("client name").set(full_name)
-        app_components.get("client name").component.configure(fg_color="light green", text_color="#000")
+        app_components.get("client name").component.configure(fg_color="light green", text_color="#000000")
 
     except Exception as e:
         app_components.get("client name").set("")
-        app_components.get("client name").component.configure(fg_color="#ddd", text_color="#aaa")
+        app_components.get("client name").component.configure(fg_color="#dddddd", text_color="#aaaaaa")

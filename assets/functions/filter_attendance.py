@@ -35,7 +35,6 @@ def callback(app=None):
 
     retrieved_entries = list(collection_name.find(search_filters).sort({"date":-1, "staff_name": 1}))
 
-    print(retrieved_entries)
     for entry in (retrieved_entries):
         print(entry)
 

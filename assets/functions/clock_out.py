@@ -25,7 +25,7 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
     dbname = db.get_database()
     collection_name = dbname["attendance"]
 
-    retrieved_entries = list(collection_name.find({"staff_name": staff_name}).sort({"date":-1}).limit(1))
+    retrieved_entries = list(collection_name.find({"staff_name": staff_name}).sort({"date":-1, "time":-1}).limit(1))
 
     if len(retrieved_entries) == 0:
         ErrorPopup(f'Unable to clock out {staff_name} without clocking in first')

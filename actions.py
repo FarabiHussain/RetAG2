@@ -352,7 +352,7 @@ def search_attendance(app, override_entries=None, is_callback=False):
             if override_entries is not None:
                 retrieved_entries = override_entries
             else:
-                retrieved_entries = collection_name.find().sort({"date":-1, "staff_name": 1})
+                retrieved_entries = collection_name.find().sort({"date":-1, "time":-1})
 
             for entry in (retrieved_entries):
                 new_row = [
@@ -498,9 +498,9 @@ def update_total_row(cart):
     cart.tools.buttons[4].configure(fg_color='#325882', text_color="white", text="${:,.2f}".format(total_price), font=font, state='normal')
 
 
-class HistoryViewer():
+class WindowedViewer():
 
-    def __init__(self, app=None, page_number=0, entries=[]):
+    def __init__(self, app=None, page_number=0, entries=[], column_names=['','','','','']):
         from GUI import RowWidget
         from GUI import WindowView
 
@@ -522,8 +522,6 @@ class HistoryViewer():
                         agreements
                 '''
             ).fetchall()
-
-            print(imported_history)
 
             if len(imported_history) == 0:
                 ErrorPopup(msg="No entries in history.")
@@ -547,10 +545,10 @@ class HistoryViewer():
                 history_window.body.columnconfigure(index=i, weight=1)
 
             self.header_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
-            RowWidget(parent_frame=self.header_frame, parent_width=self.window_width*0.99, mode="header", row_contents=['client name', 'created by', 'created date', 'application type', 'application fee'])
+            RowWidget(parent_frame=self.header_frame, parent_width=self.window_width*0.99, mode="header", row_contents=column_names)
 
             self.table_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
-            self.history_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
+            self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
 
             self.tools_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
             self.tools_frame_widgets = RowWidget(
@@ -565,8 +563,8 @@ class HistoryViewer():
                     ""
                 ], 
                 row_content_methods=[
-                    lambda:self.history_table_nav(app=app, page_number=self.page_number-1, entries=entries),
-                    lambda:self.history_table_nav(app=app, page_number=self.page_number+1, entries=entries),
+                    lambda:self.table_nav(app=app, page_number=self.page_number-1, entries=entries),
+                    lambda:self.table_nav(app=app, page_number=self.page_number+1, entries=entries),
                     lambda:None,
                     lambda:None,
                     lambda:None,
@@ -588,7 +586,7 @@ class HistoryViewer():
             history_window.show()
 
 
-    def history_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0):
+    def windowed_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0):
         from GUI import RowWidget
 
         self.table_rows = []
@@ -597,7 +595,6 @@ class HistoryViewer():
         current_page_rows = entries[(page_number*18):((page_number+1)*18)]
         for i in range(18 - len(current_page_rows)):
             current_page_rows.append(
-                # client_1_name, created_by, created_date, application_type, application_fee,
                 ('', '', '', '', '')
             )
 
@@ -615,12 +612,12 @@ class HistoryViewer():
                         f"{entry[3][0:32]}{"..." if len(entry[3]) > 32 else ""}",
                         f"{"${:,.2f}".format(float(entry[4]))}" if entry[4] != "" else entry[4],
                     ],
-                    row_color="#ddd" if index%2==0 else "#eee",
+                    row_color="#dddddd" if index%2==0 else "#eeeeee",
                 )
             )
 
 
-    def history_table_nav(self, app=None, page_number=0, entries=[]):
+    def table_nav(self, app=None, page_number=0, entries=[]):
 
         if (page_number == 0):
             self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
@@ -640,7 +637,7 @@ class HistoryViewer():
         self.page_number=page_number
         self.table_frame.destroy()
         self.table_frame = ctk.CTkFrame(master=app.get_window("history window").body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
-        self.history_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
+        self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
 
         self.header_frame.grid(row=0, column=1)
         self.table_frame.grid(row=1, column=1)
@@ -847,7 +844,7 @@ def handle_action(app=None, action="", blueprint={}):
         app.components.get('case ID').set(read_case_id())
 
     elif (action == "retainer history"):
-        HistoryViewer(app)
+        WindowedViewer(app, column_names=['client name', 'created by', 'created date', 'application type', 'application fee'])
 
     elif (action == "find receipt"):
         ReceiptFinder(app)

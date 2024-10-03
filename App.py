@@ -18,7 +18,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
-        self.version = "v2.1.1"
+        self.version = "v2.1.3"
         self.root.title(f"RETAG {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}
@@ -61,7 +61,7 @@ class App():
     def __get_position(self, w, h) -> tuple:
         return (
             (self.root.winfo_screenwidth()/2) - (w/2),
-            (self.root.winfo_screenheight()/2) - (h/2),
+            (self.root.winfo_screenheight()/2) - (h/2) - 35,
         )
 
 

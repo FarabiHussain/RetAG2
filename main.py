@@ -41,7 +41,7 @@ for subapp_name in blueprint:
         width=170,
         height=70,
         font=ctk.CTkFont(family="Roboto Bold"),
-        hover_color='#ddd'
+        hover_color='#dddddd'
     )
 
     subapp_components.append(new_subapp)
