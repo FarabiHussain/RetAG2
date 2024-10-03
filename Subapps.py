@@ -229,14 +229,13 @@ class Subapp():
                     subapp_name=self.subapp_name, 
                 )
 
-        elif "callbacks" in blueprint.keys():
+        if "callbacks" in blueprint.keys():
             for index, component_name in enumerate(blueprint.get("callbacks")):
                 current_component = app.get_all_components().get(component_name)
                 current_callback = import_function(blueprint['callbacks'][component_name], "callback")
-
                 current_component.add_callback(component_name=component_name, app=app, callback=current_callback)
 
-        elif "Init" == subapp_name:
+        if "Init" == subapp_name:
             try:
                 app.components.get('case ID').set(read_case_id())
                 app.components.get('case ID').component.configure(fg_color="light green", text_color="#000")

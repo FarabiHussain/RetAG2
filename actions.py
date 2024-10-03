@@ -418,7 +418,7 @@ def generate_row_contents(quantity_offset=None, app_components=None, override_ro
     else:
         service = app_components.get("service").get()
         quantity = float(app_components.get("quantity").get()) + quantity_offset
-        rate = float(app_components.get("rate").get().replace("$",""))
+        rate = float(app_components.get("rate").get().replace("$","").replace(",",""))
         tax_rate = float(app_components.get("GST percentage").get()) + float(app_components.get("PST percentage").get())
         gst = app_components.get("GST percentage").get()
         pst = app_components.get("PST percentage").get()

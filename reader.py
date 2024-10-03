@@ -40,16 +40,22 @@ def read_receipt_id():
 # read agreements.csv to retrieve the last created id
 def read_case_id(get_next=True):
     curr_timestamp = str(datetime.datetime.now().strftime('%Y%m'))
-    case_id = f'{curr_timestamp}-000'
+    next_case_id = f'{curr_timestamp}-000'
+    prev_case_id = ''
 
     db = Database()
     retrieved_ids = db.cursor.execute('SELECT case_id FROM agreements WHERE document_type = "Retainer Agreement" ORDER BY case_id DESC LIMIT 1').fetchall()
     db.close()
 
     if len(retrieved_ids) > 0:
-        case_id = retrieved_ids[0][0]
+        prev_case_id = retrieved_ids[0][0]
+
+        if prev_case_id[0:6] != curr_timestamp:
+            print(prev_case_id[0:6] == curr_timestamp)
+            ic(next_case_id)
+            return next_case_id
 
     if get_next:
-        case_id = f'{case_id.split("-")[0]}-{"{:03}".format(int(case_id.split("-")[1]) + 1)}'
+        next_case_id = f'{prev_case_id.split("-")[0]}-{"{:03}".format(int(prev_case_id.split("-")[1]) + 1)}'
 
-    return case_id
+    return next_case_id

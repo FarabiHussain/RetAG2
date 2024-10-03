@@ -1,3 +1,5 @@
+from icecream import ic
+
 def callback(app_components=None):
 
     if app_components is None:
@@ -20,13 +22,7 @@ def callback(app_components=None):
 
     price = float(app_components.get("quantity").get()) * service_rates.get(service_name) * tax_multuplier
 
-    app_components.get("rate").set(
-        f"{"${:,.2f}".format(service_rates.get(service_name))}"
-    )
-
-    app_components.get("price").set(
-        f"{"${:,.2f}".format(price)}"
-    )
-
+    app_components.get("rate").set(f"{"${:,.2f}".format(service_rates.get(service_name))}")
+    app_components.get("price").set(f"{"${:,.2f}".format(price)}")
     app_components.get("price").component.configure(fg_color="#ddd", text_color="#000")
 
