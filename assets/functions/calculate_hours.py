@@ -103,8 +103,6 @@ def callback(app=None):
 
         table_contents.append(curr_row)
 
-    ic(timesheet)
-
     WindowedViewer(
         app, 
         column_names=['date', 'clocked in at', 'clocked out at', 'hours in date', 'cumulative hours'],
