@@ -500,7 +500,7 @@ def update_total_row(cart):
 
 class WindowedViewer():
 
-    def __init__(self, app=None, page_number=0, entries=[], column_names=['','','','','']):
+    def __init__(self, app=None, page_number=0, entries=[], column_names=['','','','',''], add_cell_formatting=True, window_title=''):
         from GUI import RowWidget
         from GUI import WindowView
 
@@ -508,7 +508,7 @@ class WindowedViewer():
             ErrorPopup("Exception in history_button()\n\napp==None")
 
         # retrieve object from app.components
-        history_window = app.get_window("history window")
+        history_window = app.get_window(window_title)
         self.page_number = 0
 
         # check whether history entries exist
@@ -538,8 +538,8 @@ class WindowedViewer():
 
             self.window_width = 1640*0.9
             self.window_height = 800
-            history_window = WindowView(app=app, window_name="history window", width=self.window_width, height=self.window_height)
-            app.add_window("history window", history_window)
+            history_window = WindowView(app=app, window_name=window_title, width=self.window_width, height=self.window_height)
+            app.add_window(window_title, history_window)
 
             for i in range(3):
                 history_window.body.columnconfigure(index=i, weight=1)
@@ -548,7 +548,7 @@ class WindowedViewer():
             RowWidget(parent_frame=self.header_frame, parent_width=self.window_width*0.99, mode="header", row_contents=column_names)
 
             self.table_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
-            self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
+            self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting)
 
             self.tools_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
             self.tools_frame_widgets = RowWidget(
@@ -586,7 +586,7 @@ class WindowedViewer():
             history_window.show()
 
 
-    def windowed_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0):
+    def windowed_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0, add_cell_formatting=True):
         from GUI import RowWidget
 
         self.table_rows = []
@@ -599,19 +599,24 @@ class WindowedViewer():
             )
 
         for index, entry in enumerate(current_page_rows):
+            if add_cell_formatting:
+                curr_row = [
+                    f"{entry[0].title().split(";")[0][0:32]}{"..." if len(entry[0].split(";")[0]) > 32 else ""}",
+                    entry[1],
+                    entry[2],
+                    f"{entry[3][0:32]}{"..." if len(entry[3]) > 32 else ""}",
+                    f"{"${:,.2f}".format(float(entry[4]))}" if entry[4] != "" else entry[4],
+                ]
+            else:
+                curr_row=entry
+
             self.table_rows.append(
                 RowWidget(
                     parent_frame=parent_frame, 
                     parent_width=parent_width, 
                     row_number=index, 
                     mode="table", 
-                    row_contents=[
-                        f"{entry[0].title().split(";")[0][0:32]}{"..." if len(entry[0].split(";")[0]) > 32 else ""}",
-                        entry[1],
-                        entry[2],
-                        f"{entry[3][0:32]}{"..." if len(entry[3]) > 32 else ""}",
-                        f"{"${:,.2f}".format(float(entry[4]))}" if entry[4] != "" else entry[4],
-                    ],
+                    row_contents=curr_row,
                     row_color="#dddddd" if index%2==0 else "#eeeeee",
                 )
             )
@@ -844,7 +849,7 @@ def handle_action(app=None, action="", blueprint={}):
         app.components.get('case ID').set(read_case_id())
 
     elif (action == "retainer history"):
-        WindowedViewer(app, column_names=['client name', 'created by', 'created date', 'application type', 'application fee'])
+        WindowedViewer(app, column_names=['client name', 'created by', 'created date', 'application type', 'application fee'], window_title="history window")
 
     elif (action == "find receipt"):
         ReceiptFinder(app)

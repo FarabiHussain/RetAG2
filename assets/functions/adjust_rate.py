@@ -7,7 +7,7 @@ def callback(app=None):
         return
 
     try:
-        total = float(app.components.get("price").get().strip().replace("$", ""))
+        total = float(app.components.get("price").get().strip().replace("$", "").replace(",", "").replace(" ", ""))
         qty = float(app.components.get("quantity").get())
         taxes = (float(app.components.get("GST percentage").get()) + float(app.components.get("PST percentage").get())) / 100
 
