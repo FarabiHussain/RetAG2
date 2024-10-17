@@ -916,5 +916,21 @@ def handle_action(app=None, action="", blueprint={}):
             except Exception as e:
                 ErrorPopup(msg=f'Exception while attempting to remove {searched_filename}: {e}')
 
+    elif (action == "get checklist"):
+
+        selected_type = app.components['application type'].get()
+
+        if "--test" in sys.argv and selected_type.lower() == 'click to select':
+            selected_type = "eoi"
+
+        if selected_type.lower() == "click to select":
+            ErrorPopup(msg=f'Please select a case type first')
+        elif selected_type.lower():
+            try:
+                os.startfile(f'{os.getcwd()}\\assets\\checklists\\{selected_type.lower()}.docx')
+            except Exception as e:
+                print(e)
+                ErrorPopup(msg=f'Unable to find checklist for {selected_type}')
+
     else:
         InfoPopup(msg='This feature is still under construction.')
