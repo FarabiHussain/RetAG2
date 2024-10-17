@@ -13,7 +13,7 @@ from glob import glob
 from icecream import ic
 from Popups import ErrorPopup
 from dotenv import load_dotenv
-from writer import obscure, unobscure, remove_from_database, write_conduct, write_imm5476, write_invitation, write_payment_auth, write_receipt, write_retainer
+from writer import obscure, unobscure, remove_from_database, write_conduct, write_imm5476, write_invitation, write_payment_auth, write_receipt, write_retainer, calculate_taxes
 from reader import import_function, read_case_id
 from docx import Document
 from Path import resource_path
@@ -144,9 +144,9 @@ def test_button(app):
 
     app.components['address'].set("Address")
     app.components['card number'].set(f"{str(random.randint(1000000000000000, 9999999999999999))}")
-    app.components['card type'].set("Visa")
+    app.components['payment type'].set("Visa")
     app.components['cardholder name'].set(legal_name)
-    app.components['add taxes'].set("Yes")
+    app.components['add taxes'].set("5%")
     app.components['expiration'].set(y="2026", m="Dec", d="31")
     app.components['client 1 first name'].set(legal_name.split(" ")[0] + " (TEST)")
     app.components['client 1 last name'].set(legal_name.split(" ")[1] + " (TEST)")
@@ -809,8 +809,24 @@ def handle_action(app=None, action="", blueprint={}):
             date_today = f"{date_now.strftime('%b')} {int(date_now.strftime('%d'))}, {date_now.strftime('%Y')}"
             date_of_first_payment = app.components.get('payment 1').get('date')
 
+            def prepare_receipt():
+                app.components['service'].set(app.components['application type'].get())
+                app.components['quantity'].set('1')
+                app.components['GST percentage'].set('5.0')
+                app.components['PST percentage'].set('0.0')
+                app.components['rate'].set(f'${app.components['payment 1'].get('amount')}')
+                app.components['price'].set("${:,.2f}".format(float(app.components['payment 1'].get('amount')) * calculate_taxes(app.components)))
+                app.components['cart'].tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                app.components['cart'].tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                app.components['cart'].reset()
+                add_item_button(app)
+                app.components['Receipts'].lift_app(app.subapp_components['Receipts'])
+
+                PromptPopup(f"Generate receipt for {app.components['application type'].get()} at {app.components['price'].get()}?", func=lambda: handle_action(app, "create receipt"))
+                app.focus()
+
             if response == True and date_today == date_of_first_payment:
-                PromptPopup("The first payment is to be made today. Create receipt?", func=lambda: app.components['Receipts'].lift_app(app.subapp_components['Receipts']))
+                PromptPopup("The first payment is to be made today. Create receipt?", func=lambda: prepare_receipt())
                 app.focus()
         except Exception as e:
             ErrorPopup(msg=f'Exception while writing retainer:\n\n{str(e)}')

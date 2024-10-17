@@ -20,6 +20,17 @@ def unobscure(obscured: str) -> str:
     return zlib.decompress(b64d(str.encode(obscured))).decode()
 
 
+def calculate_taxes(components):
+    tax_multiplier = 1.00
+
+    try:
+        tax_multiplier += float(components['add taxes'].get().replace("%", "")) * 0.01
+    except Exception as e:
+        ErrorPopup(msg=f"could not set tax rate as {components['add taxes'].get()}. Tax has been set to 0.0%")
+
+    return tax_multiplier
+
+
 def write_payment_auth(doc, components):
     style = doc.styles['Normal']
     font = style.font
@@ -32,7 +43,7 @@ def write_payment_auth(doc, components):
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
     client_name = f'{components["client 1 first name"].get().strip()} - {components["client 1 last name"].get().strip()}'
     output_filename = f"[{formatted_timestamp}] {components['case ID'].get().strip()} - Payments - {client_name}"
-    tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
+    tax_multiplier = calculate_taxes(components)
 
     client_info_top = [
         {
@@ -60,7 +71,7 @@ def write_payment_auth(doc, components):
     card_info_2col = [
         {
             "label": "card type",
-            "info": components["card type"].get(),
+            "info": components["payment type"].get(),
         },
         {
             "label": "expiration",
@@ -189,8 +200,8 @@ def write_receipt(doc, components):
 def write_retainer(doc, components):
     check_case_id_before_submit(components)
     date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
-    tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
     case_id = components['case ID'].get().strip()
+    tax_multiplier = calculate_taxes(components)
 
     style = doc.styles['Normal']
     font = style.font
@@ -261,7 +272,7 @@ def write_retainer(doc, components):
 
     if response:
         new_payments = []
-        tax_multiplier = 1.12 if components['add taxes'].get().lower() == "yes" else 1.00
+        tax_multiplier = calculate_taxes(components)
 
         for i in range(12):
             if components[f"payment {i+1}"].get('amount') > 0:
@@ -312,16 +323,6 @@ def write_retainer(doc, components):
         write_to_database('agreements', new_agreement)
         write_to_database('payments', new_payments)
         write_to_database('files', new_file)
-
-        components['service'].set(components['application type'].get())
-        components['quantity'].set('1')
-        components['PST percentage'].set('5.0')
-        components['PST percentage'].set('7.0')
-        components['rate'].set(f'${components['payment 1'].get('amount')}')
-        components['price'].set("${:,.2f}".format(float(components['payment 1'].get('amount')) * 1.12))
-        components['cart'].tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-        components['cart'].tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-        components['cart'].reset()
 
         return response
 

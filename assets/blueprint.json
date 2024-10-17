@@ -41,7 +41,7 @@
                 "Visitor Visa"
             ]
         },
-        "add taxes": {"column": 1, "type": "combo", "options": ["Yes", "No"], "default": "Yes"},
+        "add taxes": {"column": 1, "type": "combo", "options": ["5%", "12%", "No"], "default": "5%"},
 
         "break 3": {"column": 1, "type": "break", "heading": "PAYER INFORMATION"},
         "address": {"column": 1, "type": "entry"},
@@ -49,7 +49,7 @@
         "email": {"column": 1, "type": "entry"},
 
         "break 4": {"column": 1, "type": "break", "heading": "PAYMENT METHOD"},
-        "card type": {"column": 1, "type": "combo", "options": ["Visa", "MasterCard"]},
+        "payment type": {"column": 1, "type": "combo", "options": ["Visa", "MasterCard"]},
         "card number": {"column": 1, "type": "entry"},
         "cardholder name": {"column": 1, "type": "entry"},
         "expiration": {"column": 1, "type": "datepicker", "show_day":"false"},
@@ -106,8 +106,8 @@
         "rate": {"column": 0, "type": "entry", "default": "$500.00"},
         "quantity": {"column": 0, "type": "entry", "default": "1"},
         "GST percentage": {"column": 0, "type": "entry", "default": "5.0"},
-        "PST percentage": {"column": 0, "type": "entry", "default": "7.0"},
-        "price": {"column": 0, "type": "entry", "default": "$560.00"},
+        "PST percentage": {"column": 0, "type": "entry", "default": "0.0"},
+        "price": {"column": 0, "type": "entry", "default": "$525.00"},
         "adjust rate": {"column": 0, "type": "rowbutton", "label": "Adjust Rate", "method": "/assets/functions/adjust_rate.py"},
         "cart": {"column": 1, "type": "table", "title_text": "items in cart", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
 
