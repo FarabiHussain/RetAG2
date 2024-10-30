@@ -27,8 +27,8 @@ def callback(app=None):
 
     if "--test" in sys.argv:
         filter_staff = "Meehal"
-        filter_start_date = "20240901"
-        filter_end_date = "20241130"
+        filter_start_date = "20241001"
+        filter_end_date = "20241031"
 
     if filter_staff.strip().lower() == "any":
         ErrorPopup("Please select a staff member")

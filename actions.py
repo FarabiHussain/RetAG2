@@ -563,8 +563,8 @@ class WindowedViewer():
                     ""
                 ], 
                 row_content_methods=[
-                    lambda:self.table_nav(app=app, page_number=self.page_number-1, entries=entries),
-                    lambda:self.table_nav(app=app, page_number=self.page_number+1, entries=entries),
+                    lambda:self.table_nav(app=app, page_number=self.page_number-1, entries=entries, window_title=window_title, add_cell_formatting=add_cell_formatting),
+                    lambda:self.table_nav(app=app, page_number=self.page_number+1, entries=entries, window_title=window_title, add_cell_formatting=add_cell_formatting),
                     lambda:None,
                     lambda:None,
                     lambda:None,
@@ -574,6 +574,8 @@ class WindowedViewer():
 
             if len(entries) < 19:
                 self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
+            else:
+                self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
             self.header_frame.grid(row=0, column=1, pady=[5,0])
             self.table_frame.grid(row=1, column=1)
@@ -622,15 +624,15 @@ class WindowedViewer():
             )
 
 
-    def table_nav(self, app=None, page_number=0, entries=[]):
+    def table_nav(self, app=None, page_number=0, entries=[], window_title="", add_cell_formatting=True):
 
         if (page_number == 0):
-            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray", state="disabled")
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
             self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
         elif (page_number == math.ceil(len(entries)/18)-1):
             self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
-            self.tools_frame_widgets.buttons[1].configure(fg_color="light gray", state="disabled")
+            self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
 
         else:
             self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
@@ -641,8 +643,8 @@ class WindowedViewer():
 
         self.page_number=page_number
         self.table_frame.destroy()
-        self.table_frame = ctk.CTkFrame(master=app.get_window("history window").body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
-        self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number)
+        self.table_frame = ctk.CTkFrame(master=app.get_window(window_title).body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
+        self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting)
 
         self.header_frame.grid(row=0, column=1)
         self.table_frame.grid(row=1, column=1)
