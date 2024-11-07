@@ -10,8 +10,8 @@ from actions import test_button
 from reader import *
 from RenderFont import RenderFont
 from tkinter import messagebox
-from Database import Database
-from writer import unobscure
+from Database import Database, Mongo
+from writer import unobscure, write_to_database
 import globals
 
 globals.init()
@@ -28,7 +28,7 @@ subapp_components = []
 for subapp_name in blueprint:
 
     new_subapp = {"name": subapp_name, "frame": None, "button": None}
-    new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="#444444" if "--dark" in sys.argv else "#ffffff", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
+    new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="#444444" if globals.set_dark_theme else "#ffffff", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
     new_subapp['frame'].place(x=170, y=0)
 
     new_subapp['button'] = ctk.CTkButton(

@@ -1,10 +1,11 @@
 # from RenderFont import RenderFont
-import threading
+import globals
 import customtkinter as ctk
 from Img import *
 from GUI import *
 from actions import search_attendance, search_payments_button
 from reader import import_function, read_case_id
+from icecream import ic
 
 class Subapp():
     def __init__(self, subapp_components=None, blueprint=None, app=None, imgs=None, subapp_name="Subapp", button_position=0, columns_weights=[1,1,1]) -> None:
@@ -37,8 +38,11 @@ class Subapp():
                 image=lg_img.get("a&m.png")
             ).place(x=0, y=1)
 
-        if subapp_name.lower() != 'init':
-            self.button.place(x=0, y=(70*(button_position+1)) + 12 + (1*button_position))
+        if subapp_name.lower() == 'settings':
+            self.button.place(x=0, y=(62*(13)) + 17 + (12))
+        elif subapp_name.lower() != 'init':
+            self.button.place(x=0, y=(62*(button_position+1)) + 17 + (1*button_position))
+
 
         app.subapp_components[subapp_name] = subapp_components
         self.render_app(self.frame, blueprint, app, imgs, columns_weights, subapp_components, subapp_name)
@@ -61,9 +65,9 @@ class Subapp():
 
     def lift_app(self, subapp_components=[], callback_function=None, app=None):
         for curr_subapp in subapp_components:
-            curr_subapp['button'].configure(text_color="white", fg_color="#111111" if "--dark" in sys.argv else "gray", hover_color="light gray", state='normal')
+            curr_subapp['button'].configure(text_color="white", fg_color="#111111" if globals.set_dark_theme else "gray", hover_color="light gray", state='normal')
 
-        self.button.configure(text_color="black", fg_color="#444444" if "--dark" in sys.argv else "#ffffff", hover_color="white", state='disabled')
+        self.button.configure(text_color="black", fg_color="#444444" if globals.set_dark_theme else "#ffffff", hover_color="white", state='disabled')
         self.frame.lift()
 
         if callback_function is not None and app is not None:
@@ -76,9 +80,9 @@ class Subapp():
 
         if master is None:
             self.page_columns = [
-                ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", height=728, width=460, border_width=0),
-                ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", height=728, width=460, border_width=0),
-                ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white" if not globals.set_dark_theme else "#444444", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white" if not globals.set_dark_theme else "#444444", height=728, width=460, border_width=0),
+                ctk.CTkFrame(master=frame, fg_color="white" if not globals.set_dark_theme else "#444444", height=728, width=460, border_width=0),
             ]
 
             if columns_weights == [1,1,1]:
@@ -207,11 +211,22 @@ class Subapp():
                     top_offset=offset, 
                 )
 
+            elif specs['type'] == "switch":
+                new_component = Switch(
+                    master=self.page_columns[specs['column']], 
+                    app=app, 
+                    label_text=label, 
+                    left_offset=10, 
+                    top_offset=offset, 
+                    starting_state=("on" if globals.set_dark_theme else "off"),
+                    method=specs['method']
+                )
+
             app.add_component(label, new_component)
 
             offset += 1
 
-        btn_frame = ctk.CTkFrame(master=frame, fg_color="white" if "--dark" not in sys.argv else "#444444", border_width=0, height=50, width=480)
+        btn_frame = ctk.CTkFrame(master=frame, fg_color="white" if not globals.set_dark_theme else "#444444", border_width=0, height=50, width=480)
         btn_frame.place(x=25, y=800)
 
         if "buttons" in blueprint.keys():

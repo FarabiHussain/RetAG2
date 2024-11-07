@@ -89,7 +89,7 @@ def adjust_time_button(app):
         adjust_time_window = WindowView(app=app, window_name="Adjusted clock in/out", width=500, height=360)
         app.add_window("adjust time", adjust_time_window)
 
-        frame = ctk.CTkFrame(master=adjust_time_window.body, fg_color='#ffffff' if '--dark' not in sys.argv else '#444444')
+        frame = ctk.CTkFrame(master=adjust_time_window.body, fg_color='#ffffff' if not globals.set_dark_theme else '#444444')
         frame.place(x=20, y=20)
 
         RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
@@ -570,10 +570,10 @@ class WindowedViewer():
                     lambda:None,
                 ])
 
-            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
 
             if len(entries) < 19:
-                self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
+                self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
             else:
                 self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
@@ -627,12 +627,12 @@ class WindowedViewer():
     def table_nav(self, app=None, page_number=0, entries=[], window_title="", add_cell_formatting=True):
 
         if (page_number == 0):
-            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
             self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
 
         elif (page_number == math.ceil(len(entries)/18)-1):
             self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
-            self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if "--dark" not in sys.argv else "#444444", state="disabled")
+            self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
 
         else:
             self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")

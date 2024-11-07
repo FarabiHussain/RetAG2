@@ -2,6 +2,7 @@ import customtkinter as ctk
 import os
 import json
 import GUI
+import globals
 from Database import Database
 from Path import *
 from icecream import ic
@@ -18,7 +19,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
-        self.version = "v2.1.6"
+        self.version = "v2.1.8"
         self.root.title(f"RETAG {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}
@@ -27,7 +28,7 @@ class App():
         self.windows = {}
         self.app_icon_passed = self.__check_app_ico()
 
-        if "--dark" in sys.argv:
+        if globals.set_dark_theme:
             ctk.set_appearance_mode("dark")
             self.root.configure(fg_color='#222222')
 

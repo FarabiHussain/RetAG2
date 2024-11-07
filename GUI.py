@@ -9,6 +9,7 @@ import customtkinter as ctk
 import datetime
 import os
 import pywinstyles
+import globals
 
 from dotenv import load_dotenv
 from Popups import ErrorPopup, InfoPopup, PromptPopup
@@ -34,7 +35,7 @@ class GUI:
         self.stringvar = StringVar(value="")
         self.component = None
 
-        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_bold), text_color="white" if "--dark" in sys.argv else "black")
+        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_bold), text_color="white" if globals.set_dark_theme else "black")
         self.label.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=1)
 
     def get(self) -> str:
@@ -56,7 +57,7 @@ class RowBreak():
             height=height, 
             width=width, 
             fg_color=fg_color, 
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444", 
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444", 
             text_color=text_color, 
             corner_radius=3, 
             font=ctk.CTkFont(family=family_bold, weight='bold'),
@@ -84,7 +85,7 @@ class RowButton(GUI):
         self.component = []
         column_offset = 1 if (btn_count % 2 == 0) else 0 # offset needs to be 1 if len(column) is even for the math to work
         column_span = (btn_count*btn_count) - (6*btn_count) + 10
-        self.button_frame = ctk.CTkFrame(master=master, fg_color="white" if "--dark" not in sys.argv else "#444444", border_width=0, height=32)
+        self.button_frame = ctk.CTkFrame(master=master, fg_color="white" if not globals.set_dark_theme else "#444444", border_width=0, height=32)
 
         for curr_label in label:
             current_component = ctk.CTkButton(
@@ -96,7 +97,7 @@ class RowButton(GUI):
                 text_color="#ffffff", 
                 corner_radius=3, 
                 font=ctk.CTkFont(family=family_bold, weight='bold'), 
-                bg_color="white" if "--dark" not in sys.argv else "#444444"
+                bg_color="white" if not globals.set_dark_theme else "#444444"
             )
 
             self.component.append(current_component)
@@ -129,7 +130,6 @@ class ComboBox(GUI):
 
         if type(options) != list:
             if type(options) == str and 'env.' in options:
-                print('searching env for option')
                 load_dotenv()
                 options = sorted(os.getenv(options.replace('env.','')).split(','))
             else:
@@ -146,8 +146,8 @@ class ComboBox(GUI):
             height=32,
             border_width=0,
             corner_radius=3,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=options,
             variable=self.stringvar,
             font=ctk.CTkFont(family=family_medium),
@@ -204,8 +204,8 @@ class Entry(GUI):
             height=32,
             border_width=0,
             corner_radius=3,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             textvariable=self.stringvar,
             font=ctk.CTkFont(family=family_medium),
         )
@@ -231,6 +231,40 @@ class Entry(GUI):
         self.stringvar.trace_add('write', self.stringvar_callback)
 
 
+class Switch(GUI):
+    def __init__(self, master=None, app=None, width=250, label_text="", left_offset=0, top_offset=0, starting_state="on", method=None) -> None:
+        super().__init__(master, label_text, left_offset, top_offset)
+
+        self.switchvar = StringVar(value=starting_state)
+
+        self.component = ctk.CTkSwitch(
+            master,
+            text="",
+            switch_width=50,
+            switch_height=16,
+            border_width=0,
+            corner_radius=50,
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
+            variable=self.switchvar,
+            font=ctk.CTkFont(family=family_medium),
+            onvalue="on", 
+            offvalue="off",
+            command=lambda: import_function(method, "callback")(app.components),
+        )
+
+        self.reset()
+        ctk.CTkLabel(master, height=32, width=70, text="").grid(row=top_offset, column=1, pady=10, padx=5)
+        ctk.CTkLabel(master, height=32, width=70, text="").grid(row=top_offset, column=2, pady=10, padx=5)
+        self.component.grid(row=top_offset, column=3, pady=10, padx=[40,0], columnspan=3)
+
+    def reset(self) -> None:
+        return
+
+    def get(self) -> bool:
+        return self.component.get()
+
+
 class TextBox(GUI):
     def __init__(self, master=None, app=None, lines=1, height=200, parent_width=0, label_text="", instructions_text="", left_offset=0, top_offset=0) -> None:
         # super().__init__(master, '', left_offset, top_offset)
@@ -241,9 +275,9 @@ class TextBox(GUI):
             master=master,
             width=width,
             height=lines*20,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#444444",
-            text_color='#444444' if "--dark" not in sys.argv else "#666666", 
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#444444",
+            text_color='#444444' if not globals.set_dark_theme else "#666666", 
             wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
         )
@@ -259,8 +293,8 @@ class TextBox(GUI):
             height=height, 
             border_width=0, 
             corner_radius=4, 
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             wrap='word', 
             font=ctk.CTkFont(family=family_medium), 
         )
@@ -298,8 +332,8 @@ class DatePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=3,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=self.populate_days(),
             variable=self.stringvar_day,
             font=ctk.CTkFont(family=family_medium)
@@ -317,8 +351,8 @@ class DatePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=3,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=self.populate_months(),
             variable=self.stringvar_month,
             command=self.repopulate_days,
@@ -333,8 +367,8 @@ class DatePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=3,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=self.populate_years(populate_years_with),
             variable=self.stringvar_year,
             command=self.repopulate_days,
@@ -474,8 +508,8 @@ class TimePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=3,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=populate_upto(24),
             variable=self.stringvar_hour,
             font=ctk.CTkFont(family=family_medium),
@@ -489,8 +523,8 @@ class TimePicker(GUI):
             height=32,
             border_width=0,
             corner_radius=3,
-            bg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
-            fg_color="#dddddd" if "--dark" not in sys.argv else "#222222",
+            bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
+            fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=populate_upto(60),
             variable=self.stringvar_min,
             font=ctk.CTkFont(family=family_medium),
@@ -619,7 +653,7 @@ class PaymentSplitter(GUI):
                 )
 
                 set_text_color = "#000000"
-                component_obj.label.configure(text_color="#000000" if "--dark" not in sys.argv else "#ffffff")
+                component_obj.label.configure(text_color="#000000" if not globals.set_dark_theme else "#ffffff")
                 component_obj.pay_amount.component.configure(fg_color="light green", text_color=set_text_color)
                 component_obj.pay_date.component_day.configure(fg_color="light green", text_color=set_text_color)
                 component_obj.pay_date.component_month.configure(fg_color="light green", text_color=set_text_color)
@@ -628,8 +662,8 @@ class PaymentSplitter(GUI):
                 curr_month += 1
 
             if months < curr_month:
-                set_fg_color = "#dddddd" if "--dark" not in sys.argv else "#222222"
-                set_text_color = "#aaaaaa" if "--dark" not in sys.argv else "#ffffff"
+                set_fg_color = "#dddddd" if not globals.set_dark_theme else "#222222"
+                set_text_color = "#aaaaaa" if not globals.set_dark_theme else "#ffffff"
 
                 component_obj.reset()
                 component_obj.label.configure(text_color="#bbb")
@@ -648,7 +682,7 @@ class PaymentInfo(GUI):
         super().__init__(master, label_text, left_offset, top_offset)
 
         self.pay_amount = Entry(master=master, label_text=label_text, left_offset=10, top_offset=top_offset)
-        self.pay_amount.component.configure(width=70, fg_color="#dddddd" if "--dark" not in sys.argv else "#222222")
+        self.pay_amount.component.configure(width=70, fg_color="#dddddd" if not globals.set_dark_theme else "#222222")
         self.pay_amount.stringvar.set(value="$")
         self.pay_amount.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=1)
 
@@ -669,10 +703,10 @@ class PaymentInfo(GUI):
 
 
     def reset(self) -> None:
-        set_fg_color = "#dddddd" if "--dark" not in sys.argv else "#222222"
-        set_text_color = "#aaaaaa" if "--dark" not in sys.argv else "#ffffff"
+        set_fg_color = "#dddddd" if not globals.set_dark_theme else "#222222"
+        set_text_color = "#aaaaaa" if not globals.set_dark_theme else "#ffffff"
 
-        self.label.configure(text_color="#000000" if "--dark" not in sys.argv else "#ffffff")
+        self.label.configure(text_color="#000000" if not globals.set_dark_theme else "#ffffff")
         self.pay_amount.component.configure(fg_color=set_fg_color, text_color=set_text_color)
         self.pay_date.component_day.configure(fg_color=set_fg_color, text_color=set_text_color)
         self.pay_date.component_month.configure(fg_color=set_fg_color, text_color=set_text_color)
@@ -748,7 +782,7 @@ class ActionButton():
     def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=81, height=40, row=0, col=0, blueprint={}, subapp_name="") -> None:
 
         if btn_color == '#ffffff':
-            btn_color = "#444444" if "--dark" in sys.argv else "#ffffff"
+            btn_color = "#444444" if globals.set_dark_theme else "#ffffff"
 
         self.component = ctk.CTkButton(
             master=master,
@@ -761,7 +795,7 @@ class ActionButton():
             width=width,
             height=height,
             state='disabled' if 'spacer' in action else 'normal',
-            hover_color="dark gray" if "--dark" not in sys.argv else "#222222"
+            hover_color="dark gray" if not globals.set_dark_theme else "#222222"
         )
 
         self.component.grid(row=row, column=col, pady=[20,5], padx=4)
@@ -775,8 +809,8 @@ class TabView():
         self.component = ctk.CTkTabview(
             master=master, 
             corner_radius=4, 
-            bg_color="#dddddd" if "--dark" not in sys.argv else "#444444",
-            fg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
+            bg_color="#dddddd" if not globals.set_dark_theme else "#444444",
+            fg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             width=parent_width, 
             height=height, 
             segmented_button_fg_color='white', 
@@ -875,7 +909,7 @@ class WindowView():
         self.body.title(window_name)
         self.body.geometry('%dx%d+%d+%d' % (w, h, x, y))
         self.body.resizable(False, False)
-        self.body.configure(fg_color='#ffffff' if '--dark' not in sys.argv else '#444444')
+        self.body.configure(fg_color='#ffffff' if not globals.set_dark_theme else '#444444')
         self.body.after(300, lambda:self.show())
 
     def show(self) -> None:
@@ -954,10 +988,10 @@ class RowWidget():
         if mode == "header":
             set_fg_color = "#000000"
         elif mode == "tools":
-            set_fg_color = "#ffffff" if "--dark" not in sys.argv else "#444444"
+            set_fg_color = "#ffffff" if not globals.set_dark_theme else "#444444"
         else:
             inverted_colors = {"#eeeeee": "#222222", "#dddddd": "#333333", "#ffd07a": "#cb6600"}
-            set_fg_color = row_color if "--dark" not in sys.argv else inverted_colors[row_color]
+            set_fg_color = row_color if not globals.set_dark_theme else inverted_colors[row_color]
 
         self.container = ctk.CTkFrame(master=parent_frame, fg_color=set_fg_color, bg_color='transparent', border_width=0, width=parent_width, height=30)
         self.buttons = []
@@ -1022,7 +1056,7 @@ class RowWidget():
                         width=(parent_width-61)/table_width, 
                         height=38, 
                         text=content, 
-                        text_color="#ffffff" if (mode == "header" or "--dark" in sys.argv) else "#000000", 
+                        text_color="#ffffff" if (mode == "header" or globals.set_dark_theme) else "#000000", 
                         fg_color="#000000" if mode == "header" else set_fg_color, 
                         font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode == "header" else ctk.CTkFont(family=family_medium, size=12),
                         command=lambda *args: select_row(),
@@ -1096,7 +1130,7 @@ class TableWidget():
         self.header_frame = ctk.CTkFrame(
             master=self.parent_frame, 
             bg_color='transparent',
-            fg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
+            fg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             border_width=0, 
             width=self.parent_width, 
             height=self.parent_height*0.05, 
@@ -1114,7 +1148,7 @@ class TableWidget():
         self.table_frame = ctk.CTkFrame(
             master=self.parent_frame, 
             bg_color='transparent',
-            fg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
+            fg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             border_width=1, 
             width=self.parent_width, 
             height=self.parent_height*0.90, 
@@ -1123,7 +1157,7 @@ class TableWidget():
         self.tools_frame = ctk.CTkFrame(
             master=self.parent_frame, 
             bg_color='transparent',
-            fg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
+            fg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             border_width=0, 
             width=self.parent_width, 
             height=self.parent_height*0.05
@@ -1153,7 +1187,7 @@ class TableWidget():
             self.title_frame = ctk.CTkFrame(
                 master=self.parent_frame, 
                 bg_color='transparent',
-                fg_color="#ffffff" if "--dark" not in sys.argv else "#444444",
+                fg_color="#ffffff" if not globals.set_dark_theme else "#444444",
                 border_width=0, 
                 width=self.parent_width, 
                 height=self.parent_height*0.05, 
@@ -1187,7 +1221,7 @@ class TableWidget():
 
     def navigate(self, page=0):
 
-        set_fg_color = "#eeeeee" if "--dark" not in sys.argv else "#444444"
+        set_fg_color = "#eeeeee" if not globals.set_dark_theme else "#444444"
 
         if (page == 1):
             self.tools.buttons[0].configure(fg_color=set_fg_color, state="disabled", text="")
@@ -1250,7 +1284,7 @@ class TableWidget():
 
                 # set the next button to be active if the next row is not a blank
                 if (index + page_offset) == len(self.rows) - 1:
-                    self.tools.buttons[1].configure(fg_color="#ffffff" if "--dark" not in sys.argv else "#444444", state="disabled", text="")
+                    self.tools.buttons[1].configure(fg_color="#ffffff" if not globals.set_dark_theme else "#444444", state="disabled", text="")
                 else:
                     self.tools.buttons[1].configure(fg_color="#000000", state="normal", text=f"page {page+1} ▶")
 
@@ -1268,7 +1302,7 @@ class TableWidget():
                 )
 
                 # set the next button to be active if the last row was blank
-                self.tools.buttons[1].configure(fg_color="#ffffff" if "--dark" not in sys.argv else "#444444", state="disabled", text="")
+                self.tools.buttons[1].configure(fg_color="#ffffff" if not globals.set_dark_theme else "#444444", state="disabled", text="")
 
 
     def reset(self) -> None:
@@ -1303,7 +1337,7 @@ class TableWidget():
                 app=self.app, 
             )
 
-        set_fg_color = "#ffffff" if "--dark" not in sys.argv else "#444444"
+        set_fg_color = "#ffffff" if not globals.set_dark_theme else "#444444"
 
         self.tools.buttons[0].configure(fg_color=set_fg_color, state="disabled", text="")
 
@@ -1399,7 +1433,7 @@ class TableWidget():
 class LoadingSplash():
     def __init__(self, master=None, opacity=1.0, splash_text="loading") -> None:
 
-        set_color = '#ffffff' if '--dark' not in sys.argv else '#444444' 
+        set_color = '#ffffff' if not globals.set_dark_theme else '#444444' 
         self.opacity = opacity
 
         self.component = ctk.CTkFrame(
@@ -1416,7 +1450,7 @@ class LoadingSplash():
             width=1500, 
             text=splash_text, 
             font=ctk.CTkFont(family=family_bold, size=300), 
-            text_color="#4e4e4e" if "--dark" in sys.argv else "#dddddd"
+            text_color="#4e4e4e" if globals.set_dark_theme else "#dddddd"
         ).place(x=0, y=205)
 
 

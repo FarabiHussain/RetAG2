@@ -27,11 +27,12 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
 
     retrieved_entries = list(collection_name.find({"staff_name": staff_name}).sort({"date":-1, "time":-1}).limit(1))
 
-    if len(retrieved_entries) > 0 and (retrieved_entries[0]['type'] == 1):
-        prev_time = retrieved_entries[0]['time']
-        prev_date = dt.strptime(retrieved_entries[0]['date'], "%Y%m%d")
-        ErrorPopup(f'{staff_name} has previously clocked in at {prev_time} on {dt.strftime(prev_date, '%b %d, %Y')}. Must be clocked out to be able to clock in.')
-        return
+    if adjusted_datetime is None:
+        if len(retrieved_entries) > 0 and (retrieved_entries[0]['type'] == 1):
+            prev_time = retrieved_entries[0]['time']
+            prev_date = dt.strptime(retrieved_entries[0]['date'], "%Y%m%d")
+            ErrorPopup(f'{staff_name} has previously clocked in at {prev_time} on {dt.strftime(prev_date, '%b %d, %Y')}. Must be clocked out to be able to clock in.')
+            return
 
     if adjusted_datetime is not None:
         dt_object = dt.strptime(adjusted_datetime, "%Y%m%d_%H%M")

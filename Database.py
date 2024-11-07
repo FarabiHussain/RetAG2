@@ -1,4 +1,3 @@
-
 from ast import Import
 import sys
 
@@ -15,7 +14,7 @@ class Database:
             for idx, col in enumerate(cursor.description):
                 d[col[0]] = row[idx]
             return d
-        
+
         self.dict_factory = dict_factory
 
     def close(self):
@@ -97,6 +96,15 @@ class Database:
                     date TEXT, 
                     time TEXT, 
                     type INTEGER
+                );
+            '''
+        )
+
+        self.cursor.execute(
+            '''
+                CREATE TABLE IF NOT EXISTS theme (
+                    device_name TEXT, 
+                    dark_mode INTEGER
                 );
             '''
         )

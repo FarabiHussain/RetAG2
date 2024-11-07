@@ -31,11 +31,12 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
         ErrorPopup(f'Unable to clock out {staff_name} without clocking in first')
         return
 
-    if (retrieved_entries[0]['type'] == 0):
-        prev_time = retrieved_entries[0]['time']
-        prev_date = dt.strptime(retrieved_entries[0]['date'], "%Y%m%d")
-        ErrorPopup(f'{staff_name} has previously clocked out at {prev_time} on {dt.strftime(prev_date, '%b %d, %Y')}. Must be clocked in to be able to clock out.')
-        return
+    if adjusted_datetime is None:
+        if (retrieved_entries[0]['type'] == 0):
+            prev_time = retrieved_entries[0]['time']
+            prev_date = dt.strptime(retrieved_entries[0]['date'], "%Y%m%d")
+            ErrorPopup(f'{staff_name} has previously clocked out at {prev_time} on {dt.strftime(prev_date, '%b %d, %Y')}. Must be clocked in to be able to clock out.')
+            return
 
     if adjusted_datetime is not None:
         dt_object = dt.strptime(adjusted_datetime, "%Y%m%d_%H%M")

@@ -380,5 +380,10 @@
         }
     },
 
+    "Settings": {
+        "column_weights": [1,1,1],
+        "dark theme": {"column": 0, "type": "switch", "method": "/assets/functions/set_dark_mode.py"}
+    },
+
     "Init": {}
 }
