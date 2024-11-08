@@ -4,6 +4,7 @@
 # from RenderFont import RenderFont
 # from docx import Document
 import math
+import re
 import time
 import customtkinter as ctk
 import datetime
@@ -635,13 +636,12 @@ class PaymentSplitter(GUI):
 
         # set the amount to be paid each month and change up the colors a bit
         curr_month = 0
-        start_point = ""
+        start_point = self.app.components['payment 1'].get('date')
+        ic(start_point)
         for component_name, component_obj in zip(self.app.components.keys(), self.app.components.values()):
 
-            if "payment 1" in component_name:
-                start_point = component_obj.get('date')
-
-            if "payment" in component_name:
+            if re.search("payment [0-9]", component_name) is not None:
+                ic(component_name)
                 dt_object = datetime.datetime.strptime(start_point, "%b %d, %Y")
                 dt_object = dt_object + rd.relativedelta(days=curr_month*30)
 
