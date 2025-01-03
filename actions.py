@@ -328,7 +328,7 @@ def search_payments_button(app, is_callback=False):
     loadingsplash.show(task)
 
 
-def search_attendance(app, override_entries=None, is_callback=False):
+def search_attendance(app, override_entries=None, is_callback=False, is_first_tab=False):
 
     if is_callback:
         if globals.attendance_queried_time is not None:
@@ -380,7 +380,10 @@ def search_attendance(app, override_entries=None, is_callback=False):
         except Exception as e:
             ErrorPopup(f'Error when searching for attendance\n{e}')
 
-    loadingsplash.show(task)
+    if is_first_tab:
+        task()
+    else:
+        loadingsplash.show(task)
 
 
 def switch_payment_status_button(app):

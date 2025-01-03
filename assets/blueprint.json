@@ -358,7 +358,6 @@
         },
 
         "break 1": {"column": 0, "type": "break", "heading": "SEARCH FILTERS"},
-        "attendance of staff": {"column": 0, "type": "combo", "default": "Any", "options": "env.STAFF"},
         "attendance start date": {"column": 0, "type": "datepicker", "show_day": "true"},
         "attendance end date": {"column": 0, "type": "datepicker", "show_day": "true"},
         "clock type": {"column": 0, "type": "combo", "default": "Any", "options": ["Any", "Clock in", "Clock out"]},

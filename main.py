@@ -6,7 +6,7 @@ from Img import *
 from GUI import *
 from App import *
 from Subapps import *
-from actions import test_button
+from actions import test_button, search_attendance
 from reader import *
 from RenderFont import RenderFont
 from tkinter import messagebox
@@ -67,11 +67,36 @@ def on_startup():
         # test_button(app)
         pass
 
+    def set_home_as_default():
+        subapp_components[0]['subapp_obj'].lift_app(subapp_components)
+
+    def set_attendance_as_default():
+        staff_names = {
+            "FARABI-AMCAIM": "Farabi",
+            "SAIFUL": "Saiful",
+            "MRIDHA": "Meehal",
+            "SOHAIB-AMCAIM": "Sohaib",
+            "MEHRU-AMCAIM": "Shakil",
+            "ZAHEEB": "Zaheeb",
+            "JUNAIDULLAH": "Junaid",
+            "RAIDKHAN": "Raid"
+        }
+
+        device_name = os.environ['COMPUTERNAME']
+
+        if device_name in staff_names.keys():
+            app.components['staff name'].set(staff_names[device_name])
+
+        app.components['attendance start date'].set(d="01")
+        search_attendance(app, is_callback=True, is_first_tab=True)
+        subapp_components[5]['subapp_obj'].lift_app(subapp_components)
+
     def task():
         for curr_subapp in subapp_components:
             curr_subapp['button'].configure(state='normal')
+
         time.sleep(0.01)
-        subapp_components[0]['subapp_obj'].lift_app(subapp_components)
+        set_attendance_as_default()
 
     from GUI import LoadingSplash
     loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="RETAG2")
@@ -79,7 +104,7 @@ def on_startup():
 
 
 def on_closing():
-    if "--test" in sys.argv or messagebox.askokcancel("Quit", "Do you want to quit?"):
+    if "--test" not in sys.argv or messagebox.askokcancel("Quit", "Do you want to quit?"):
         Database().close()
         app.root.destroy()
 

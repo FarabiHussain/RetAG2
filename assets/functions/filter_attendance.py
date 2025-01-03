@@ -8,7 +8,7 @@ def callback(app=None):
         print("app components not provided")
         return
 
-    filter_staff = app.components.get("attendance of staff").get()
+    filter_staff = app.components.get("staff name").get()
     filter_clock_type = app.components.get("clock type").get()
     filter_start_date = app.components.get("attendance start date").get(formatting="$y%m$d")
     filter_end_date = app.components.get("attendance end date").get(formatting="$y%m$d")

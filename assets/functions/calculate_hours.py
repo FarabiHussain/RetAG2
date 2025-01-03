@@ -21,7 +21,7 @@ def callback(app=None):
     dbname = db.get_database()
     collection_name = dbname["attendance"]
 
-    filter_staff = app.components.get("attendance of staff").get()
+    filter_staff = app.components.get("staff name").get()
     filter_start_date = app.components.get("attendance start date").get(formatting="$y%m$d")
     filter_end_date = app.components.get("attendance end date").get(formatting="$y%m$d")
 
