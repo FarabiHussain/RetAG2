@@ -990,7 +990,7 @@ class RowWidget():
         elif mode == "tools":
             set_fg_color = "#ffffff" if not globals.set_dark_theme else "#444444"
         else:
-            inverted_colors = {"#eeeeee": "#222222", "#dddddd": "#333333", "#ffd07a": "#cb6600"}
+            inverted_colors = {"#eeeeee": "#222222", "#dddddd": "#333333", "#ffd07a": "#cb6600", "#ffaaaa": "#660000", "#ffbbbb": "#440000"}
             set_fg_color = row_color if not globals.set_dark_theme else inverted_colors[row_color]
 
         self.container = ctk.CTkFrame(master=parent_frame, fg_color=set_fg_color, bg_color='transparent', border_width=0, width=parent_width, height=30)
