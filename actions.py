@@ -18,6 +18,8 @@ from reader import import_function, read_case_id
 from docx import Document
 from Path import resource_path
 from Popups import ErrorPopup, InfoPopup, PromptPopup
+# from calculate_hours import parsetime
+
 
 
 def decrypt_button(app):
@@ -503,7 +505,7 @@ def update_total_row(cart):
 
 class WindowedViewer():
 
-    def __init__(self, app=None, page_number=0, entries=[], column_names=['','','','',''], add_cell_formatting=True, window_title=''):
+    def __init__(self, app=None, page_number=0, entries=[], column_names=['','','','',''], add_cell_formatting=True, window_title='', highlight_weekends=False):
         from GUI import RowWidget
         from GUI import WindowView
 
@@ -551,7 +553,7 @@ class WindowedViewer():
             RowWidget(parent_frame=self.header_frame, parent_width=self.window_width*0.99, mode="header", row_contents=column_names)
 
             self.table_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
-            self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting)
+            self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting, highlight_weekends=highlight_weekends)
 
             self.tools_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
             self.tools_frame_widgets = RowWidget(
@@ -591,7 +593,7 @@ class WindowedViewer():
             history_window.show()
 
 
-    def windowed_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0, add_cell_formatting=True):
+    def windowed_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0, add_cell_formatting=True, highlight_weekends=False):
         from GUI import RowWidget
 
         self.table_rows = []
@@ -615,6 +617,11 @@ class WindowedViewer():
             else:
                 curr_row=entry
 
+            row_color="#dddddd" if index%2==0 else "#eeeeee"
+            if highlight_weekends and curr_row[0] != '':
+                if ("Sat" in curr_row[0] or "Sun" in curr_row[0]):
+                    row_color = "#ffaaaa" if row_color == "#dddddd" else "#ffbbbb"
+
             self.table_rows.append(
                 RowWidget(
                     parent_frame=parent_frame, 
@@ -622,12 +629,12 @@ class WindowedViewer():
                     row_number=index, 
                     mode="table", 
                     row_contents=curr_row,
-                    row_color="#dddddd" if index%2==0 else "#eeeeee",
+                    row_color=row_color,
                 )
             )
 
 
-    def table_nav(self, app=None, page_number=0, entries=[], window_title="", add_cell_formatting=True):
+    def table_nav(self, app=None, page_number=0, entries=[], window_title="", add_cell_formatting=True, highlight_weekends=False):
 
         if (page_number == 0):
             self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
@@ -647,7 +654,7 @@ class WindowedViewer():
         self.page_number=page_number
         self.table_frame.destroy()
         self.table_frame = ctk.CTkFrame(master=app.get_window(window_title).body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
-        self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting)
+        self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting, highlight_weekends=highlight_weekends)
 
         self.header_frame.grid(row=0, column=1)
         self.table_frame.grid(row=1, column=1)

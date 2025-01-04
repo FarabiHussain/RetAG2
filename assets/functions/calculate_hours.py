@@ -94,7 +94,7 @@ def callback(app=None):
             hrs_in_date = ("%d hr %d min" % (day_hrs, day_mins)) if (day_hrs + day_mins > 0) else "-"
 
         curr_row = [
-            formattime(key[0:8], '%Y%m%d', '%b %d, %Y'),
+            formattime(key[0:8], '%Y%m%d', '%a, %b %d, %Y'),
             val.get('in', '-'),
             val.get('out', '-'),
             hrs_in_date,
@@ -108,5 +108,6 @@ def callback(app=None):
         column_names=['date', 'clocked in at', 'clocked out at', 'hours in date', 'cumulative hours'],
         entries=table_contents,
         add_cell_formatting=False,
-        window_title=f'attendance breakdown: {filter_staff}, between {formattime(filter_start_date, '%Y%m%d', '%b %d, %Y')} and {formattime(filter_end_date, '%Y%m%d', '%b %d, %Y')}'
+        window_title=f'attendance breakdown: {filter_staff}, between {formattime(filter_start_date, '%Y%m%d', '%b %d, %Y')} and {formattime(filter_end_date, '%Y%m%d', '%b %d, %Y')}',
+        highlight_weekends=True
     )

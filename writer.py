@@ -528,13 +528,14 @@ def write_invitation(doc, components):
 def write_imm5476(doc, components):
     date_on_document = datetime.datetime.now()
     case_id = components['case ID'].get().strip()
+    is_sponsorship = True if ("sponsorship" in (components['application type'].get()).lower()) else False
 
     document_data = {
         '[DAY]': date_on_document.strftime("%d"),
         '[MONTH]': date_on_document.strftime("%b"),
         '[YEAR]': date_on_document.strftime("%Y"),
         '[signedDate1]': (f"{components["date on document"].get().strip()}"),
-        '[signedDate2]': (f"{components["date on document"].get().strip()}"),
+        '[signedDate2]': (f"{components["date on document"].get().strip()}") if is_sponsorship else "",
         '[applicantUCI]': (f"{components["client 1 UCI"].get().strip()}"),
         '[applicantDOB]': (f"{components["client 1 date of birth"].get().strip()}"),
         '[applicantGivenName]': (f"{components["client 1 first name"].get().strip()}"),
@@ -555,11 +556,14 @@ def write_imm5476(doc, components):
             return False
 
     document_data["[applicantDOB]"] = datetime.datetime.strptime(document_data["[applicantDOB]"], "%b %d, %Y")
-    document_data["[signedDate1]"] = datetime.datetime.strptime(document_data["[signedDate1]"], "%b %d, %Y")
-    document_data["[signedDate2]"] = datetime.datetime.strptime(document_data["[signedDate2]"], "%b %d, %Y")
     document_data["[applicantDOB]"] = datetime.datetime.strftime(document_data["[applicantDOB]"], '%Y-%m-%d')
+
+    document_data["[signedDate1]"] = datetime.datetime.strptime(document_data["[signedDate1]"], "%b %d, %Y")
     document_data["[signedDate1]"] = datetime.datetime.strftime(document_data["[signedDate1]"], '%Y-%m-%d')
-    document_data["[signedDate2]"] = datetime.datetime.strftime(document_data["[signedDate2]"], '%Y-%m-%d')
+
+    if is_sponsorship:
+        document_data["[signedDate2]"] = datetime.datetime.strptime(document_data["[signedDate2]"], "%b %d, %Y")
+        document_data["[signedDate2]"] = datetime.datetime.strftime(document_data["[signedDate2]"], '%Y-%m-%d')
 
     if components["client 2 first name"].get().strip() == "" and components["client 2 last name"].get().strip() == "":
         document_data["[signedDate2]"] = ""
