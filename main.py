@@ -71,21 +71,10 @@ def on_startup():
         subapp_components[0]['subapp_obj'].lift_app(subapp_components)
 
     def set_attendance_as_default():
-        staff_names = {
-            "FARABI-AMCAIM": "Farabi",
-            "SAIFUL": "Saiful",
-            "MRIDHA": "Meehal",
-            "SOHAIB-AMCAIM": "Sohaib",
-            "MEHRU-AMCAIM": "Shakil",
-            "ZAHEEB": "Zaheeb",
-            "JUNAIDULLAH": "Junaid",
-            "RAIDKHAN": "Raid"
-        }
+        ic(globals.defualt_device_user)
 
-        device_name = os.environ['COMPUTERNAME']
-
-        if device_name in staff_names.keys():
-            app.components['staff name'].set(staff_names[device_name])
+        if globals.defualt_device_user != "":
+            app.components['staff name'].set(globals.defualt_device_user)
 
         app.components['attendance start date'].set(d="01")
         search_attendance(app, is_callback=True, is_first_tab=True)
