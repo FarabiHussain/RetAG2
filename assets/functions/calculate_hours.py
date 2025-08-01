@@ -25,10 +25,10 @@ def callback(app=None):
     filter_start_date = app.components.get("attendance start date").get(formatting="$y%m$d")
     filter_end_date = app.components.get("attendance end date").get(formatting="$y%m$d")
 
-    if "--test" in sys.argv:
-        filter_staff = "Meehal"
-        filter_start_date = "20241001"
-        filter_end_date = "20241031"
+    # if "--test" in sys.argv:
+        # filter_staff = "Farabi"
+        # filter_start_date = "20250701"
+        # filter_end_date = "20250731"
 
     if filter_staff.strip().lower() == "any":
         ErrorPopup("Please select a staff member")
@@ -49,26 +49,25 @@ def callback(app=None):
         return
 
     timesheet = {}
-    dateCounters = {}
+    dateCounters = {} # how many times does the same date come up in the list?
 
     for entry in (retrieved_entries):
         clock_state = 'in' if entry.get('type') == 1 else 'out'
         curr_date = entry.get('date')
         curr_date_count = dateCounters.get(curr_date, '1')
 
+        # a certain date already exists in the timesheet
         if (f"{curr_date}{curr_date_count}") in timesheet:
             if clock_state in timesheet[f"{curr_date}{curr_date_count}"]:
-                # print(f"`{clock_state}` already in {curr_date} {timesheet[f"{curr_date}{dateCounters[curr_date]}"]}")
                 dateCounters[curr_date] += 1
                 timesheet[f'{curr_date}{dateCounters[curr_date]}'] = {clock_state: entry.get('time')}
-                # print("created", f'{curr_date}{dateCounters[curr_date]})', timesheet[f"{curr_date}{dateCounters[curr_date]}"])
             else:
                 timesheet[f"{curr_date}{curr_date_count}"][clock_state] = entry.get('time')
-                # print(f"`{clock_state}` newly added to {curr_date} {timesheet[f"{curr_date}{dateCounters[curr_date]}"]}")
+
+        # no duplicates for the current date so far
         else:
             dateCounters[curr_date] = 1
             timesheet[f"{curr_date}{dateCounters[curr_date]}"] = {clock_state: entry.get('time')}
-            # print("created", f'{curr_date}{dateCounters[curr_date]})', timesheet[f"{curr_date}{dateCounters[curr_date]}"])
 
 
     total_seconds = 0
@@ -76,10 +75,11 @@ def callback(app=None):
 
     for key, val in zip(timesheet.keys(), timesheet.values()):
 
+        val['tdelta'] = 0
+
+        # the current date has both a 'clock-in' and 'clock-out', so the difference can be calculated
         if "in" in val and "out" in val:
             val['tdelta'] = (parsetime(val['out'], '%H:%M:%S') - parsetime(val['in'], '%H:%M:%S')).total_seconds()
-        else:
-            val['tdelta'] = 0
 
         total_seconds += int(val['tdelta'])
 
@@ -95,8 +95,8 @@ def callback(app=None):
 
         curr_row = [
             formattime(key[0:8], '%Y%m%d', '%a, %b %d, %Y'),
-            val.get('in', '-'),
-            val.get('out', '-'),
+            val.get('in', '-')[0:5],
+            val.get('out', '-')[0:5],
             hrs_in_date,
             ("%d hr %d min" % (total_hrs, total_min))
         ]

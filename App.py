@@ -19,7 +19,7 @@ class App():
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
-        self.version = "v2.1.11"
+        self.version = "v2.1.13"
         self.root.title(f"RETAG {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}
@@ -71,6 +71,15 @@ class App():
 
 
     def get_blueprint(self) -> dict:
+        skipped_subapps = []
+
+        for subapp in self.blueprint:
+            if str(subapp).startswith("#"):
+                skipped_subapps.append(subapp)
+
+        for remove_from_blueprint in skipped_subapps:
+            del self.blueprint[remove_from_blueprint]
+
         return self.blueprint
 
 

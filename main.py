@@ -26,7 +26,6 @@ subapp_components = []
 
 # first initialize the subapp frames and buttons so that we can control their visibilty and active status
 for subapp_name in blueprint:
-
     new_subapp = {"name": subapp_name, "frame": None, "button": None}
     new_subapp['frame'] = ctk.CTkFrame(master=app.root, fg_color="#444444" if globals.set_dark_theme else "#ffffff", border_width=0, height=1010, width=1540, corner_radius=0, border_color="gray")
     new_subapp['frame'].place(x=170, y=0)
@@ -78,12 +77,13 @@ def on_startup():
 
         app.components['attendance start date'].set(d="01")
         search_attendance(app, is_callback=True, is_first_tab=True)
-        subapp_components[5]['subapp_obj'].lift_app(subapp_components)
+        subapp_components[0]['subapp_obj'].lift_app(subapp_components)
+
+    def disable_buttons_while_loading():
+        for curr_subapp in subapp_components:
+            curr_subapp['button'].configure(state='disabled')
 
     def task():
-        for curr_subapp in subapp_components:
-            curr_subapp['button'].configure(state='normal')
-
         time.sleep(0.01)
         set_attendance_as_default()
 

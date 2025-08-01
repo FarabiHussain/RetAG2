@@ -248,7 +248,11 @@ class Subapp():
             for index, component_name in enumerate(blueprint.get("callbacks")):
                 current_component = app.get_all_components().get(component_name)
                 current_callback = import_function(blueprint['callbacks'][component_name], "callback")
-                current_component.add_callback(component_name=component_name, app=app, callback=current_callback)
+
+                try:
+                    current_component.add_callback(component_name=component_name, app=app, callback=current_callback)
+                except Exception as e:
+                    print(f"\n\nfailed to add callback: `{component_name}` in `{subapp_name}`")
 
         if "Init" == subapp_name:
             try:

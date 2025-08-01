@@ -1,5 +1,47 @@
 {
-    "Agreements": {
+    "Attendance": {
+        "column_weights": [1,2,0],
+
+        "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
+        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": "env.STAFF"},
+        
+        "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
+                "/assets/functions/clock_in.py", 
+                "/assets/functions/clock_out.py"
+            ]
+        },
+
+        "clocked in today": {"column": 1, "title_text": "recent entries", "type": "table", "headers": [
+                "staff name", 
+                "date", 
+                "time", 
+                "type"
+            ]
+        },
+
+        "break 1": {"column": 0, "type": "break", "heading": "SEARCH FILTERS"},
+        "attendance start date": {"column": 0, "type": "datepicker", "show_day": "true"},
+        "attendance end date": {"column": 0, "type": "datepicker", "show_day": "true"},
+        "clock type": {"column": 0, "type": "combo", "default": "Any", "options": ["Any", "Clock in", "Clock out"]},
+        "filter attendance": {"column": 0, "type": "rowbutton", 
+            "label": [
+                "apply filters", 
+                "clear/reload", 
+                "calculate hours"
+            ], 
+            "method": [
+                "/assets/functions/filter_attendance.py", 
+                "/assets/functions/clear_attendance_filters.py",
+                "/assets/functions/calculate_hours.py"
+            ]
+        },
+
+        "buttons": {
+            "adjust time": "#383FBC"
+        }
+    },
+
+    "#Agreements": {
         "column_weights": [1,1,1],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT 1 INFORMATION"},
@@ -140,7 +182,7 @@
         }
     },
 
-    "Payment Dates": {
+    "#Payment Dates": {
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "SEARCH PAYMENTS BY FILTERS"},
@@ -161,7 +203,7 @@
         }
     },
 
-    "Files": {
+    "#Files": {
         "column_weights": [1,2,0],
         "break 0": {"column": 0, "type": "break", "heading": "FILTERS"},
         "search case ID": {"column": 0, "type": "entry"},
@@ -334,48 +376,6 @@
             "spacer 13": "#ffffff",
             "test": "#d3d3d3",
             "reset receipt": "#BA0600"
-        }
-    },
-
-    "Attendance": {
-        "column_weights": [1,2,0],
-
-        "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
-        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": "env.STAFF"},
-        
-        "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
-                "/assets/functions/clock_in.py", 
-                "/assets/functions/clock_out.py"
-            ]
-        },
-
-        "clocked in today": {"column": 1, "title_text": "recent entries", "type": "table", "headers": [
-                "staff name", 
-                "date", 
-                "time", 
-                "type"
-            ]
-        },
-
-        "break 1": {"column": 0, "type": "break", "heading": "SEARCH FILTERS"},
-        "attendance start date": {"column": 0, "type": "datepicker", "show_day": "true"},
-        "attendance end date": {"column": 0, "type": "datepicker", "show_day": "true"},
-        "clock type": {"column": 0, "type": "combo", "default": "Any", "options": ["Any", "Clock in", "Clock out"]},
-        "filter attendance": {"column": 0, "type": "rowbutton", 
-            "label": [
-                "apply filters", 
-                "clear/reload", 
-                "calculate hours"
-            ], 
-            "method": [
-                "/assets/functions/filter_attendance.py", 
-                "/assets/functions/clear_attendance_filters.py",
-                "/assets/functions/calculate_hours.py"
-            ]
-        },
-
-        "buttons": {
-            "adjust time": "#383FBC"
         }
     },
 

@@ -354,7 +354,7 @@ def search_attendance(app, override_entries=None, is_callback=False, is_first_ta
             if override_entries is not None:
                 retrieved_entries = override_entries
             else:
-                retrieved_entries = collection_name.find().sort({"date":-1, "time":-1})
+                retrieved_entries = collection_name.find().sort({"date":-1, "time":-1}).limit(75)
 
             for entry in (retrieved_entries):
                 new_row = [
