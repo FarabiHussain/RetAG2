@@ -175,6 +175,11 @@ class ComboBox(GUI):
     def set(self, opt) -> None:
         self.stringvar.set(opt)
 
+    def add_options(self, new_options=[]) -> None:
+        # current_options = list(self.component.cget("values"))
+        # current_options.append(new_options)
+        self.component.configure(values=new_options)
+
     def reset(self) -> None:
         if self.default_option is None:
             self.component.set(self.default_string)
@@ -1369,6 +1374,7 @@ class TableWidget():
                 self.rows[row_index] = new_row
 
         self.update(page=self.page)
+
 
 
     def remove(self) -> None:

@@ -1,5 +1,6 @@
 from ast import Import
 import sys
+import globals
 
 
 class Database:
@@ -128,3 +129,12 @@ class Mongo:
             return self.client['retag-test']
 
         return self.client['retag-db']
+
+
+    def load_staff_names(self):
+        db = self.get_database()
+        collection = db["staff"]
+
+        # Fetch names where show == True
+        staff = collection.find({"show": True}, {"name": 1, "_id": 0})
+        globals.staff_names = [s["name"] for s in staff]

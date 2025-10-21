@@ -3,7 +3,7 @@
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
-        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": "env.STAFF"},
+        "staff name": {"column": 0, "type": "combo", "default": "Select", "options": []},
         
         "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
                 "/assets/functions/clock_in.py", 
@@ -141,16 +141,20 @@
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT AND CASE INFORMATION"},
-        "payment for case ID": {"column": 0, "type": "entry"},
+        "matter type": {"column": 0, "type": "entry"},
         "client name": {"column": 0, "type": "entry"},
-        "break 1": {"column": 0, "type": "break", "heading": "PURCHASE"},
-        "service": {"column": 0, "type": "combo", "options": ["Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
+        "document type": {"column": 0, "type": "combo", "options": ["Invoice", "Receipt"], "default": "Invoice"},
+        "break 1": {"column": 0, "type": "break", "heading": "INVOICE CREATION"},
+        "invoice total": {"column": 0, "type": "entry", "default": "1000.0"},
+        "paid amount": {"column": 0, "type": "entry"},
+        "due date": {"column": 0, "type": "datepicker", "show_day":"true"},
+        "use invoice template": {"column": 0, "type": "rowbutton", "label": "USE INVOICE TEMPLATE", "method": "/assets/functions/use_invoice_template.py"},
+        "break 2": {"column": 0, "type": "break", "heading": "ITEM CREATION"},
+        "service": {"column": 0, "type": "combo", "options": ["Payment", "Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
         "rate": {"column": 0, "type": "entry", "default": "$500.00"},
         "quantity": {"column": 0, "type": "entry", "default": "1"},
         "GST percentage": {"column": 0, "type": "entry", "default": "5.0"},
         "PST percentage": {"column": 0, "type": "entry", "default": "0.0"},
-        "price": {"column": 0, "type": "entry", "default": "$525.00"},
-        "adjust rate": {"column": 0, "type": "rowbutton", "label": "Adjust Rate", "method": "/assets/functions/adjust_rate.py"},
         "cart": {"column": 1, "type": "table", "title_text": "items in cart", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
 
         "callbacks": {
@@ -254,6 +258,7 @@
         "host creator": {"column": 0, "type": "tabview", "tabs": ["host info", "host 1", "host 2"], 
             "tab_components": [
                 {
+                    "date on letter": {"column": 0, "type": "datepicker", "show_day":"true"},
                     "bearer of expenses": {"column": 0, "type": "combo", "default": "host(s)", "options": ["host(s)", "guest(s)"]},
                     "attached documents": {"column": 0, "type": "entry"}
                 },
@@ -357,7 +362,6 @@
         },
 
         "generate conclusion": {"column": 2, "type": "rowbutton", "label": "Generate Conclusion", "method": "/assets/functions/generate_conclusion.py"},
-        "rephrase contents": {"column": 2, "type": "rowbutton", "label": "Rephrase Contents", "method": "/assets/functions/rephrase_contents.py"},
 
         "buttons": {
             "create letter": "#1A8405",

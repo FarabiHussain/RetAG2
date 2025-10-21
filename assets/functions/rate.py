@@ -12,12 +12,12 @@ def callback(app_components=None):
         tax_multuplier += float(app_components.get("PST percentage").get())
         tax_multuplier = float(tax_multuplier/100)
 
-        price = float(app_components.get("quantity").get()) * float(app_components.get("rate").get().strip().replace("$","").replace(",","").replace(" ","")) * tax_multuplier
+        # price = float(app_components.get("quantity").get()) * float(app_components.get("rate").get().strip().replace("$","").replace(",","").replace(" ","")) * tax_multuplier
 
-        app_components.get("price").set(f"{"${:,.2f}".format(price)}")
-        app_components.get("price").component.configure(fg_color="light green", text_color="#000000")
+        # app_components.get("price").set(f"{"${:,.2f}".format(price)}")
+        # app_components.get("price").component.configure(fg_color="light green", text_color="#000000")
 
-        app_components.get("rate").component.configure(fg_color="light gray", text_color="#000000")
+        # app_components.get("rate").component.configure(fg_color="light gray", text_color="#000000")
 
     except Exception as e:
         app_components.get("price").set("$0.00")

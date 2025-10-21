@@ -144,10 +144,33 @@ def write_payment_auth(doc, components):
         )
 
 
-def write_receipt(doc, components):
+def write_receipt(doc, components, is_invoice_needing_receipt=False):
     cart = components.get('cart')
     cart_items = []
-    case_id = components.get('payment for case ID').get()
+
+    # need to clear the items from cart if this is being called from an invoice that requires a receipt
+    if is_invoice_needing_receipt:
+        cart.reset()
+        paid_amount = components.get('paid amount').get().strip()
+
+        cart.add(
+            row_contents=[['Amount Paid', 1.0, float(paid_amount), 0.0, float(paid_amount)]], 
+            row_info=[
+                {
+                    'service': 'Amount Paid',
+                    'quantity': 1.0,
+                    'rate': float(paid_amount),
+                    'gst': 0.0,
+                    'pst': 0.0,
+                    'taxes': 0.0,
+                    'price': float(paid_amount),
+                }
+            ],
+            row_index=None
+        )
+
+    # check document type before proceeding
+    document_type = components.get('document type').get().strip()
 
     style = doc.styles['Normal']
     font = style.font
@@ -167,21 +190,28 @@ def write_receipt(doc, components):
         ErrorPopup('Add at least one item to create a document.')
         return False
 
-    if len(case_id.strip()) == 0:
-        case_id = '000000-000'
-
     receipt_id = "{:010}".format((read_receipt_id() + 1))
+    matter_type = components.get('matter type').get().strip()
     client_name = components.get('client name').get().strip()
+    due_date = components.get('due date').get().strip()
     timestamp_obj = datetime.datetime.now()
     timestamp = str(timestamp_obj.strftime("%H:%M - %B %d %Y"))
     formatted_timestamp = str(timestamp_obj.strftime("%Y.%m.%d-%H.%M.%S"))
-    output_filename = f"[{formatted_timestamp}] {case_id} - Receipt {receipt_id} - {client_name}"
+    output_filename = f"[{formatted_timestamp}] - {document_type.title()} {receipt_id} - {client_name}"
 
+    # predefined limit for rows per page to ensure clean printing
     printed_rows = 0
     rows_per_page = 7
 
     while printed_rows < len(cart_items):
-        insert_invoice_info(doc, receipt_id, client_name, timestamp)
+
+        # headers are different for receipt vs invoice
+        if document_type.lower() == 'receipt':
+            insert_invoice_info(doc, receipt_id, client_name, timestamp)
+        else:
+            insert_invoice_info(doc, receipt_id, client_name, timestamp, matter_type, due_date)
+
+        # table is the same for receipt vs invoice
         insert_items_table(doc, cart_items[printed_rows : printed_rows + rows_per_page])
         printed_rows += rows_per_page
 
@@ -189,12 +219,11 @@ def write_receipt(doc, components):
             doc.add_page_break()
 
     insert_totals_table(doc, cart_items)
-    response = save_doc(doc=doc, components=components, folder_name='receipts', override_output_filename=output_filename)
+    save_doc(doc=doc, components=components, folder_name='receipts', override_output_filename=output_filename)
 
-    if response:
+    needs_receipt = (document_type.lower() == 'invoice') and (float(components.get('paid amount').get()) > 0)
 
-        write_to_database('files', (case_id, os.environ['COMPUTERNAME'],components.get('client name').get().strip(), formatted_timestamp, 'Payment Receipt', output_filename, f'#{receipt_id} ({"${:.2f}".format(total)})'))
-        write_to_database('receipts', (receipt_id, case_id, os.environ['COMPUTERNAME'], client_name, formatted_timestamp, output_filename))
+    return needs_receipt
 
 
 def write_retainer(doc, components):
@@ -376,7 +405,7 @@ def write_conduct(doc, components):
 
 
 def write_invitation(doc, components):
-    date_on_document = datetime.datetime.strptime(components['date on document'].get(), "%b %d, %Y")
+    date_on_document = datetime.datetime.strptime(components['date on letter'].get(), "%b %d, %Y")
     has_second_host = False
 
     bearer_of_expenses = {
@@ -520,7 +549,7 @@ def write_invitation(doc, components):
                 formatted_timestamp, 
                 'Invitation Letter', 
                 output_filename, 
-                components['application type'].get()
+                'Invitation Letter'
             )
         )
 
@@ -691,7 +720,7 @@ def get_prompt_response(prompt="") -> str:
     }
 
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
+        model_name="gemini-2.5-flash",
         generation_config=generation_config,
     )
 

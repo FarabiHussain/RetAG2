@@ -95,7 +95,7 @@ def adjust_time_button(app):
         frame.place(x=20, y=20)
 
         RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
-        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(os.getenv('STAFF').split(',')))
+        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(globals.staff_names))
         timepicker = TimePicker(frame, label_text="time (24-hour format)", top_offset=2)
         datepicker = DatePicker(frame, label_text="date", top_offset=3)
         adminpass = Entry(frame, label_text="admin password", top_offset=4, is_password=True)
@@ -144,100 +144,104 @@ def test_button(app):
     legal_name = names.get_full_name(gender=random.choice(['male', 'female']))
     legal_name_2 = names.get_full_name(gender=random.choice(['male', 'female']))
 
-    app.components['address'].set("Address")
-    app.components['card number'].set(f"{str(random.randint(1000000000000000, 9999999999999999))}")
-    app.components['payment type'].set("Visa")
-    app.components['cardholder name'].set(legal_name)
-    app.components['add taxes'].set("5%")
-    app.components['expiration'].set(y="2026", m="Dec", d="31")
-    app.components['client 1 first name'].set(legal_name.split(" ")[0] + " (TEST)")
-    app.components['client 1 last name'].set(legal_name.split(" ")[1] + " (TEST)")
-    app.components['client 1 email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
-    app.components['client 1 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
-    app.components['email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
-    app.components['phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
-    app.components['client 2 first name'].set(legal_name_2.split(" ")[0] + " (TEST)")
-    app.components['client 2 last name'].set(legal_name_2.split(" ")[1] + " (TEST)")
-    app.components['client 2 email'].set(f"{legal_name_2.lower().replace(" ","")}@gmail.com")
-    app.components['client 2 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
-    app.components['security code'].set(f"{str(random.randint(100, 999))}")
-    app.components['case ID'].set(read_case_id())
-    app.components['client name'].set(f'{app.components['client 1 first name'].get()} {app.components['client 1 last name'].get()}')
-    app.components['client 1 date of birth'].set(y=f"199{random.randint(0,9)}", m=random.randint(0,11), d=random.randint(1,28))
-    app.components['client 1 UCI'].set("0123456789")
-    # app.components['search case ID'].set("202407-001")
+    if globals.current_lifted_subapp == ("Agreements"):
+        app.components['address'].set("Address")
+        app.components['card number'].set(f"{str(random.randint(1000000000000000, 9999999999999999))}")
+        app.components['payment type'].set("Visa")
+        app.components['cardholder name'].set(legal_name)
+        app.components['add taxes'].set("5%")
+        app.components['expiration'].set(y="2026", m="Dec", d="31")
+        app.components['client 1 first name'].set(legal_name.split(" ")[0] + " (TEST)")
+        app.components['client 1 last name'].set(legal_name.split(" ")[1] + " (TEST)")
+        app.components['client 1 email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
+        app.components['client 1 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
+        app.components['email'].set(f"{legal_name.lower().replace(" ","")}@gmail.com")
+        app.components['phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
+        app.components['client 2 first name'].set(legal_name_2.split(" ")[0] + " (TEST)")
+        app.components['client 2 last name'].set(legal_name_2.split(" ")[1] + " (TEST)")
+        app.components['client 2 email'].set(f"{legal_name_2.lower().replace(" ","")}@gmail.com")
+        app.components['client 2 phone'].set(f"+1 {random.choice(["(431)", "(204)"])} {str(random.randint(100, 999))}-{str(random.randint(1000, 9999))}")
+        app.components['security code'].set(f"{str(random.randint(100, 999))}")
+        app.components['case ID'].set(read_case_id())
+        app.components['client name'].set(f'{app.components['client 1 first name'].get()} {app.components['client 1 last name'].get()}')
+        app.components['client 1 date of birth'].set(y=f"199{random.randint(0,9)}", m=random.randint(0,11), d=random.randint(1,28))
+        app.components['client 1 UCI'].set("0123456789")
+        # app.components['search case ID'].set("202407-001")
 
-    for i in range(1,random.randint(2,3)):
-        other_host = "2" if i==1 else "1"
-        host_name = legal_name if i == 1 else legal_name_2
-        app.components[f"host {i} name"].set(host_name)
-        app.components[f"host {i} date of birth"].set(y=f"199{random.randint(0,9)}", m=random.randint(0,11), d=random.randint(1,28))
-        app.components[f"host {i} passport no."].set('XXXXXXXXX')
-        app.components[f"host {i} address"].set("999 St Mary\'s Rd, Winnipeg, MB R3C 0C4")
-        app.components[f"host {i} phone number"].set('999-999-9999')
-        app.components[f"host {i} email address"].set('email@domain.com')
-        app.components[f"host {i} occupation"].set('occupation')
-        app.components[f"host {i} status in Canada"].set('citizen')
-        app.components[f'relationship to host {other_host}'].set('spouse')
+    elif globals.current_lifted_subapp == ("Invitation Letter"):
+        for i in range(1,random.randint(2,3)):
+                other_host = "2" if i==1 else "1"
+                host_name = legal_name if i == 1 else legal_name_2
+                app.components[f"host {i} name"].set(host_name)
+                app.components[f"host {i} date of birth"].set(y=f"199{random.randint(0,9)}", m=random.randint(0,11), d=random.randint(1,28))
+                app.components[f"host {i} passport no."].set('XXXXXXXXX')
+                app.components[f"host {i} address"].set("999 St Mary\'s Rd, Winnipeg, MB R3C 0C4")
+                app.components[f"host {i} phone number"].set('999-999-9999')
+                app.components[f"host {i} email address"].set('email@domain.com')
+                app.components[f"host {i} occupation"].set('occupation')
+                app.components[f"host {i} status in Canada"].set('citizen')
+                app.components[f'relationship to host {other_host}'].set('spouse')
 
-    for i in range(1,random.randint(2,6)):
-        app.components[f"guest {i} name"].set(names.get_full_name(gender=random.choice(['male', 'female'])) + " (TEST)")
-        app.components[f"guest {i} date of birth"].set(y=f"{random.randint(1990,2006)}", m=random.randint(0,11), d=random.randint(1,31))
-        app.components[f"guest {i} passport no."].set('XXXXXXXXX')
-        app.components[f"guest {i} address"].set('3310 Evergreen Lane, Los Angeles, California, USA 90017')
-        app.components[f"guest {i} phone number"].set(f'{random.randint(100,999)}-{random.randint(100,999)}-{random.randint(1000,9999)}')
-        app.components[f"guest {i} email address"].set(f'guest{i}@domain.com')
-        app.components[f"guest {i} occupation"].set('occupation')
-        app.components[f"guest {i} country of citizenship"].set('USA')
-        app.components[f"guest {i} relation to host 1"].set('sibling')
+        for i in range(1,random.randint(2,6)):
+            app.components[f"guest {i} name"].set(names.get_full_name(gender=random.choice(['male', 'female'])) + " (TEST)")
+            app.components[f"guest {i} date of birth"].set(y=f"{random.randint(1990,2006)}", m=random.randint(0,11), d=random.randint(1,31))
+            app.components[f"guest {i} passport no."].set('XXXXXXXXX')
+            app.components[f"guest {i} address"].set('3310 Evergreen Lane, Los Angeles, California, USA 90017')
+            app.components[f"guest {i} phone number"].set(f'{random.randint(100,999)}-{random.randint(100,999)}-{random.randint(1000,9999)}')
+            app.components[f"guest {i} email address"].set(f'guest{i}@domain.com')
+            app.components[f"guest {i} occupation"].set('occupation')
+            app.components[f"guest {i} country of citizenship"].set('USA')
+            app.components[f"guest {i} relation to host 1"].set('sibling')
 
-    app.components["arrival date"].set(y=f"2024", m=random.randint(8,9), d=random.randint(1,15))
-    app.components["departure date"].set(y=f"2024", m=random.randint(9,11), d=random.randint(1,15))
-    app.components["purpose of visit"].set('to visit me, their sibling')
-    app.components["country of residence"].set('USA')
-    app.components["address in Canada"].set('1325 Markham Rd, Winnipeg, MB, Canada')
+        app.components["arrival date"].set(y=f"2024", m=random.randint(8,9), d=random.randint(1,15))
+        app.components["departure date"].set(y=f"2024", m=random.randint(9,11), d=random.randint(1,15))
+        app.components["purpose of visit"].set('to visit me, their sibling')
+        app.components["country of residence"].set('USA')
+        app.components["address in Canada"].set('1325 Markham Rd, Winnipeg, MB, Canada')
 
-    total_amount = 0
-    total_months = random.randint(1,12)
-    now = dt.now()
+    elif globals.current_lifted_subapp == ("Payment Dates"):
+        total_amount = 0
+        total_months = random.randint(1,12)
+        now = dt.now()
 
-    for i in range(total_months):
-        total_amount += 100
+        for i in range(total_months):
+            total_amount += 100
 
-        dt_object = now + rd.relativedelta(days=i)
-        year = (datetime.datetime.strftime(dt_object, "%Y"))
-        month = (datetime.datetime.strftime(dt_object, "%b"))
-        day = (datetime.datetime.strftime(dt_object, "%d"))
+            dt_object = now + rd.relativedelta(days=i)
+            year = (datetime.datetime.strftime(dt_object, "%Y"))
+            month = (datetime.datetime.strftime(dt_object, "%b"))
+            day = (datetime.datetime.strftime(dt_object, "%d"))
 
-        app.components[f'payment {i+1}'].set("100", year, month, day)
+            app.components[f'payment {i+1}'].set("100", year, month, day)
 
-    app.components['application fee'].set(f"${total_amount}", total_months)
+        app.components['application fee'].set(f"${total_amount}", total_months)
 
-    random_row_contents = []
-    random_row_infos = []
+    elif globals.current_lifted_subapp == ("Receipts"):
+        random_row_contents = []
+        random_row_infos = []
 
-    for i in range(random.randint(2,6)):
-        new_row, new_row_info = generate_row_contents(
-            app_components=app.components, 
-            override_row_content={
-                'service': f'item_{i+1}',
-                'quantity': f"{str(random.randint(1, 3))}",
-                'rate': str(random.choice([100,200,300,400,500])),
-                'tax_rate': 12.0,
-                'gst': 7.0,
-                'pst': 5.0,
-            }
+        for i in range(random.randint(2,6)):
+            new_row, new_row_info = generate_row_contents(
+                app_components=app.components, 
+                override_row_content={
+                    'service': f'item_{i+1}',
+                    'quantity': f"{str(random.randint(1, 3))}",
+                    'rate': str(random.choice([100,200,300,400,500])),
+                    'tax_rate': 12.0,
+                    'gst': 7.0,
+                    'pst': 5.0,
+                }
+            )
+
+            random_row_contents.append(new_row)
+            random_row_infos.append(new_row_info)
+
+        app.components.get('cart').add(
+            row_contents=random_row_contents,
+            row_info=random_row_infos,
         )
 
-        random_row_contents.append(new_row)
-        random_row_infos.append(new_row_info)
-
-    app.components.get('cart').add(
-        row_contents=random_row_contents,
-        row_info=random_row_infos,
-    )
-
-    update_total_row(cart=app.components.get('cart'))
+        update_total_row(cart=app.components.get('cart'))
 
 
 def search_files_button(app):
@@ -851,11 +855,20 @@ def handle_action(app=None, action="", blueprint={}):
             ErrorPopup(msg=f'Exception while writing code of conduct:\n\n{str(e)}')
 
     elif (action == "create receipt"):
-        try:
-            doc = Document(resource_path("assets\\templates\\receipt.docx"))
-            write_receipt(doc, app.get_all_components())
-        except Exception as e:
-            ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
+        # try:
+            doc = Document(resource_path(f"assets\\templates\\{app.components.get('document type').get()}.docx"))
+            is_invoice_needing_receipt = write_receipt(doc, app.get_all_components())
+
+            if is_invoice_needing_receipt:
+                doc = Document(resource_path(f"assets\\templates\\receipt.docx"))
+                PromptPopup(
+                    "This invoice contains a payment. Would you like to create a receipt as well?", 
+                    func=lambda: write_receipt(doc, app.get_all_components(), is_invoice_needing_receipt)
+                )
+                app.focus()
+
+        # except Exception as e:
+            # ErrorPopup(msg=f'Exception while writing receipt:\n\n{str(e)}')
 
     elif (action == "create letter"):
 

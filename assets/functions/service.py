@@ -9,6 +9,7 @@ def callback(app_components=None):
     service_name = (app_components.get("service").get()).lower()
 
     service_rates = {
+        "payment": (500.0, 5.0, 0.0),
         "immigration": (500.0, 5.0, 0.0),
         "invitation letter": (100.0, 5.0, 7.0),
         "affidavit": (100.0, 5.0, 7.0),

@@ -64,6 +64,8 @@ class Subapp():
 
 
     def lift_app(self, subapp_components=[], callback_function=None, app=None):
+        globals.current_lifted_subapp = self.subapp_name
+        
         for curr_subapp in subapp_components:
             curr_subapp['button'].configure(text_color="white", fg_color="#111111" if globals.set_dark_theme else "gray", hover_color="light gray", state='normal')
 

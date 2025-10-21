@@ -157,18 +157,33 @@ def save_doc(doc=None, components=None, folder_name="", prefix="", override_outp
 
 
 # write the invoice number and date on the top
-def insert_invoice_info(document=None, doc_id="", billed_to="", timestamp=""):
+def insert_invoice_info(document=None, doc_id="", billed_to="", timestamp="", matter_type="", due_date=""):
+    lines = []
 
-    if (len(billed_to.strip()) == 0):
-        insert_paragraph(
-            document.add_paragraph(),
-            (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\n\n"),
-        )
-    else:
-        insert_paragraph(
-            document.add_paragraph(),
-            (f"Payment#\t{doc_id}\nDate\t\t{timestamp}\nBilled to\t\t{billed_to}\n"),
-        )
+    # # Define label-value pairs with the number of tabs for alignment
+    fields = [
+        ("Payment#", doc_id, 1),
+        ("Date", timestamp, 2),
+        ("Billed to", billed_to, 2),
+        ("Matter Type", matter_type, 1),
+        ("Due Date", due_date, 1),
+    ]
+
+    for label, value, tabs in fields:
+        s = "" if value is None else str(value).strip()
+
+        # If the field is not empty, add a formatted line to the list
+        if s:
+            lines.append(f"{label}{'\t' * tabs}{s}")
+
+    text = "\n".join(lines) + "\n"
+
+    if text:
+        # insert_paragraph(document.add_paragraph(), text)
+        paragraph = document.add_paragraph()
+        paragraph.paragraph_format.space_before = 0
+        paragraph.paragraph_format.space_after = 0
+        paragraph.add_run(text)
 
 
 # itemized table
