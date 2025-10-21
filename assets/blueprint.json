@@ -41,7 +41,7 @@
         }
     },
 
-    "#Agreements": {
+    "Agreements": {
         "column_weights": [1,1,1],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT 1 INFORMATION"},
@@ -137,7 +137,7 @@
         }
     },
 
-    "Receipts": {
+    "#Receipts": {
         "column_weights": [1,2,0],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT AND CASE INFORMATION"},
