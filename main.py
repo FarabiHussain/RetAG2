@@ -85,7 +85,8 @@ def on_startup():
 
     def task():
         time.sleep(0.01)
-        set_attendance_as_default()
+        subapp_components[3]['subapp_obj'].lift_app(subapp_components)
+        # set_attendance_as_default()
         Mongo().load_staff_names()
         app.components.get('staff name').add_options(new_options=sorted(globals.staff_names))
 

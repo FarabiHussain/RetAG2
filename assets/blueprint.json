@@ -383,6 +383,42 @@
         }
     },
 
+    "Info and Forms": {
+        "column_weights": [1,0,0],
+
+        "host creator": {"column": 0, "type": "tabview", "tabs": ["principal", "dep 1", "dep 2", "dep 3", "dep 4", "dep 5"], 
+            "tab_components": [
+                {
+                    "principal applicant name": {"column": 0, "type": "entry"},
+                    "type of application": {"column": 0, "type": "combo", "default": "host(s)", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]}
+                },
+                {
+                    "dep 1 name": {"column": 0, "type": "entry"},
+                    "dep 1 application": {"column": 0, "type": "combo", "default": "host(s)", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]}
+                }
+            ]
+        },
+
+        "buttons": {
+            "create application": "#1A8405",
+            "spacer 1": "#ffffff",
+            "spacer 2": "#ffffff",
+            "spacer 3": "#ffffff",
+            "spacer 4": "#ffffff",
+            "spacer 5": "#ffffff",
+            "spacer 6": "#ffffff",
+            "spacer 7": "#ffffff",
+            "spacer 8": "#ffffff",
+            "spacer 9": "#ffffff",
+            "spacer 10": "#ffffff",
+            "spacer 11": "#ffffff",
+            "spacer 12": "#ffffff",
+            "spacer 13": "#ffffff",
+            "spacer 14": "#ffffff",
+            "test": "#d3d3d3"
+        }
+    },
+
     "Settings": {
         "column_weights": [1,1,1],
         "dark theme": {"column": 0, "type": "switch", "method": "/assets/functions/set_dark_mode.py"}
