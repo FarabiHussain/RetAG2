@@ -13,5 +13,6 @@ def callback(app_components=None):
         app_components.get("client name").component.configure(fg_color="light green", text_color="#000000")
 
     except Exception as e:
-        app_components.get("client name").set("")
-        app_components.get("client name").component.configure(fg_color="#dddddd", text_color="#aaaaaa")
+        # app_components.get("client name").set("")
+        # app_components.get("client name").component.configure(fg_color="#dddddd", text_color="#aaaaaa")
+        pass

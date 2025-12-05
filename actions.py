@@ -6,6 +6,7 @@ import os
 import names
 import random
 import math
+from spreadsheet_assistant import spreadsheet_assistant
 from datetime import datetime as dt
 from dateutil import relativedelta as rd
 from Database import Database, Mongo
@@ -242,6 +243,12 @@ def test_button(app):
         )
 
         update_total_row(cart=app.components.get('cart'))
+
+    elif globals.current_lifted_subapp == ("Info and Forms"):
+        app.components['Principal applicant name'].set("John Doe")
+        app.components['Principal applicant application'].set("PR")
+        app.components['Dependent 1 name'].set("Jane Doe")
+        app.components['Dependent 1 application'].set("PR")
 
 
 def search_files_button(app):
@@ -972,6 +979,13 @@ def handle_action(app=None, action="", blueprint={}):
             except Exception as e:
                 print(e)
                 ErrorPopup(msg=f'Unable to find checklist for {selected_type}')
+
+    elif (action == "create application"):
+            try:
+                spreadsheet_assistant(app.components)
+            except Exception as e:
+                ErrorPopup(msg=f'Exception while writing application:\n\n{str(e)}')
+
 
     else:
         InfoPopup(msg='This feature is still under construction.')

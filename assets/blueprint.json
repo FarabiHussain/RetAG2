@@ -384,20 +384,41 @@
     },
 
     "Info and Forms": {
-        "column_weights": [1,0,0],
+        "column_weights": [1,1,1],
 
-        "host creator": {"column": 0, "type": "tabview", "tabs": ["principal", "dep 1", "dep 2", "dep 3", "dep 4", "dep 5"], 
-            "tab_components": [
-                {
-                    "principal applicant name": {"column": 0, "type": "entry"},
-                    "type of application": {"column": 0, "type": "combo", "default": "host(s)", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]}
-                },
-                {
-                    "dep 1 name": {"column": 0, "type": "entry"},
-                    "dep 1 application": {"column": 0, "type": "combo", "default": "host(s)", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]}
-                }
-            ]
-        },
+        "break 0": {"column": 0, "type": "break", "heading": "PRINCIPAL APPLICANT"},
+        "Principal applicant name": {"column": 0, "type": "entry"},
+        "Principal applicant application": {"column": 0, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 1": {"column": 0, "type": "break", "heading": "DEPENDENT 1"},
+        "Dependent 1 name": {"column": 0, "type": "entry"},
+        "Dependent 1 application": {"column": 0, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 2": {"column": 0, "type": "break", "heading": "DEPENDENT 2"},
+        "Dependent 2 name": {"column": 0, "type": "entry"},
+        "Dependent 2 application": {"column": 0, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 3": {"column": 0, "type": "break", "heading": "DEPENDENT 3"},
+        "Dependent 3 name": {"column": 0, "type": "entry"},
+        "Dependent 3 application": {"column": 0, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 4": {"column": 0, "type": "break", "heading": "DEPENDENT 4"},
+        "Dependent 4 name": {"column": 0, "type": "entry"},
+        "Dependent 4 application": {"column": 0, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 5": {"column": 1, "type": "break", "heading": "DEPENDENT 5"},
+        "Dependent 5 name": {"column": 1, "type": "entry"},
+        "Dependent 5 application": {"column": 1, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 6": {"column": 1, "type": "break", "heading": "DEPENDENT 6"},
+        "Dependent 6 name": {"column": 1, "type": "entry"},
+        "Dependent 6 application": {"column": 1, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 7": {"column": 1, "type": "break", "heading": "DEPENDENT 7"},
+        "Dependent 7 name": {"column": 1, "type": "entry"},
+        "Dependent 7 application": {"column": 1, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 8": {"column": 1, "type": "break", "heading": "DEPENDENT 8"},
+        "Dependent 8 name": {"column": 1, "type": "entry"},
+        "Dependent 8 application": {"column": 1, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+        "break 9": {"column": 1, "type": "break", "heading": "DEPENDENT 9"},
+        "Dependent 9 name": {"column": 1, "type": "entry"},
+        "Dependent 9 application": {"column": 1, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
+
+        "break 10": {"column": 2, "type": "break", "heading": "PROGRESS OUTPUT"},
+        "progress output": {"column": 2, "type": "textbox", "lines":0, "box_height": 657, "instructions_text": ""},
 
         "buttons": {
             "create application": "#1A8405",
