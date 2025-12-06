@@ -230,6 +230,8 @@ def spreadsheet_assistant(components) -> None:
     # create the target folder using PA's name in the format: "Last Name - First Name"
     target_folder = create_target_folder(applications[0]["name"])
 
+    console_messages = []
+
     for application in applications:
         application_type = application["type"]
         nomalized_name = normalize_last_first(application['name'])
@@ -239,7 +241,6 @@ def spreadsheet_assistant(components) -> None:
         info_path = target_folder / info_name
 
         progress_console = components['progress output']
-        console_messages = []
 
         console_messages.append(f">>> downloading info sheet for {nomalized_name}")
         download_file(TYPE_CHOICES.get(application_type).get("downloadUrl"), info_path)
@@ -263,6 +264,8 @@ def spreadsheet_assistant(components) -> None:
             sponsor_out = target_folder / f"_{normalize_last_first(applications[0]['name'])}_SPNSR_{date_stamp}.xlsx"
             print(f">>> downloading info sheet for sponsor, {normalize_last_first(applications[0]['name'])}")
             download_file(SPONSOR_SHEET_URL, sponsor_out)
+
+    progress_console.set("\n".join(console_messages))
 
     try:
         if os.name == "nt":
