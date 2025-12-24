@@ -1,7 +1,7 @@
 from icecream import ic
 from Database import Mongo
 from Popups import ErrorPopup
-from actions import search_attendance
+from actions import set_attendance
 
 def callback(app=None):
     if app is None:
@@ -38,7 +38,7 @@ def callback(app=None):
     for entry in (retrieved_entries):
         print(entry)
 
-    search_attendance(app, retrieved_entries)
+    set_attendance(app, retrieved_entries)
 
     db.client.close()
 

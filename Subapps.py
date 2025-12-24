@@ -3,7 +3,7 @@ import globals
 import customtkinter as ctk
 from Img import *
 from GUI import *
-from actions import search_attendance, search_payments_button
+from actions import set_attendance, search_payments_button
 from reader import import_function, read_case_id
 from icecream import ic
 
@@ -11,7 +11,7 @@ class Subapp():
     def __init__(self, subapp_components=None, blueprint=None, app=None, imgs=None, subapp_name="Subapp", button_position=0, columns_weights=[1,1,1]) -> None:
 
         if (subapp_name.lower() == "attendance"):
-            callback_function = search_attendance
+            callback_function = set_attendance
         elif (subapp_name.lower() == "payment dates"):
             callback_function = search_payments_button
         else:

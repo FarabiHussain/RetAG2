@@ -173,6 +173,67 @@ def adjust_sources_button(app):
         adjust_sources_window.show()
 
 
+def edit_attendance_button(app, row_to_edit=None):
+    table = app.components.get('clocked in today')
+    selected_info = table.get_selected_info()
+
+    if table.get_selected_info() is None:
+        ErrorPopup(msg="Select table item to perform action.")
+        return
+
+    # create a dt object with the date and time in the selected row
+    dt_obj = dt.strptime(selected_info["date"] + selected_info["time"], "%Y%m%d%H:%M:%S")
+
+    from GUI import WindowView, DatePicker, TimePicker, RowBreak, Entry, ComboBox
+    load_dotenv()
+
+    # retrieve object from app.components
+    adjust_time_window = app.get_window("edit attendance")
+
+    # check whether the object contains a window
+    if (adjust_time_window is not None) and (not adjust_time_window.body.winfo_exists()):
+        adjust_time_window = None
+
+    # create a new object if None was found
+    if adjust_time_window is None:
+        adjust_time_window = WindowView(app=app, window_name="Edit attendance", width=500, height=400)
+        app.add_window("edit attendance", adjust_time_window)
+
+        frame = ctk.CTkFrame(master=adjust_time_window.body, fg_color='#ffffff' if not globals.set_dark_theme else '#444444')
+        frame.place(x=20, y=20)
+
+        RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
+        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(globals.staff_names), default_option=selected_info['staff_name'])
+        clockpicker = ComboBox(frame, label_text="clock type", top_offset=2, options=["in", "out"], default_option="in" if selected_info['type'] == 1 else "out")
+        timepicker = TimePicker(frame, label_text="time (24-hour format)", top_offset=3)
+        datepicker = DatePicker(frame, label_text="date", top_offset=4)
+        adminpass = Entry(frame, label_text="admin password", top_offset=5, is_password=True)
+
+        timepicker.set(hr=dt_obj.strftime("%H"), min=dt_obj.strftime("%M"))
+        datepicker.set(m=int(dt_obj.strftime("%m"))-1, d=int(dt_obj.strftime("%d")), y=int(dt_obj.strftime("%Y")))
+
+        ctk.CTkButton(frame, text="SAVE", border_width=0, corner_radius=2, fg_color="#235e27", command=lambda:run_decryptor("/assets/functions/edit_attendance.py"), width=180, height=36).grid(row=6, column=0, columnspan=2, pady=10)
+        ctk.CTkButton(frame, text="DELETE", border_width=0, corner_radius=2, fg_color="#a11111", command=lambda:run_decryptor("/assets/functions/delete_attendance.py"), width=180, height=36).grid(row=6, column=1, columnspan=3, pady=10)
+
+        def run_decryptor(functionpath) -> str:
+            input_password = adminpass.get()
+
+            if os.getenv('PW') == obscure(input_password):
+                import_function(functionpath, "callback")(
+                    app, 
+                    staffpicker.get(), 
+                    dt_obj, 
+                    1 if clockpicker.get() == "in" else 0,
+                    selected_info['_id']
+                )
+            else:
+                ErrorPopup(msg='Incorrect password')
+
+    # bring the window forward if found
+    else:
+        adjust_time_window.show()
+
+
 def reset_button(app=None, blueprint={}, action=""):
     app_components = app.get_all_components()
 
@@ -299,10 +360,13 @@ def test_button(app):
         update_total_row(cart=app.components.get('cart'))
 
     elif globals.current_lifted_subapp == ("Info and Forms"):
-        app.components['Principal applicant name'].set("Applicant")
-        app.components['Principal applicant application'].set("Sponsorship")
-        # app.components['Dependent 1 name'].set("Sponsor")
-        # app.components['Dependent 1 application'].set("Sponsorship")
+        app.components['Principal applicant name'].set("TEST1")
+        app.components['Principal applicant application'].set("PR")
+
+        test_applications = ["Sponsorship", "Study Permit", "Work Permit", "Express Entry Profile", "MPNP"]
+        for i in range(1,6):
+            app.components[f'Dependent {i} name'].set(f"TEST{i}")
+            app.components[f'Dependent {i} application'].set(test_applications[i-1])
 
 
 def search_files_button(app):
@@ -395,107 +459,63 @@ def search_payments_button(app, is_callback=False):
     loadingsplash.show(task)
 
 
-# def search_attendance(app, override_entries=None, is_callback=False, is_first_tab=False):
+def retrieve_attendance():
+    db = Mongo()
+    dbname = db.get_database()
+    collection_name = dbname["attendance"]
 
-#     if is_callback:
-#         if globals.attendance_queried_time is not None:
-#             timediff = dt.now() - globals.attendance_queried_time
-#             if timediff.total_seconds() < 30:
-#                 return
+    retrieved_entries = collection_name.find().sort([("date", -1), ("time", -1)]).limit(75)
+    retrieved_entries = list(retrieved_entries)
 
-#     row_contents_list = []
-#     row_info_list = []
-#     table = app.components.get('clocked in today')
-
-#     from GUI import LoadingSplash
-#     loadingsplash = LoadingSplash(app.root, opacity=1.0)
-
-#     db = Mongo()
-#     dbname = db.get_database()
-#     collection_name = dbname["attendance"]
-
-#     def task():
-#         try:
-#             if override_entries is not None:
-#                 retrieved_entries = override_entries
-#             else:
-#                 retrieved_entries = collection_name.find().sort({"date":-1, "time":-1}).limit(75)
-
-#             for entry in (retrieved_entries):
-#                 new_row = [
-#                     entry.get('staff_name'), 
-#                     datetime.datetime.strftime(datetime.datetime.strptime(entry.get('date'), '%Y%m%d'), '%b %d, %Y'), 
-#                     datetime.datetime.strftime(datetime.datetime.strptime(entry.get('time'), '%H:%M:%S'), '%I:%M %p'),
-#                     'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
-#                 ]
-
-#                 row_contents_list.append(new_row)
-#                 row_info_list.append(entry)
-
-#             if len(row_contents_list) > 0 or len(override_entries) == 0:
-#                 table.selected_row = None
-#                 table.selected_row_info = None
-#                 table.reset()
-
-#                 if len(row_contents_list) > 0 and len(row_info_list) > 0:
-#                     table.add(row_contents=row_contents_list, row_info=row_info_list)
-
-#             db.client.close()
-#             loadingsplash.stop()
-#             globals.attendance_queried_time = dt.now()
-
-#         except Exception as e:
-#             ErrorPopup(f'Error when searching for attendance\n{e}')
-
-#     if is_first_tab:
-#         task()
-#     else:
-#         loadingsplash.show(task)
+    globals.queried_attendance_entries = retrieved_entries
+    return retrieved_entries
 
 
-def search_attendance(app, override_entries=None, is_callback=False, is_first_tab=False):
+def _format_attendance_entries(retrieved_entries):
+    row_contents_list = []
+    row_info_list = []
+
+    for entry in retrieved_entries:
+        new_row = [
+            entry.get('staff_name'),
+            datetime.datetime.strftime(
+                datetime.datetime.strptime(entry.get('date'), '%Y%m%d'),
+                '%b %d, %Y'
+            ),
+            datetime.datetime.strftime(
+                datetime.datetime.strptime(entry.get('time'), '%H:%M:%S'),
+                '%I:%M %p'
+            ),
+            'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
+        ]
+        row_contents_list.append(new_row)
+        row_info_list.append(entry)
+
+    return row_contents_list, row_info_list
+
+
+def set_attendance(app, override_entries=None, is_callback=False, is_first_tab=False):
 
     if is_callback:
         if globals.attendance_queried_time is not None:
             timediff = dt.now() - globals.attendance_queried_time
             if timediff.total_seconds() < 30:
                 return
-
+            
     table = app.components.get('clocked in today')
 
     from GUI import LoadingSplash
     loadingsplash = LoadingSplash(app.root, opacity=1.0)
 
-    db = Mongo()
-    dbname = db.get_database()
-    collection_name = dbname["attendance"]
-
     # --- worker thread: DB + processing ONLY (no Tk calls here)
-    def worker():
+    def worker(override_entries):
+        row_contents_list, row_info_list = [], []
+
         try:
-            row_contents_list = []
-            row_info_list = []
-
-            if override_entries is not None:
-                retrieved_entries = override_entries
+            if override_entries is None:
+                row_contents_list, row_info_list = _format_attendance_entries(retrieve_attendance())
             else:
-                retrieved_entries = collection_name.find().sort({"date": -1, "time": -1}).limit(75)
-
-            for entry in retrieved_entries:
-                new_row = [
-                    entry.get('staff_name'),
-                    datetime.datetime.strftime(
-                        datetime.datetime.strptime(entry.get('date'), '%Y%m%d'),
-                        '%b %d, %Y'
-                    ),
-                    datetime.datetime.strftime(
-                        datetime.datetime.strptime(entry.get('time'), '%H:%M:%S'),
-                        '%I:%M %p'
-                    ),
-                    'Clock in' if int(entry.get('type')) == 1 else 'Clock out'
-                ]
-                row_contents_list.append(new_row)
-                row_info_list.append(entry)
+                row_contents_list, row_info_list = _format_attendance_entries(override_entries)
 
             # --- UI thread update
             def finish_ui():
@@ -510,23 +530,19 @@ def search_attendance(app, override_entries=None, is_callback=False, is_first_ta
 
                     globals.attendance_queried_time = dt.now()
                 finally:
-                    try:
-                        db.client.close()
-                    except Exception:
-                        pass
                     loadingsplash.stop()
 
             app.root.after(0, finish_ui)
 
         except Exception as e:
-            def show_error():
+            def show_error(e):
                 loadingsplash.stop()
                 ErrorPopup(f'Error when searching for attendance\n{e}')
-            app.root.after(0, show_error)
+            app.root.after(0, show_error(e))
 
     # --- show splash first, then start thread
     def start_thread():
-        threading.Thread(target=worker, daemon=True).start()
+        threading.Thread(target=worker, args=(override_entries,), daemon=True).start()
 
     # Always show splash before starting the work
     loadingsplash.show(lambda: start_thread())
@@ -1121,6 +1137,10 @@ def handle_action(app=None, action="", blueprint={}):
 
     elif (action == "adjust file sources"):
         adjust_sources_button(app)
+
+    elif (action == "edit attendance"):
+        edit_attendance_button(app)
+        pass
 
     else:
         InfoPopup(msg='This feature is still under construction.')

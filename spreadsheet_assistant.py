@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 import os, sys, re, datetime as dt
 from pathlib import Path
-from Popups import show_popup
 import globals
 from Database import Mongo
 
@@ -194,23 +192,22 @@ def print_applications_list(applications, title_width=53):
     print(border + "\n")
 
 
-
-
 def spreadsheet_assistant(components, root) -> None:
     import threading
-
-    # Show popup on UI thread
-    popup = show_popup(root, msg="Downloading application files, please wait...")
+    from GUI import LoadingSplash
+    loadingsplash = LoadingSplash(root, opacity=1.0, splash_text="starting downloads", text_size=70)
 
     # Start downloads in background
-    threading.Thread(
-        target=_spreadsheet_worker,
-        args=(components, popup),
-        daemon=True
-    ).start()
+    def start_worker():
+        threading.Thread(
+            target=_spreadsheet_worker,
+            args=(components, loadingsplash),
+            daemon=True
+        ).start()
 
+    loadingsplash.show(task=start_worker)
 
-def _spreadsheet_worker(components, popup):
+def _spreadsheet_worker(components, loadingsplash):
     try:
         console_messages = []
 
@@ -267,28 +264,39 @@ def _spreadsheet_worker(components, popup):
             if application['type'].lower() == "work permit":
                 download_file(links["5710"], target_folder / f"{normalized_name} - imm5710.pdf")
                 console_messages.append(f">>> downloaded imm5710 for {normalized_name}")
+                loadingsplash.set_splash_text(f"imm5710 for\n{normalized_name}", text_size=70)
 
                 download_file(links["5707"], target_folder / f"{normalized_name} - imm5707.pdf")
                 console_messages.append(f">>> downloaded imm5707 for {normalized_name}")
+                loadingsplash.set_splash_text(f"imm5707 for\n{normalized_name}", text_size=70)
 
             elif application['type'].lower() == "study permit":
                 download_file(links["5709"], target_folder / f"{normalized_name} - imm5709.pdf")
                 console_messages.append(f">>> downloaded imm5709 for {normalized_name}")
+                loadingsplash.set_splash_text(f"imm5709 for\n{normalized_name}", text_size=70)
+                download_file(links["5645"], target_folder / f"{normalized_name} - imm5645.pdf")
+                console_messages.append(f">>> downloaded imm5645 for {normalized_name}")
+                loadingsplash.set_splash_text(f"imm5645 for\n{normalized_name}", text_size=70)
 
             elif application['type'].lower() == "sponsorship" and index == 1:
                 download_file(links["5532"], target_folder / f"{normalized_name} - imm5532.pdf")
                 console_messages.append(f">>> downloaded imm5532 for {normalized_name}")
+                loadingsplash.set_splash_text(f"imm5532 for\n{normalized_name}", text_size=70)
 
                 download_file(links["1344"], target_folder / f"{normalized_name} - imm1344.pdf")
                 console_messages.append(f">>> downloaded imm1344 for {normalized_name}")
+                loadingsplash.set_splash_text(f"imm1344 for\n{normalized_name}", text_size=70)
 
                 download_file(links["photos"], target_folder / f"{normalized_name} - Proof of Relationship to Sponsor - Relationship Photos.docx")
                 console_messages.append(f">>> downloaded Relationship Photos for {normalized_name}")
+                loadingsplash.set_splash_text(f"Relationship Photos for\n{normalized_name}", text_size=70)
 
         components['progress output'].set("\n".join(console_messages))
 
         try:
-            popup.after(0, popup.destroy)
+            # popup.after(0, popup.destroy)
+            loadingsplash.stop()
+
             if os.name == "nt":
                 os.startfile(target_folder)
         except Exception:
@@ -296,5 +304,6 @@ def _spreadsheet_worker(components, popup):
 
     except Exception as e:
         # Ensure popup closes even on error
-        popup.after(0, lambda: popup.destroy())
+        # popup.after(0, lambda: popup.destroy())
+        loadingsplash.stop()
         raise

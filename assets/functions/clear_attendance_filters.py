@@ -1,8 +1,8 @@
-from actions import search_attendance
+from actions import set_attendance
 
 def callback(app=None):
     if app is None:
         print("app components not provided")
         return
 
-    search_attendance(app)
+    set_attendance(app)

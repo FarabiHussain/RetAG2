@@ -1,17 +1,15 @@
 import customtkinter as ctk
-import glob
 import os
 from Path import *
 from Img import *
 from GUI import *
 from App import *
 from Subapps import *
-from actions import test_button, search_attendance
+from actions import retrieve_attendance, set_attendance
 from reader import *
 from RenderFont import RenderFont
 from tkinter import messagebox
 from Database import Database, Mongo
-from writer import unobscure, write_to_database
 import globals
 
 globals.init()
@@ -19,12 +17,10 @@ imgs = Img("md")
 app = App()
 app.set_size(w=1640, h=900)
 rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
-search_attendance(app, is_callback=True, is_first_tab=True)
-
+retrieve_attendance()
 
 blueprint = app.get_blueprint()
 subapp_components = []
-
 
 # first initialize the subapp frames and buttons so that we can control their visibilty and active status
 for subapp_name in blueprint:
@@ -68,28 +64,17 @@ def on_startup():
         # test_button(app)
         pass
 
-    def set_home_as_default():
-        subapp_components[0]['subapp_obj'].lift_app(subapp_components)
-
     def set_attendance_as_default():
-        ic(globals.defualt_device_user)
-
         if globals.defualt_device_user != "":
             app.components['staff name'].set(globals.defualt_device_user)
 
+        set_attendance(app, is_callback=True, is_first_tab=True, override_entries=globals.queried_attendance_entries)
         app.components['attendance start date'].set(d="01")
-        # search_attendance(app, is_callback=True, is_first_tab=True)
         subapp_components[0]['subapp_obj'].lift_app(subapp_components)
 
-    def disable_buttons_while_loading():
-        for curr_subapp in subapp_components:
-            curr_subapp['button'].configure(state='disabled')
-
     def task():
-        # time.sleep(0.01)
-        # subapp_components[2]['subapp_obj'].lift_app(subapp_components)
+        time.sleep(0.01)
         set_attendance_as_default()
-        Mongo().load_staff_names()
         app.components.get('staff name').add_options(new_options=sorted(globals.staff_names))
 
     from GUI import LoadingSplash

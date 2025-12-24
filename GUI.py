@@ -545,10 +545,10 @@ class TimePicker(GUI):
 
     # return a formatted date
     def get(self) -> str:
-        hr = self.stringvar_hour.get()
+        hr = int(self.stringvar_hour.get())
         min = int(self.stringvar_min.get())
 
-        return f"{hr}:{min}"
+        return f"{hr:02d}:{min:02d}"
 
     # set the date 
     def set(self, hr: str|int = None, min: str|int = None) -> str:
@@ -1437,7 +1437,7 @@ class TableWidget():
 
 
 class LoadingSplash():
-    def __init__(self, master=None, opacity=1.0, splash_text="loading") -> None:
+    def __init__(self, master=None, opacity=1.0, splash_text="loading", text_size=300) -> None:
 
         set_color = '#ffffff' if not globals.set_dark_theme else '#444444' 
         self.opacity = opacity
@@ -1455,9 +1455,20 @@ class LoadingSplash():
             height=300, 
             width=1500, 
             text=splash_text, 
-            font=ctk.CTkFont(family=family_bold, size=300), 
+            font=ctk.CTkFont(family=family_bold, size=text_size), 
             text_color="#4e4e4e" if globals.set_dark_theme else "#dddddd"
-        ).place(x=0, y=205)
+        )
+
+        self.label.place(x=0, y=(200 + (300 - text_size)/2))
+
+
+    def set_splash_text(self, new_text="loading", text_size=300) -> None:
+        if self.label is None:
+            print("No label to set text on!")
+            return
+
+        self.label.configure(text=new_text, font=ctk.CTkFont(family=family_bold, size=text_size))
+        self.label.place(x=0, y=(200 + (300 - text_size)/2))
 
 
     def show(self, task=None, waitfor=0.1):
@@ -1467,7 +1478,6 @@ class LoadingSplash():
         if task is not None:
             import threading
 
-            print(task)
             newThread = threading.Thread(target=task)
             newThread.start()
 

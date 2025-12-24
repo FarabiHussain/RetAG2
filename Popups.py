@@ -12,21 +12,6 @@ class InfoPopup():
         self.popup.destroy()
 
 
-def show_popup(parent, msg="Please wait..."):
-    win = ctk.CTkToplevel(parent)
-    win.overrideredirect(True)
-    win.attributes("-topmost", True)
-
-    ctk.CTkLabel(win, text=msg).pack(padx=80, pady=80)
-
-    win.update_idletasks()
-    x = parent.winfo_rootx() + parent.winfo_width()//2 - win.winfo_width()//2
-    y = parent.winfo_rooty() + parent.winfo_height()//2 - win.winfo_height()//2
-    win.geometry(f"+{x}+{y}")
-
-    return win
-
-
 class ErrorPopup():
     def __init__(self, msg="ErrorPopup") -> None:
         CTkMessagebox(title="Error", message=f"\n{msg}\n", icon="cancel")

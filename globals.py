@@ -1,12 +1,15 @@
 from datetime import datetime as dt
 import os
 from icecream import ic
-from Database import Database
+from Database import Database, Mongo
 
 global defualt_device_user
 global attendance_queried_time
 global set_dark_theme
+global current_lifted_subapp
+global queried_attendance_entries
 global links_dict
+global staff_names
 
 def init():
     db = Database()
@@ -23,11 +26,17 @@ def init():
     global current_lifted_subapp
     current_lifted_subapp = None
 
+    global queried_attendance_entries
+    queried_attendance_entries = []
+
     global staff_names
     staff_names = []
 
     global links_dict
     links_dict = {}
+
+    mongodb = Mongo()
+    mongodb.load_staff_names()
 
     retreived_devices = db.cursor.execute(f"SELECT * FROM theme WHERE device_name = '{os.environ['COMPUTERNAME']}'").fetchall()
 

@@ -3,7 +3,7 @@ import globals
 from icecream import ic
 from Database import Mongo
 from Popups import ErrorPopup, PromptPopup
-from actions import search_attendance
+from actions import set_attendance
 from datetime import datetime as dt
 
 def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
@@ -52,7 +52,7 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
             }
         )
 
-        search_attendance(app)
+        set_attendance(app)
 
     db.client.close()
 
