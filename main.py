@@ -19,6 +19,8 @@ imgs = Img("md")
 app = App()
 app.set_size(w=1640, h=900)
 rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
+search_attendance(app, is_callback=True, is_first_tab=True)
+
 
 blueprint = app.get_blueprint()
 subapp_components = []
@@ -76,7 +78,7 @@ def on_startup():
             app.components['staff name'].set(globals.defualt_device_user)
 
         app.components['attendance start date'].set(d="01")
-        search_attendance(app, is_callback=True, is_first_tab=True)
+        # search_attendance(app, is_callback=True, is_first_tab=True)
         subapp_components[0]['subapp_obj'].lift_app(subapp_components)
 
     def disable_buttons_while_loading():
@@ -84,9 +86,9 @@ def on_startup():
             curr_subapp['button'].configure(state='disabled')
 
     def task():
-        time.sleep(0.01)
-        subapp_components[3]['subapp_obj'].lift_app(subapp_components)
-        # set_attendance_as_default()
+        # time.sleep(0.01)
+        # subapp_components[2]['subapp_obj'].lift_app(subapp_components)
+        set_attendance_as_default()
         Mongo().load_staff_names()
         app.components.get('staff name').add_options(new_options=sorted(globals.staff_names))
 

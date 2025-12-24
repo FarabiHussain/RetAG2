@@ -6,6 +6,7 @@ from Database import Database
 global defualt_device_user
 global attendance_queried_time
 global set_dark_theme
+global links_dict
 
 def init():
     db = Database()
@@ -24,6 +25,9 @@ def init():
 
     global staff_names
     staff_names = []
+
+    global links_dict
+    links_dict = {}
 
     retreived_devices = db.cursor.execute(f"SELECT * FROM theme WHERE device_name = '{os.environ['COMPUTERNAME']}'").fetchall()
 

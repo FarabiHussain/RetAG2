@@ -41,7 +41,7 @@
         }
     },
 
-    "Agreements": {
+    "#Agreements": {
         "column_weights": [1,1,1],
 
         "break 0": {"column": 0, "type": "break", "heading": "CLIENT 1 INFORMATION"},
@@ -386,10 +386,10 @@
     "Info and Forms": {
         "column_weights": [1,1,1],
 
-        "break 0": {"column": 0, "type": "break", "heading": "PRINCIPAL APPLICANT"},
+        "break 0": {"column": 0, "type": "break", "heading": "PRINCIPAL APPLICANT (SELECT 'PR' FOR SPONSORSHIP)"},
         "Principal applicant name": {"column": 0, "type": "entry"},
         "Principal applicant application": {"column": 0, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
-        "break 1": {"column": 0, "type": "break", "heading": "DEPENDENT 1"},
+        "break 1": {"column": 0, "type": "break", "heading": "DEPENDENT 1 (OR SPONSOR - SELECT 'SPONSORSHIP' FORM)"},
         "Dependent 1 name": {"column": 0, "type": "entry"},
         "Dependent 1 application": {"column": 0, "type": "combo", "default": "click to select", "options": ["PR", "Sponsorship", "Express Entry Profile", "MPNP", "Work Permit", "Study Permit"]},
         "break 2": {"column": 0, "type": "break", "heading": "DEPENDENT 2"},
@@ -422,7 +422,7 @@
 
         "buttons": {
             "create application": "#1A8405",
-            "spacer 1": "#ffffff",
+            "adjust file sources": "#114707",
             "spacer 2": "#ffffff",
             "spacer 3": "#ffffff",
             "spacer 4": "#ffffff",

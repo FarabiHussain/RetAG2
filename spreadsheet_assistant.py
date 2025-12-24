@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os, sys, re, datetime as dt
 from pathlib import Path
-import threading
+from Popups import show_popup
+import globals
+from Database import Mongo
 
 try:
     import requests
@@ -18,7 +20,7 @@ TYPE_CHOICES = {
         "ext": "xlsx",
     },
     "Sponsorship": {
-        "downloadUrl": "https://netorg5734909-my.sharepoint.com/:x:/g/personal/farabi_amcaim_ca/EXF65r3c07xJr_RCaGRvM1EBkRbBkCpdSXiynQswaBsCbw?e=7Wtxi5&download=1",
+        "downloadUrl": "https://netorg5734909-my.sharepoint.com/:x:/g/personal/farabi_amcaim_ca/IQDdMCguzYAnSpMZwNlEjOAPAaT6hYGmPjJiH4V3sFE2I1k?e=YyJwyP&download=1",
         "ext": "xlsx",
     },
     "Express Entry Profile": {
@@ -30,24 +32,14 @@ TYPE_CHOICES = {
         "ext": "xlsx",
     },
     "Work Permit": {
-        "downloadUrl": "https://netorg5734909-my.sharepoint.com/:w:/g/personal/farabi_amcaim_ca/ET6sZyLyheRAhUUpB0cRDZIBFhcRRLcq3YKndc8JFRc6Zg?e=Sxhb7W&download=1",
+        "downloadUrl": "https://netorg5734909-my.sharepoint.com/:w:/g/personal/farabi_amcaim_ca/IQCxEz6QzvDPS5LDsP6TL10KAZXkvw15RHHha0njwhp50E0?e=CCvP6J&download=1",
         "ext": "docx",
     },
     "Study Permit": {
-        "downloadUrl": "https://netorg5734909-my.sharepoint.com/:w:/g/personal/farabi_amcaim_ca/ET6sZyLyheRAhUUpB0cRDZIBFhcRRLcq3YKndc8JFRc6Zg?e=Sxhb7W&download=1",
+        "downloadUrl": "https://netorg5734909-my.sharepoint.com/:w:/g/personal/farabi_amcaim_ca/IQDWWELv1zpiS5u7yeLJlBdJAbrjJXILREPChhWhr9sLISs?e=IfPLrb&download=1",
         "ext": "docx",
     },
 }
-
-# IMM / supporting-doc URLs
-URL_1344 = "https://netorg5734909-my.sharepoint.com/:b:/g/personal/farabi_amcaim_ca/EfWJwUl5kGxGngogRZUnnEsB-FJo6BwYJ4tKE_lAWbXsAw?e=77vbnb&download=1"
-URL_5532 = "https://netorg5734909-my.sharepoint.com/:b:/g/personal/farabi_amcaim_ca/EXNqmnRsL8xBjF0JmPYGYq0Bhd8QDo5hw0JxVN3OrZ-KiA?e=B7ABEc&download=1"
-URL_5476 = "https://netorg5734909-my.sharepoint.com/:b:/g/personal/farabi_amcaim_ca/IQDOCH5-_XuTTZtx3RFsXvEHAZ29084N1ktSuy1dj5shNc0?e=wcD0GF&download=1"
-URL_5707 = "https://netorg5734909-my.sharepoint.com/:b:/g/personal/farabi_amcaim_ca/Eb-mrEba-qtBut_2PWOpU4kBa1MxrT2PnpjFf0c8N3eyNA?e=kOulpc&download=1"
-URL_5709 = "https://netorg5734909-my.sharepoint.com/:b:/g/personal/farabi_amcaim_ca/EdOjB1t6_4NOhZaxWXVfp6kBtRmv1GaAnZ5TpI1W2t3CmQ?e=OAQwhK&download=1"
-URL_5710 = "https://netorg5734909-my.sharepoint.com/:b:/g/personal/farabi_amcaim_ca/EdrIxBtsY-pDo0hvPOEYrdYBYCjZx8Odv1zqP_x12SIYeA?e=YACkO5&download=1"
-URL_PHOTOS = "https://netorg5734909-my.sharepoint.com/:w:/g/personal/farabi_amcaim_ca/EX23P6Z_QZNKkgLkTlXzDKMBhEW2b-DzK4PB8CTJX5Vf9w?e=h1scjz&download=1"
-SPONSOR_SHEET_URL = "https://netorg5734909-my.sharepoint.c...wKC7NgCdKkxnA2USM4A8BkE_6OxqTU0seo6_B0vEEUw?e=YNkLc3&download=1"
 
 
 def sanitize_filename(name: str, replacement: str = "_") -> str:
@@ -81,7 +73,7 @@ def sanitize_filename(name: str, replacement: str = "_") -> str:
 
 def download_file(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    # print(f">>> downloading {str(out_path).split('\\')[-1]}")
+
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         with open(out_path, "wb") as f:
@@ -202,73 +194,107 @@ def print_applications_list(applications, title_width=53):
     print(border + "\n")
 
 
-def spreadsheet_assistant(components) -> None:
 
-    applications = []
-    date_stamp = dt.datetime.now().strftime("%Y.%m.%d")
 
-    for i in range(10):
-        curr_application = {}
-        is_valid_name = False
-        is_valid_app_type = False
+def spreadsheet_assistant(components, root) -> None:
+    import threading
 
-        curr_applicant = "Principal applicant" if i == 0 else f"Dependent {i}"
+    # Show popup on UI thread
+    popup = show_popup(root, msg="Downloading application files, please wait...")
 
-        if components[f"{curr_applicant} name"].get().strip() != "":
-            is_valid_name = True
-            curr_application["name"] = components[f"{curr_applicant} name"].get().strip()
-        else:
-            continue
+    # Start downloads in background
+    threading.Thread(
+        target=_spreadsheet_worker,
+        args=(components, popup),
+        daemon=True
+    ).start()
 
-        if components[f"{curr_applicant} application"].get().lower() in ["pr", "sponsorship", "express entry profile", "mpnp", "work permit", "study permit"]:
-            is_valid_app_type = True
-            curr_application["type"] = components[f"{curr_applicant} application"].get().strip()
 
-        if is_valid_name and is_valid_app_type:
-            applications.append(curr_application) 
-
-    # create the target folder using PA's name in the format: "Last Name - First Name"
-    target_folder = create_target_folder(applications[0]["name"])
-
-    console_messages = []
-
-    for application in applications:
-        application_type = application["type"]
-        nomalized_name = normalize_last_first(application['name'])
-
-        # Download principal info sheet
-        info_name = f"_{nomalized_name}_{application['type']}_{date_stamp}.{TYPE_CHOICES[application_type]['ext']}"
-        info_path = target_folder / info_name
-
-        progress_console = components['progress output']
-
-        console_messages.append(f">>> downloading info sheet for {nomalized_name}")
-        download_file(TYPE_CHOICES.get(application_type).get("downloadUrl"), info_path)
-        download_file(URL_5476, target_folder / f"{nomalized_name} - imm5476.pdf")
-
-        if application['type'].lower() == "work permit":
-            download_file(URL_5710, target_folder / f"{nomalized_name} - imm5710.pdf")
-            console_messages.append(f">>> downloading imm5710 for {nomalized_name}")
-            download_file(URL_5707, target_folder / f"{nomalized_name} - imm5707.pdf")
-            console_messages.append(f">>> downloading imm5707 for {nomalized_name}")
-        elif application['type'].lower() == "study permit":
-            download_file(URL_5709, target_folder / f"{nomalized_name} - imm5709.pdf")
-            console_messages.append(f">>> downloading imm5709 for {nomalized_name}")
-        elif application['type'].lower() == "sponsorship":
-            download_file(URL_5532, target_folder / f"{nomalized_name} - imm5532.pdf")
-            console_messages.append(f">>> downloading imm5532 for {nomalized_name}")
-            download_file(URL_1344, target_folder / f"{nomalized_name} - imm1344.pdf")
-            console_messages.append(f">>> downloading imm1344 for {nomalized_name}")
-            download_file(URL_PHOTOS,target_folder / f"{nomalized_name} - Proof of Relationship to Sponsor - Relationship Photos.docx")
-            console_messages.append(f">>> downloading Proof of Relationship to Sponsor - Relationship Photos for {nomalized_name}")
-            sponsor_out = target_folder / f"_{normalize_last_first(applications[0]['name'])}_SPNSR_{date_stamp}.xlsx"
-            print(f">>> downloading info sheet for sponsor, {normalize_last_first(applications[0]['name'])}")
-            download_file(SPONSOR_SHEET_URL, sponsor_out)
-
-    progress_console.set("\n".join(console_messages))
-
+def _spreadsheet_worker(components, popup):
     try:
-        if os.name == "nt":
-            os.startfile(target_folder)  # type: ignore[attr-defined]
-    except Exception:
-        pass
+        console_messages = []
+
+        applications = []
+        date_stamp = dt.datetime.now().strftime("%Y.%m.%d")
+
+        for i in range(10):
+            curr_application = {}
+            curr_applicant = "Principal applicant" if i == 0 else f"Dependent {i}"
+
+            name = components[f"{curr_applicant} name"].get().strip()
+            if not name:
+                continue
+
+            app_type = components[f"{curr_applicant} application"].get().strip()
+            if app_type.lower() not in ["pr", "sponsorship", "express entry profile", "mpnp", "work permit", "study permit"]:
+                continue
+
+            curr_application["name"] = name
+            curr_application["type"] = app_type
+            applications.append(curr_application)
+
+        if not applications:
+            return
+
+        target_folder = create_target_folder(applications[0]["name"])
+
+        db = Mongo()
+        dbname = db.get_database()
+        collection_name = dbname["links"]
+        entries = collection_name.find()
+
+        for row in entries:
+            url = row['url']
+            globals.links_dict[row['form']] = (url + "&download=1") if not url.endswith("&download=1") else url
+
+        links = globals.links_dict
+
+        for index, application in enumerate(applications):
+            application_type = application["type"]
+            normalized_name = normalize_last_first(application['name'])
+
+            if index == 0 and application['type'].lower() == "sponsorship":
+                application_type = "PR"
+
+            info_name = f"_{normalized_name}_{application['type']}_{date_stamp}.{TYPE_CHOICES[application_type]['ext']}"
+            info_path = target_folder / info_name
+
+            console_messages.append(f">>> downloaded info sheet for {normalized_name}")
+            download_file(TYPE_CHOICES[application_type]["downloadUrl"], info_path)
+
+            download_file(links["5476"], target_folder / f"{normalized_name} - imm5476.pdf")
+
+            if application['type'].lower() == "work permit":
+                download_file(links["5710"], target_folder / f"{normalized_name} - imm5710.pdf")
+                console_messages.append(f">>> downloaded imm5710 for {normalized_name}")
+
+                download_file(links["5707"], target_folder / f"{normalized_name} - imm5707.pdf")
+                console_messages.append(f">>> downloaded imm5707 for {normalized_name}")
+
+            elif application['type'].lower() == "study permit":
+                download_file(links["5709"], target_folder / f"{normalized_name} - imm5709.pdf")
+                console_messages.append(f">>> downloaded imm5709 for {normalized_name}")
+
+            elif application['type'].lower() == "sponsorship" and index == 1:
+                download_file(links["5532"], target_folder / f"{normalized_name} - imm5532.pdf")
+                console_messages.append(f">>> downloaded imm5532 for {normalized_name}")
+
+                download_file(links["1344"], target_folder / f"{normalized_name} - imm1344.pdf")
+                console_messages.append(f">>> downloaded imm1344 for {normalized_name}")
+
+                download_file(links["photos"], target_folder / f"{normalized_name} - Proof of Relationship to Sponsor - Relationship Photos.docx")
+                console_messages.append(f">>> downloaded Relationship Photos for {normalized_name}")
+
+        components['progress output'].set("\n".join(console_messages))
+
+        try:
+            popup.after(0, popup.destroy)
+            if os.name == "nt":
+                os.startfile(target_folder)
+        except Exception:
+            pass
+
+    except Exception as e:
+        # Ensure popup closes even on error
+        popup.after(0, lambda: popup.destroy())
+        raise
