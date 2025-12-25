@@ -138,3 +138,4 @@ class Mongo:
         # Fetch names where show == True
         staff = collection.find({"show": True}, {"name": 1, "_id": 0})
         globals.staff_names = [s["name"] for s in staff]
+        print(globals.staff_names)

@@ -38,7 +38,8 @@
 
         "buttons": {
             "adjust time": "#383FBC",
-            "edit attendance": "#383FBC"
+            "edit attendance": "#383FBC",
+            "edit staff": "#383FBC"
         }
     },
 

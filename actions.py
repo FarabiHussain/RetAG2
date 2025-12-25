@@ -234,6 +234,50 @@ def edit_attendance_button(app, row_to_edit=None):
         adjust_time_window.show()
 
 
+def edit_staff_button(app, row_to_edit=None):
+    if len(globals.staff_names) == 0:
+        ErrorPopup(msg="No staff names found in database.")
+        return
+
+    from GUI import WindowView, RowBreak, Entry, ComboBox
+    load_dotenv()
+
+    # retrieve object from app.components
+    adjust_time_window = app.get_window("edit staff")
+
+    # check whether the object contains a window
+    if (adjust_time_window is not None) and (not adjust_time_window.body.winfo_exists()):
+        adjust_time_window = None
+
+    # create a new object if None was found
+    if adjust_time_window is None:
+        adjust_time_window = WindowView(app=app, window_name="Edit staff", width=500, height=400)
+        app.add_window("edit staff", adjust_time_window)
+
+        frame = ctk.CTkFrame(master=adjust_time_window.body, fg_color='#ffffff' if not globals.set_dark_theme else '#444444')
+        frame.place(x=20, y=20)
+
+        RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
+        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(globals.staff_names))
+        new_name = Entry(frame, label_text="rename staff to", top_offset=2, is_password=False)
+        adminpass = Entry(frame, label_text="admin password", top_offset=3, is_password=True)
+
+        ctk.CTkButton(frame, text="SAVE", border_width=0, corner_radius=2, fg_color="#235e27", command=lambda:run_decryptor("/assets/functions/edit_staff.py"), width=180, height=36).grid(row=4, column=0, columnspan=2, pady=10)
+        ctk.CTkButton(frame, text="DELETE", border_width=0, corner_radius=2, fg_color="#a11111", command=lambda:run_decryptor("/assets/functions/delete_staff.py"), width=180, height=36).grid(row=4, column=1, columnspan=3, pady=10)
+
+        def run_decryptor(functionpath) -> str:
+            input_password = adminpass.get()
+
+            if os.getenv('PW') == obscure(input_password):
+                import_function(functionpath, "callback")(app, staffpicker.get(), new_name.get())
+            else:
+                ErrorPopup(msg='Incorrect password')
+
+    # bring the window forward if found
+    else:
+        adjust_time_window.show()
+
+
 def reset_button(app=None, blueprint={}, action=""):
     app_components = app.get_all_components()
 
@@ -1140,7 +1184,9 @@ def handle_action(app=None, action="", blueprint={}):
 
     elif (action == "edit attendance"):
         edit_attendance_button(app)
-        pass
+
+    elif (action == "edit staff"):
+        edit_staff_button(app)
 
     else:
         InfoPopup(msg='This feature is still under construction.')
