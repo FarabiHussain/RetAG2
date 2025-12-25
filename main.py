@@ -9,7 +9,7 @@ from actions import retrieve_attendance, set_attendance
 from reader import *
 from RenderFont import RenderFont
 from tkinter import messagebox
-from Database import Database, Mongo
+from Database import Database
 import globals
 
 globals.init()
@@ -60,10 +60,6 @@ for i, subapp_name in enumerate(blueprint):
 
 
 def on_startup():
-    if "--test" in sys.argv:
-        # test_button(app)
-        pass
-
     def set_attendance_as_default():
         if globals.defualt_device_user != "":
             app.components['staff name'].set(globals.defualt_device_user)

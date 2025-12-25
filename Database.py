@@ -105,12 +105,13 @@ class Database:
             '''
                 CREATE TABLE IF NOT EXISTS theme (
                     device_name TEXT, 
-                    dark_mode INTEGER
+                    dark_mode INTEGER, 
+                    user_name TEXT
                 );
             '''
         )
 
-        self.database.close()
+        # self.database.close()
 
 
 class Mongo:
@@ -138,4 +139,3 @@ class Mongo:
         # Fetch names where show == True
         staff = collection.find({"show": True}, {"name": 1, "_id": 0})
         globals.staff_names = [s["name"] for s in staff]
-        print(globals.staff_names)

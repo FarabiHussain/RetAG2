@@ -10,10 +10,7 @@ def callback(app=None, *args, **kwargs):
         print("app components not provided")
         return
     else:
-        # staff_name = app.components['staff name'].get()
-        selected_staff = args[0]
-        new_staff_name = args[1]
-        staff_picker = args[2]
+        new_staff_name = args[0]
 
         if new_staff_name == "Select":
             ErrorPopup("Please select an employee")
@@ -24,19 +21,10 @@ def callback(app=None, *args, **kwargs):
     dbname = db.get_database()
     collection_name = dbname["staff"]
 
-    if PromptPopup(f"Delete staff member {selected_staff}?").get():
-        collection_name.update_one(
-            {"name": selected_staff},
-            {
-                "$set": {
-                    "name": new_staff_name,
-                }
-            },
-        )
+    if PromptPopup(f"Add staff member {new_staff_name}?").get():
+        collection_name.insert_one({"name": new_staff_name})
 
         db.load_staff_names()
         app.components["staff name"].add_options(globals.staff_names)
-        staff_picker.add_options(globals.staff_names)
-        staff_picker.set(new_staff_name)
 
     db.client.close()

@@ -13,6 +13,7 @@ global staff_names
 
 def init():
     db = Database()
+    db.init_tables()
 
     global attendance_queried_time
     attendance_queried_time = None
@@ -44,7 +45,7 @@ def init():
         set_dark_theme = True if retreived_devices[0][1] == 1 else False
         defualt_device_user = retreived_devices[0][2]
     else:
-        db.cursor.execute(f"INSERT INTO theme VALUES (?, ?, ?)", (os.environ['COMPUTERNAME'], 0, ""))
+        db.cursor.execute(f"INSERT INTO theme VALUES (?, ?, ?)", (os.environ['COMPUTERNAME'], 0, "-"))
         db.commit()
 
     db.close()

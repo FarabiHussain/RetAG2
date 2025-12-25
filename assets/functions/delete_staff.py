@@ -24,19 +24,12 @@ def callback(app=None, *args, **kwargs):
     dbname = db.get_database()
     collection_name = dbname["staff"]
 
-    if PromptPopup(f"Delete staff member {selected_staff}?").get():
-        collection_name.update_one(
-            {"name": selected_staff},
-            {
-                "$set": {
-                    "name": new_staff_name,
-                }
-            },
-        )
+    if PromptPopup(f"Rename {selected_staff} to {new_staff_name}?").get():
+        collection_name.delete_one({"name": selected_staff})
 
         db.load_staff_names()
         app.components["staff name"].add_options(globals.staff_names)
         staff_picker.add_options(globals.staff_names)
-        staff_picker.set(new_staff_name)
+        staff_picker.set('click to select')
 
     db.client.close()

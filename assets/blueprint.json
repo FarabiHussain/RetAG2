@@ -37,9 +37,10 @@
         },
 
         "buttons": {
-            "adjust time": "#383FBC",
-            "edit attendance": "#383FBC",
-            "edit staff": "#383FBC"
+            "adjust time": "#2711a1",
+            "edit attendance": "#291792",
+            "edit staff": "#1E1457",
+            "add staff": "#17113b"
         }
     },
 

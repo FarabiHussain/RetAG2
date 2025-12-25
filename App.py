@@ -32,9 +32,6 @@ class App():
             ctk.set_appearance_mode("dark")
             self.root.configure(fg_color='#222222')
 
-        db = Database()
-        db.init_tables()
-
 
     def __check_app_ico(self) -> bool:
         try:

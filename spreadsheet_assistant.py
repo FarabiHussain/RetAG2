@@ -113,22 +113,6 @@ def prompt_int(prompt: str) -> int:
         sys.exit(1)
 
 
-def print_title() -> None:
-    os.system("cls")
-    print(
-        r"""
-____ ___  ____ ____ ____ ___  ____ _  _ ____ ____ ___
-[__  |__] |__/ |___ |__| |  \ [__  |__| |___ |___  |
-___] |    |  \ |___ |  | |__/ ___] |  | |___ |___  |
-____ ____ ____ _ ____ ___ ____ _  _ ___
-|__| [__  [__  | [__   |  |__| |\ |  |
-|  | ___] ___] | ___]  |  |  | | \|  |   [2025.12.02]
-_____________________________________________________
-
-"""
-    )
-
-
 def print_application_options(applicant_number) -> None:
     print(
         f"""Select the application type for {"principal applicant" if applicant_number == 0 else (f"applicant #{applicant_number + 1}")}:

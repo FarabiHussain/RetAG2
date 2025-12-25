@@ -1437,7 +1437,7 @@ class TableWidget():
 
 
 class LoadingSplash():
-    def __init__(self, master=None, opacity=1.0, splash_text="loading", text_size=300) -> None:
+    def __init__(self, master=None, opacity=1.0, splash_text="RETAG2", text_size=300) -> None:
 
         set_color = '#ffffff' if not globals.set_dark_theme else '#444444' 
         self.opacity = opacity

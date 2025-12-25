@@ -256,17 +256,13 @@ class Subapp():
                 except Exception as e:
                     print(f"\n\nfailed to add callback: `{component_name}` in `{subapp_name}`")
 
-        if "Init" == subapp_name:
+        if subapp_name == "Init":
             try:
-                app.components.get('case ID').set(read_case_id())
-                app.components.get('case ID').component.configure(fg_color="light green", text_color="#000")
-                app.components.get('search case ID').component.configure(fg_color="light green", text_color="#000")
-                app.components.get('search case ID').set('000000-000')
-                app.components.get('cart').tools.buttons[3].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
-                app.components.get('cart').tools.buttons[4].configure(fg_color='light gray', text_color="white", state='disabled', text="$0.00")
+                # add initialization code here when and if needed
+                pass
 
             except Exception as e:
-                print(e)
+                print(f"Error when processing subapp == 'Init': {e}")
 
 
 
