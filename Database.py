@@ -129,7 +129,7 @@ class Mongo:
         if '--test' in sys.argv:
             return self.client['retag-test']
 
-        return self.client['retag-test']
+        return self.client['retag-db']
 
 
     def load_staff_names(self):

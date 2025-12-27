@@ -1,8 +1,10 @@
 from __future__ import annotations
-import os, sys, re, datetime as dt
+import os, sys, re, datetime as dt, requests
+from Popups import InfoPopup
+import globals, calendar
 from pathlib import Path
-import globals
 from Database import Mongo
+from bs4 import BeautifulSoup
 
 try:
     import requests
@@ -291,3 +293,41 @@ def _spreadsheet_worker(components, loadingsplash):
         # popup.after(0, lambda: popup.destroy())
         loadingsplash.stop()
         raise
+
+
+def get_latest_form_version(form_number: str) -> dict:
+    BASE = "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/"
+
+    r = requests.get(f"{BASE}{form_number}.html", timeout=30)
+    r.raise_for_status()
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    text = soup.get_text("\n", strip=True)
+
+    # Look for "A new version of this form is available ..."
+    m = re.search(r"A new version of this form is available\s*\((\d{2}-\d{4})\)", text)
+    version = m.group(1) if m else None
+
+    if not version:
+        m2 = re.search(r"Last updated:\s*([A-Za-z]+)\s+(\d{4})", text)
+        month_name, year = m2.group(1), m2.group(2)
+        month_num = list(calendar.month_name).index(month_name)   # "November" -> 11
+        mm_yyyy = f"{month_num:02d}-{year}"                       # "11-2025"
+        version = mm_yyyy if mm_yyyy else None
+    else:
+        InfoPopup(f"A new version of form {form_number} ({version}) is currently available. Please ensure you download the latest version from the IRCC website.", title="Form Update Available")
+
+    # Find the PDF link
+    pdf_link = None
+    for a in soup.find_all("a", href=True):
+        if "PDF" in a.get_text(strip=True).upper() or a["href"].lower().endswith(".pdf"):
+            href = a["href"]
+            if form_number in href.lower():
+                pdf_link = href if href.startswith("http") else "https://www.canada.ca" + href
+                break
+
+    return {
+        "version": version,
+        "pdf_link": pdf_link
+    }
+
