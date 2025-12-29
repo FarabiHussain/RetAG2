@@ -1,7 +1,7 @@
 import os
 import globals
 from icecream import ic
-from Database import Mongo
+from Database import Database
 from Popups import ErrorPopup, PromptPopup
 from actions import set_attendance
 from datetime import datetime as dt
@@ -21,7 +21,7 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
         return
 
     dt_object = dt.now()
-    db = Mongo()
+    db = Database()
     dbname = db.get_database()
     collection_name = dbname["attendance"]
 

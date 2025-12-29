@@ -1,6 +1,4 @@
 from PIL import Image, ImageFont, ImageDraw, ImageTk
-import customtkinter as ctk
-
 
 class RenderFont:
     def __init__(self, filename, fill=(0, 0, 0)):
@@ -39,7 +37,6 @@ class RenderFont:
         for item in rgba_data:
             if item[0] == 255 and item[1] == 255 and item[2] == 255:
                 newdata.append((255, 255, 255, 0))
-
             else:
                 newdata.append(item)
 

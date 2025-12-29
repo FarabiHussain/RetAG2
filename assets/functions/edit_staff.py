@@ -1,5 +1,5 @@
 import globals
-from Database import Mongo
+from Database import Database
 from Popups import ErrorPopup, PromptPopup
 from actions import set_attendance
 from datetime import datetime as dt
@@ -20,7 +20,7 @@ def callback(app=None, *args, **kwargs):
             return
 
     dt_object = dt.now()
-    db = Mongo()
+    db = Database()
     dbname = db.get_database()
     collection_name = dbname["staff"]
 
@@ -34,7 +34,7 @@ def callback(app=None, *args, **kwargs):
             },
         )
 
-        db.load_staff_names()
+        db.init_staff_names()
         app.components["staff name"].add_options(globals.staff_names)
         staff_picker.add_options(globals.staff_names)
         staff_picker.set(new_staff_name)

@@ -1,10 +1,9 @@
 import os
-import sys
-from icecream import ic
-from Database import Mongo
 import datetime as dt
+from icecream import ic
+from Database import Database
 from Popups import ErrorPopup
-from actions import WindowedViewer
+from GUI import WindowedViewer
 
 
 def parsetime(t, format):
@@ -17,18 +16,13 @@ def formattime(t, parse, format):
 def callback(app=None):
     os.system('cls')
 
-    db = Mongo()
+    db = Database()
     dbname = db.get_database()
     collection_name = dbname["attendance"]
 
     filter_staff = app.components.get("staff name").get()
     filter_start_date = app.components.get("attendance start date").get(formatting="$y%m$d")
     filter_end_date = app.components.get("attendance end date").get(formatting="$y%m$d")
-
-    # if "--test" in sys.argv:
-        # filter_staff = "Farabi"
-        # filter_start_date = "20250701"
-        # filter_end_date = "20250731"
 
     if filter_staff.strip().lower() == "any":
         ErrorPopup("Please select a staff member")

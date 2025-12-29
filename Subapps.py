@@ -3,19 +3,18 @@ import globals
 import customtkinter as ctk
 from Img import *
 from GUI import *
-from actions import set_attendance, search_payments_button
-from reader import import_function, read_case_id
+from actions import set_attendance
+from reader import import_function
 from icecream import ic
 
 class Subapp():
     def __init__(self, subapp_components=None, blueprint=None, app=None, imgs=None, subapp_name="Subapp", button_position=0, columns_weights=[1,1,1]) -> None:
 
-        if (subapp_name.lower() == "attendance"):
-            callback_function = set_attendance
-        elif (subapp_name.lower() == "payment dates"):
-            callback_function = search_payments_button
-        else:
-            callback_function = None
+        callback_function = None
+
+        if not subapp_name.startswith("#"):
+            if (subapp_name.lower() == "attendance"):
+                callback_function = set_attendance
 
         self.frame = subapp_components[button_position]['frame']
         self.button = subapp_components[button_position]['button']
@@ -173,6 +172,7 @@ class Subapp():
                     top_offset=offset, 
                     options=specs['options'], 
                     default_option=(None if 'default' not in specs else specs['default']),
+                    method=specs['method'] if 'method' in specs else None
                 )
 
             elif specs['type'] == "break":

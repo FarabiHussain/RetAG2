@@ -5,7 +5,7 @@ from Img import *
 from GUI import *
 from App import *
 from Subapps import *
-from actions import retrieve_attendance, set_attendance
+from actions import set_attendance
 from reader import *
 from RenderFont import RenderFont
 from tkinter import messagebox
@@ -17,7 +17,7 @@ imgs = Img("md")
 app = App()
 app.set_size(w=1640, h=900)
 rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
-retrieve_attendance()
+query_attendance()
 
 blueprint = app.get_blueprint()
 subapp_components = []
@@ -37,7 +37,7 @@ for subapp_name in blueprint:
         fg_color="lightgray",
         width=170,
         height=70,
-        font=ctk.CTkFont(family="Roboto Bold"),
+        font=ctk.CTkFont(family="Roboto Bold", weight="bold"),
         hover_color='#dddddd'
     )
 
@@ -61,8 +61,8 @@ for i, subapp_name in enumerate(blueprint):
 
 def on_startup():
     def set_attendance_as_default():
-        if globals.defualt_device_user != "":
-            app.components['staff name'].set(globals.defualt_device_user)
+        if globals.default_device_user != "":
+            app.components['staff name'].set(globals.default_device_user)
 
         set_attendance(app, is_callback=True, is_first_tab=True, override_entries=globals.queried_attendance_entries)
         app.components['attendance start date'].set(d="01")
@@ -72,6 +72,7 @@ def on_startup():
         time.sleep(0.01)
         set_attendance_as_default()
         app.components.get('staff name').add_options(new_options=sorted(globals.staff_names))
+        app.components.get('default staff').add_options(new_options=sorted(globals.staff_names))
 
     from GUI import LoadingSplash
     loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="RETAG2")

@@ -1,5 +1,5 @@
 from icecream import ic
-from Database import Mongo
+from Database import Database
 from Popups import ErrorPopup
 from actions import set_attendance
 
@@ -21,7 +21,7 @@ def callback(app=None):
         ErrorPopup("Please select an a valid clock type")
         return
 
-    db = Mongo()
+    db = Database()
     dbname = db.get_database()
     collection_name = dbname["attendance"]
 

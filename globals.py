@@ -1,28 +1,26 @@
 from datetime import datetime as dt
 import os
 from icecream import ic
-from Database import Database, Mongo
+from Database import Database
 
-global defualt_device_user
+global default_device_user
 global attendance_queried_time
 global set_dark_theme
 global current_lifted_subapp
 global queried_attendance_entries
 global links_dict
 global staff_names
+global device_settings
 
 def init():
-    db = Database()
-    db.init_tables()
+    # db = Database()
+    # db.init_tables()
 
     global attendance_queried_time
     attendance_queried_time = None
 
-    global defualt_device_user
-    defualt_device_user = None
-
-    global set_dark_theme
-    set_dark_theme = False
+    global default_device_user
+    default_device_user = None
 
     global current_lifted_subapp
     current_lifted_subapp = None
@@ -36,18 +34,18 @@ def init():
     global links_dict
     links_dict = {}
 
-    mongodb = Mongo()
-    mongodb.load_staff_names()
+    global device_settings
+    device_settings = {}
 
-    retreived_devices = db.cursor.execute(f"SELECT * FROM theme WHERE device_name = '{os.environ['COMPUTERNAME']}'").fetchall()
+    global set_dark_theme
+    set_dark_theme = False
 
-    if len(retreived_devices) > 0:
-        set_dark_theme = True if retreived_devices[0][1] == 1 else False
-        defualt_device_user = retreived_devices[0][2]
-    else:
-        db.cursor.execute(f"INSERT INTO theme VALUES (?, ?, ?)", (os.environ['COMPUTERNAME'], 0, "-"))
-        db.commit()
+    mongodb = Database()
+    mongodb.init_staff_names()
+    mongodb.init_device_settings()
 
-    db.close()
+    if len(device_settings) > 0:
+        set_dark_theme = True if device_settings[os.environ['COMPUTERNAME']]['dark_mode'] == 1 else False
+        default_device_user = device_settings[os.environ['COMPUTERNAME']]['username']
 
     return

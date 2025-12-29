@@ -151,7 +151,6 @@
         "invoice total": {"column": 0, "type": "entry", "default": "1000.0"},
         "paid amount": {"column": 0, "type": "entry"},
         "due date": {"column": 0, "type": "datepicker", "show_day":"true"},
-        "use invoice template": {"column": 0, "type": "rowbutton", "label": "USE INVOICE TEMPLATE", "method": "/assets/functions/use_invoice_template.py"},
         "break 2": {"column": 0, "type": "break", "heading": "ITEM CREATION"},
         "service": {"column": 0, "type": "combo", "options": ["Payment", "Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
         "rate": {"column": 0, "type": "entry", "default": "$500.00"},
@@ -381,8 +380,8 @@
             "spacer 11": "#ffffff",
             "spacer 12": "#ffffff",
             "spacer 13": "#ffffff",
-            "test": "#d3d3d3",
-            "reset receipt": "#BA0600"
+            "reset fields": "#BA0600",
+            "test": "#d3d3d3"
         }
     },
 
@@ -445,7 +444,9 @@
 
     "Settings": {
         "column_weights": [1,1,1],
-        "dark theme": {"column": 0, "type": "switch", "method": "/assets/functions/set_dark_mode.py"}
+        "dark theme": {"column": 0, "type": "switch", "method": "/assets/functions/set_dark_mode.py"},
+        "default staff": {"column": 0, "type": "combo", "default": "Select", "options": []},
+        "generate conclusion": {"column": 0, "type": "rowbutton", "label": "Save Default User", "method": "/assets/functions/set_default_user.py"}
     },
 
     "Init": {}

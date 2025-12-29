@@ -1,8 +1,3 @@
-# import shutil
-# import glob
-# import json
-# from RenderFont import RenderFont
-# from docx import Document
 import math
 import re
 import time
@@ -11,9 +6,8 @@ import datetime
 import os
 import pywinstyles
 import globals
-
 from dotenv import load_dotenv
-from Popups import ErrorPopup, InfoPopup, PromptPopup
+from Popups import ErrorPopup
 from Path import *
 from tkinter import StringVar
 from icecream import ic
@@ -124,7 +118,7 @@ class RowButton(GUI):
 
 
 class ComboBox(GUI):
-    def __init__(self, master=None, app=None, label_text="", options=None, left_offset=0, top_offset=0, default_string='click to select', default_option=None) -> None:
+    def __init__(self, master=None, app=None, label_text="", options=None, left_offset=0, top_offset=0, default_string='click to select', default_option=None, method=None) -> None:
         """create a new GUI ComboBox object"""
 
         super().__init__(master, label_text, left_offset, top_offset)
@@ -151,15 +145,23 @@ class ComboBox(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=options,
             variable=self.stringvar,
-            font=ctk.CTkFont(family=family_medium),
-            dropdown_font=ctk.CTkFont(family=family_medium),
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            dropdown_font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
+
+        if method is not None:
+            callback_func = (import_function(method, "callback"))
+
+            self.add_callback(
+                component_name=label_text,
+                app=app,
+                callback=lambda: callback_func(app.components)
+            )
 
         if default_option is not None:
             self.default_option = default_option
             self.set(default_option)
 
-        # self.component.place(x=left_offset + 210, y=top_offset + 8)
         self.component.grid(row=top_offset, column=1, pady=10, padx=5, columnspan=3)
 
     def dropdown_callback(self, choice):
@@ -213,7 +215,7 @@ class Entry(GUI):
             bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             textvariable=self.stringvar,
-            font=ctk.CTkFont(family=family_medium),
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
 
         if is_password:
@@ -253,7 +255,7 @@ class Switch(GUI):
             bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             variable=self.switchvar,
-            font=ctk.CTkFont(family=family_medium),
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
             onvalue="on", 
             offvalue="off",
             command=lambda: import_function(method, "callback")(app.components),
@@ -285,7 +287,7 @@ class TextBox(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#444444",
             text_color='#444444' if not globals.set_dark_theme else "#666666", 
             wrap='word', 
-            font=ctk.CTkFont(family=family_medium), 
+            font=ctk.CTkFont(family=family_bold, weight='bold'), 
         )
 
         self.instructions.insert('0.0', instructions_text)
@@ -302,7 +304,7 @@ class TextBox(GUI):
             bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             wrap='word', 
-            font=ctk.CTkFont(family=family_medium), 
+            font=ctk.CTkFont(family=family_bold, weight='bold'), 
         )
 
         self.reset()
@@ -342,7 +344,7 @@ class DatePicker(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=self.populate_days(),
             variable=self.stringvar_day,
-            font=ctk.CTkFont(family=family_medium)
+            font=ctk.CTkFont(family=family_bold, weight='bold')
         )
 
         # in some cases, like credit card expirations, the day is not needed
@@ -362,7 +364,7 @@ class DatePicker(GUI):
             values=self.populate_months(),
             variable=self.stringvar_month,
             command=self.repopulate_days,
-            font=ctk.CTkFont(family=family_medium),
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
 
         self.component_month.grid(row=top_offset, column=2, pady=10, padx=5)
@@ -378,7 +380,7 @@ class DatePicker(GUI):
             values=self.populate_years(populate_years_with),
             variable=self.stringvar_year,
             command=self.repopulate_days,
-            font=ctk.CTkFont(family=family_medium),
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
 
         self.component_year.grid(row=top_offset, column=3, pady=10, padx=5)
@@ -518,7 +520,7 @@ class TimePicker(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=populate_upto(24),
             variable=self.stringvar_hour,
-            font=ctk.CTkFont(family=family_medium),
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
 
         self.component_hour.grid(row=top_offset, column=2, pady=10, padx=5)
@@ -533,7 +535,7 @@ class TimePicker(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=populate_upto(60),
             variable=self.stringvar_min,
-            font=ctk.CTkFont(family=family_medium),
+            font=ctk.CTkFont(family=family_bold, weight='bold'),
         )
 
         self.component_min.grid(row=top_offset, column=3, pady=10, padx=5)
@@ -766,7 +768,7 @@ class AppButton():
         self.desc_frame.grid(row=row, column=1, pady=10, padx=5)
 
         self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=app_name, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_bold, weight='bold')).place(x=10, y=8)
-        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=desc, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_medium), text_color="#777777").place(x=10, y=32)
+        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=desc, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_bold, weight='bold'), text_color="#777777").place(x=10, y=32)
 
 
     def __open_app(self, app_name, app):
@@ -1498,3 +1500,144 @@ class LoadingSplash():
 
             if i == (self.opacity*100) - 1:
                 self.component.destroy()
+
+
+class WindowedViewer():
+
+    def __init__(self, app=None, page_number=0, entries=[], column_names=['','','','',''], add_cell_formatting=True, window_title='', highlight_weekends=False):
+        from GUI import RowWidget
+        from GUI import WindowView
+
+        if app == None:
+            ErrorPopup("Exception in history_button()\n\napp==None")
+
+        # retrieve object from app.components
+        history_window = app.get_window(window_title)
+        self.page_number = 0
+
+        # check whether the object contains a window
+        if (history_window is not None) and (not history_window.body.winfo_exists()):
+            history_window = None
+
+        # create a new object if None was found
+        if history_window is None:
+
+            self.window_width = 1640*0.9
+            self.window_height = 800
+            history_window = WindowView(app=app, window_name=window_title, width=self.window_width, height=self.window_height)
+            app.add_window(window_title, history_window)
+
+            for i in range(3):
+                history_window.body.columnconfigure(index=i, weight=1)
+
+            self.header_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
+            RowWidget(parent_frame=self.header_frame, parent_width=self.window_width*0.99, mode="header", row_contents=column_names)
+
+            self.table_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
+            self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting, highlight_weekends=highlight_weekends)
+
+            self.tools_frame = ctk.CTkFrame(master=history_window.body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.05)
+            self.tools_frame_widgets = RowWidget(
+                parent_frame=self.tools_frame, 
+                parent_width=self.window_width*0.99, 
+                mode="tools", 
+                row_contents=[
+                    "previous page", 
+                    "next page", 
+                    "", 
+                    "", 
+                    ""
+                ], 
+                row_content_methods=[
+                    lambda:self.table_nav(app=app, page_number=self.page_number-1, entries=entries, window_title=window_title, add_cell_formatting=add_cell_formatting),
+                    lambda:self.table_nav(app=app, page_number=self.page_number+1, entries=entries, window_title=window_title, add_cell_formatting=add_cell_formatting),
+                    lambda:None,
+                    lambda:None,
+                    lambda:None,
+                ])
+
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
+
+            if len(entries) < 19:
+                self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
+            else:
+                self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
+
+            self.header_frame.grid(row=0, column=1, pady=[5,0])
+            self.table_frame.grid(row=1, column=1)
+            self.tools_frame.grid(row=2, column=1)
+
+            history_window.body.after(20, lambda: history_window.body.focus())
+
+        # bring the window forward if found
+        else:
+            history_window.show()
+
+
+    def windowed_table(self, parent_frame=None, parent_width=0, entries=[], page_number=0, add_cell_formatting=True, highlight_weekends=False):
+        from GUI import RowWidget
+
+        self.table_rows = []
+
+        # pad the list with empty entries if less than 18 rows in order to keep a constant table size on the UI
+        current_page_rows = entries[(page_number*18):((page_number+1)*18)]
+        for i in range(18 - len(current_page_rows)):
+            current_page_rows.append(
+                ('', '', '', '', '')
+            )
+
+        for index, entry in enumerate(current_page_rows):
+            if add_cell_formatting:
+                curr_row = [
+                    f"{entry[0].title().split(";")[0][0:32]}{"..." if len(entry[0].split(";")[0]) > 32 else ""}",
+                    entry[1],
+                    entry[2],
+                    f"{entry[3][0:32]}{"..." if len(entry[3]) > 32 else ""}",
+                    f"{"${:,.2f}".format(float(entry[4]))}" if entry[4] != "" else entry[4],
+                ]
+            else:
+                curr_row=entry
+
+            row_color="#dddddd" if index%2==0 else "#eeeeee"
+            if highlight_weekends and curr_row[0] != '':
+                if ("Sat" in curr_row[0] or "Sun" in curr_row[0]):
+                    row_color = "#ffaaaa" if row_color == "#dddddd" else "#ffbbbb"
+
+            self.table_rows.append(
+                RowWidget(
+                    parent_frame=parent_frame, 
+                    parent_width=parent_width, 
+                    row_number=index, 
+                    mode="table", 
+                    row_contents=curr_row,
+                    row_color=row_color,
+                )
+            )
+
+
+    def table_nav(self, app=None, page_number=0, entries=[], window_title="", add_cell_formatting=True, highlight_weekends=False):
+
+        if (page_number == 0):
+            self.tools_frame_widgets.buttons[0].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
+            self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
+
+        elif (page_number == math.ceil(len(entries)/18)-1):
+            self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
+            self.tools_frame_widgets.buttons[1].configure(fg_color="light gray" if not globals.set_dark_theme else "#444444", state="disabled")
+
+        else:
+            self.tools_frame_widgets.buttons[0].configure(fg_color="black", state="normal")
+            self.tools_frame_widgets.buttons[1].configure(fg_color="black", state="normal")
+
+        for table_row in self.table_rows:
+            table_row.cleanup()
+
+        self.page_number=page_number
+        self.table_frame.destroy()
+        self.table_frame = ctk.CTkFrame(master=app.get_window(window_title).body, fg_color="white", border_width=0, width=self.window_width*0.99, height=self.window_height*0.9)
+        self.windowed_table(parent_frame=self.table_frame, parent_width=self.window_width*0.99, entries=entries, page_number=page_number, add_cell_formatting=add_cell_formatting, highlight_weekends=highlight_weekends)
+
+        self.header_frame.grid(row=0, column=1)
+        self.table_frame.grid(row=1, column=1)
+        self.tools_frame.grid(row=2, column=1)
+

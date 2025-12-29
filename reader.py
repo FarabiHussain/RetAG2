@@ -1,11 +1,9 @@
-# import csv
-# import sys
 import importlib.util
 import os
-import datetime
+import globals
 from icecream import ic
 from Database import Database
-from Path import resource_path
+
 
 # imports a function pointed by a path
 def import_function(function_path=None, function_name=None) -> str:
@@ -22,40 +20,14 @@ def import_function(function_path=None, function_name=None) -> str:
     return getattr(module_name, function_name, lambda: None)
 
 
-# read records.csv to retrieve the last created receipt id
-def read_receipt_id():
-
-    receipt_id = 0
-
+def query_attendance():
     db = Database()
-    retrieved_ids = db.cursor.execute('SELECT receipt_id FROM receipts ORDER BY receipt_id DESC LIMIT 1').fetchall()
-    db.close()
+    dbname = db.get_database()
+    collection_name = dbname["attendance"]
 
-    if len(retrieved_ids) > 0:
-        receipt_id = int(retrieved_ids[0][0])
+    retrieved_entries = collection_name.find().sort([("date", -1), ("time", -1)]).limit(75)
+    globals.queried_attendance_entries = list(retrieved_entries)
 
-    return receipt_id
+    return globals.queried_attendance_entries
 
 
-# read agreements.csv to retrieve the last created id
-def read_case_id(get_next=True):
-    curr_timestamp = str(datetime.datetime.now().strftime('%Y%m'))
-    next_case_id = f'{curr_timestamp}-000'
-    prev_case_id = ''
-
-    db = Database()
-    retrieved_ids = db.cursor.execute('SELECT case_id FROM agreements WHERE document_type = "Retainer Agreement" ORDER BY case_id DESC LIMIT 1').fetchall()
-    db.close()
-
-    if len(retrieved_ids) > 0:
-        prev_case_id = retrieved_ids[0][0]
-
-        if prev_case_id[0:6] != curr_timestamp:
-            print(prev_case_id[0:6] == curr_timestamp)
-            ic(next_case_id)
-            return next_case_id
-
-    if get_next:
-        next_case_id = f'{prev_case_id.split("-")[0]}-{"{:03}".format(int(prev_case_id.split("-")[1]) + 1)}'
-
-    return next_case_id
