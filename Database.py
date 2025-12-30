@@ -14,10 +14,7 @@ class Database:
         self.client = MongoClient(CONNECTION_STRING)
 
     def get_database(self):
-        if '--test' in sys.argv:
-            return self.client['retag-test']
-
-        return self.client['retag-test']
+        return self.client['retag-db']
 
     def init_staff_names(self):
         db = self.get_database()

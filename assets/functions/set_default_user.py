@@ -1,7 +1,27 @@
+import threading
+from GUI import LoadingSplash
 from icecream import ic
 from Popups import PromptPopup
 from Database import Database
 import os
+
+
+def _write_to_db(new_default_user, loadingsplash):
+    db = Database()
+    dbname = db.get_database()
+    collection_name = dbname["settings"]
+
+    collection_name.update_one(
+        {"device_name": os.environ["COMPUTERNAME"]},
+        {
+            "$set": {"username": new_default_user},
+            "$setOnInsert": {"dark_mode": 0},  # only applied if inserted
+        },
+        upsert=True,
+    )
+
+    db.client.close()
+    loadingsplash.stop()
 
 
 def callback(app=None):
@@ -9,25 +29,17 @@ def callback(app=None):
         print("app components not provided")
         return
 
-    db = Database()
-    dbname = db.get_database()
-    collection_name = dbname["settings"]
 
     new_default_user = app.components["default staff"].get()
 
     if PromptPopup(f"Set default user to {new_default_user}?").get():
-        response = collection_name.update_one(
-            {"device_name": os.environ["COMPUTERNAME"]},
-            {"$set": {"username": new_default_user}},
-        )
+        loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="validating")
 
-        if response.modified_count == 0:
-            response = collection_name.insert_one(
-                {
-                    "device_name": os.environ["COMPUTERNAME"],
-                    "dark_mode": 0,
-                    "username": new_default_user,
-                }
-            )
+        def start_write_to_db():
+            threading.Thread(
+                target=_write_to_db,
+                args=(new_default_user, loadingsplash),
+                daemon=True
+            ).start()
 
         app.components["staff name"].set(new_default_user)

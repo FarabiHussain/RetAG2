@@ -1,11 +1,11 @@
 {
-  "etag": "W/\"307be10ee464535c33da9fd60716a528e87eeb1aaea55ca9f9025ec920365eb7\"",
+  "etag": "W/\"88066fc13a8ef30bc5fd04ee1b5408496d6b343502162545c1bad489fe0be26f\"",
   "latest": {
-    "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273287509",
-    "assets_url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273287509/assets",
-    "upload_url": "https://uploads.github.com/repos/FarabiHussain/RetAG2/releases/273287509/assets{?name,label}",
-    "html_url": "https://github.com/FarabiHussain/RetAG2/releases/tag/v2.1.19",
-    "id": 273287509,
+    "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273306517",
+    "assets_url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273306517/assets",
+    "upload_url": "https://uploads.github.com/repos/FarabiHussain/RetAG2/releases/273306517/assets{?name,label}",
+    "html_url": "https://github.com/FarabiHussain/RetAG2/releases/tag/v2.1.20",
+    "id": 273306517,
     "author": {
       "login": "FarabiHussain",
       "id": 61535150,
@@ -27,22 +27,22 @@
       "user_view_type": "public",
       "site_admin": false
     },
-    "node_id": "RE_kwDOMTOijM4QSglV",
-    "tag_name": "v2.1.19",
+    "node_id": "RE_kwDOMTOijM4QSlOV",
+    "tag_name": "v2.1.20",
     "target_commitish": "main",
-    "name": "v2.1.19",
+    "name": "v2.1.20",
     "draft": false,
     "immutable": false,
     "prerelease": false,
-    "created_at": "2025-12-29T05:31:33Z",
-    "updated_at": "2025-12-29T21:37:44Z",
-    "published_at": "2025-12-29T21:31:08Z",
+    "created_at": "2025-12-30T00:24:06Z",
+    "updated_at": "2025-12-30T00:25:19Z",
+    "published_at": "2025-12-30T00:25:19Z",
     "assets": [
       {
-        "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/assets/334224125",
-        "id": 334224125,
-        "node_id": "RA_kwDOMTOijM4T69r9",
-        "name": "v2.1.19.zip",
+        "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/assets/334272761",
+        "id": 334272761,
+        "node_id": "RA_kwDOMTOijM4T7Jj5",
+        "name": "v2.1.20.zip",
         "label": null,
         "uploader": {
           "login": "FarabiHussain",
@@ -67,16 +67,16 @@
         },
         "content_type": "application/x-zip-compressed",
         "state": "uploaded",
-        "size": 80572225,
-        "digest": "sha256:8a652a8d4ebdc7e007c17a3a7b9f86eccc9a171dcf20e1c58ececaa6ec988fa7",
-        "download_count": 15,
-        "created_at": "2025-12-29T21:37:38Z",
-        "updated_at": "2025-12-29T21:37:44Z",
-        "browser_download_url": "https://github.com/FarabiHussain/RetAG2/releases/download/v2.1.19/v2.1.19.zip"
+        "size": 80576352,
+        "digest": "sha256:3adda1d9039019ccdb30449159b01342e7af4d3a4834b06d94c39286f2ba4858",
+        "download_count": 1,
+        "created_at": "2025-12-30T00:25:07Z",
+        "updated_at": "2025-12-30T00:25:12Z",
+        "browser_download_url": "https://github.com/FarabiHussain/RetAG2/releases/download/v2.1.20/v2.1.20.zip"
       }
     ],
-    "tarball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/tarball/v2.1.19",
-    "zipball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/zipball/v2.1.19",
-    "body": "- cleanup of database operations\r\n- version checker for immigration forms from IRCC websites\r\n- ability to set the default user per machine"
+    "tarball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/tarball/v2.1.20",
+    "zipball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/zipball/v2.1.20",
+    "body": "Created an updater tool to make updates independent from Syncthing."
   }
 }

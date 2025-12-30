@@ -1,5 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
+import webbrowser
 from icecream import ic
 import os, re, datetime as dt, requests
 from Popups import PromptPopup
@@ -69,8 +70,8 @@ def _get_latest_form_version(form_number: str, new_versions_found: list) -> dict
         version = mm_yyyy if mm_yyyy else None
     else:
         new_versions_found.append(form_number)
-        ic(new_versions_found)
-        PromptPopup(f"A new version of form {form_number} ({version}) is currently available.\n\nPlease ensure you download the latest version from the IRCC website. Would you like to open the form page now?")
+        if PromptPopup(f"A new version of form {form_number} ({version}) is currently available.\n\nPlease ensure you download the latest version from the IRCC website. Would you like to open the form page now?"):
+            webbrowser.open(f"{BASE}{form_number}.html")
 
     # Find the PDF link
     pdf_link = None
@@ -91,7 +92,7 @@ def _download_file(url: str, out_path: Path, normalized_name: str, form_name: st
     out_path.parent.mkdir(parents=True, exist_ok=True)
     _set_messages(normalized_name, form_name, console_messages, loadingsplash)
 
-    ic(_get_latest_form_version(form_name, new_versions_found))
+    _get_latest_form_version(form_name, new_versions_found)
 
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -236,6 +237,7 @@ def _retrieve_files_worker(components, loadingsplash):
 
         try:
             loadingsplash.stop()
+            new_versions_found = []
             if os.name == "nt": os.startfile(target_folder)
         except Exception:
             pass
@@ -248,7 +250,7 @@ def _retrieve_files_worker(components, loadingsplash):
 def retrieve_files(components, root) -> None:
     import threading
     from GUI import LoadingSplash
-    loadingsplash = LoadingSplash(root, opacity=1.0, splash_text="starting downloads", text_size=70)
+    loadingsplash = LoadingSplash(root, opacity=1.0, splash_text="STARTING DOWNLOADS", text_size=100)
 
     # Start downloads in background
     def start_worker():

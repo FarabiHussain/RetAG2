@@ -23,6 +23,7 @@ if '--selector' not in sys.argv:
         ver[i] = unformat(ver[i])
 
     set_version(cwd, ver)
+    set_prod_db(cwd)
     build_exe(cwd, ver)
 
 else:

@@ -22,7 +22,7 @@ def callback(app=None, *args, **kwargs):
     collection_name = dbname["staff"]
 
     if PromptPopup(f"Add staff member {new_staff_name}?").get():
-        collection_name.insert_one({"name": new_staff_name})
+        collection_name.insert_one({"name": new_staff_name, "show": True})
 
         db.init_staff_names()
         app.components["staff name"].add_options(globals.staff_names)

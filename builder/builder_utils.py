@@ -127,10 +127,9 @@ def build_exe(cwd, ver):
     os.startfile(f'{output_dir}\\{filename}')
 
 
-# replace the app version in `variables.py` with the selected version 
+# replace the app version in `App.py` with the selected version 
 def set_version(cwd, ver):
     variables_dir = (cwd + '\\App.py').replace('\\builder', '')
-    print(variables_dir)
     version_regex = "v[0-9]+.[0-9]+.[0-9]+"
 
     # iterate through the file, attempt to find version_regex
@@ -140,6 +139,22 @@ def set_version(cwd, ver):
         # if version_regex is found, replace it with the newly selected version number
         if (ver_match is not None):
             line = line.replace(ver_match.group(), f"v{(".").join(ver)}")
+
+        # write all lines into file so that nothing else is changed
+        sys.stdout.write(line)
+
+
+# set the prod database in `Database.py` on build
+def set_prod_db(cwd):
+    variables_dir = (cwd + '\\Database.py').replace('\\builder', '')
+    test_db_name = "retag-test"
+
+    # iterate through the file, attempt to find test_db_name
+    for line in fileinput.input(variables_dir, inplace=1):
+        ver_match = re.search(test_db_name, line)
+
+        if (ver_match is not None):
+            line = line.replace(ver_match.group(), "retag-db")
 
         # write all lines into file so that nothing else is changed
         sys.stdout.write(line)

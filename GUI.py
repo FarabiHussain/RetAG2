@@ -1439,7 +1439,7 @@ class TableWidget():
 
 
 class LoadingSplash():
-    def __init__(self, master=None, opacity=1.0, splash_text="RETAG2", text_size=300) -> None:
+    def __init__(self, master=None, opacity=1.0, splash_text="RETAG2", text_size=200) -> None:
 
         set_color = '#ffffff' if not globals.set_dark_theme else '#444444' 
         self.opacity = opacity
@@ -1461,16 +1461,16 @@ class LoadingSplash():
             text_color="#4e4e4e" if globals.set_dark_theme else "#dddddd"
         )
 
-        self.label.place(x=0, y=(200 + (300 - text_size)/2))
+        self.label.place(x=0, y=200+(text_size)/3)
 
 
-    def set_splash_text(self, new_text="loading", text_size=300) -> None:
+    def set_splash_text(self, new_text="loading", text_size=200) -> None:
         if self.label is None:
             print("No label to set text on!")
             return
 
         self.label.configure(text=new_text, font=ctk.CTkFont(family=family_bold, size=text_size))
-        self.label.place(x=0, y=(200 + (300 - text_size)/2))
+        self.label.place(x=0, y=200+(text_size)/3)
 
 
     def show(self, task=None, waitfor=0.1):

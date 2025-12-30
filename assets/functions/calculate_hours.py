@@ -1,32 +1,27 @@
 import os
 import datetime as dt
+import threading
+from GUI import WindowedViewer, LoadingSplash
 from icecream import ic
 from Database import Database
 from Popups import ErrorPopup
-from GUI import WindowedViewer
 
 
-def parsetime(t, format):
+def _parsetime(t, format):
     return dt.datetime.strptime(t, format)
 
-def formattime(t, parse, format):
+
+def _formattime(t, parse, format):
     return dt.datetime.strftime(dt.datetime.strptime(t, parse), format)
 
 
-def callback(app=None):
-    os.system('cls')
-
+def _callback_helper(app=None, loadingsplash=None, filter_staff=""):
     db = Database()
     dbname = db.get_database()
     collection_name = dbname["attendance"]
 
-    filter_staff = app.components.get("staff name").get()
     filter_start_date = app.components.get("attendance start date").get(formatting="$y%m$d")
     filter_end_date = app.components.get("attendance end date").get(formatting="$y%m$d")
-
-    if filter_staff.strip().lower() == "any":
-        ErrorPopup("Please select a staff member")
-        return
 
     retrieved_entries = list(
         collection_name.find({
@@ -73,7 +68,7 @@ def callback(app=None):
 
         # the current date has both a 'clock-in' and 'clock-out', so the difference can be calculated
         if "in" in val and "out" in val:
-            val['tdelta'] = (parsetime(val['out'], '%H:%M:%S') - parsetime(val['in'], '%H:%M:%S')).total_seconds()
+            val['tdelta'] = (_parsetime(val['out'], '%H:%M:%S') - _parsetime(val['in'], '%H:%M:%S')).total_seconds()
 
         total_seconds += int(val['tdelta'])
 
@@ -88,7 +83,7 @@ def callback(app=None):
             hrs_in_date = ("%d hr %d min" % (day_hrs, day_mins)) if (day_hrs + day_mins > 0) else "-"
 
         curr_row = [
-            formattime(key[0:8], '%Y%m%d', '%a, %b %d, %Y'),
+            _formattime(key[0:8], '%Y%m%d', '%a, %b %d, %Y'),
             val.get('in', '-')[0:5],
             val.get('out', '-')[0:5],
             hrs_in_date,
@@ -102,6 +97,29 @@ def callback(app=None):
         column_names=['date', 'clocked in at', 'clocked out at', 'hours in date', 'cumulative hours'],
         entries=table_contents,
         add_cell_formatting=False,
-        window_title=f'attendance breakdown: {filter_staff}, between {formattime(filter_start_date, '%Y%m%d', '%b %d, %Y')} and {formattime(filter_end_date, '%Y%m%d', '%b %d, %Y')}',
+        window_title=f'attendance breakdown: {filter_staff}, between {_formattime(filter_start_date, '%Y%m%d', '%b %d, %Y')} and {_formattime(filter_end_date, '%Y%m%d', '%b %d, %Y')}',
         highlight_weekends=True
     )
+
+    loadingsplash.stop()
+
+
+def callback(app=None):
+    os.system('cls')
+
+    filter_staff = app.components.get("staff name").get()
+
+    if filter_staff.strip().lower() == "any":
+        ErrorPopup("Please select a staff member")
+        return
+
+    loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="CALCULATING\nHOURS", text_size=200)
+
+    def start_worker():
+        threading.Thread(
+            target=_callback_helper,
+            args=(app, loadingsplash, filter_staff),
+            daemon=True
+        ).start()
+
+    loadingsplash.show(task=start_worker)

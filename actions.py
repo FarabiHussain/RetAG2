@@ -68,12 +68,12 @@ def _test_button(app):
         app.components["address in Canada"].set('1325 Markham Rd, Winnipeg, MB, Canada')
 
     elif globals.current_lifted_subapp == ("Info and Forms"):
-        app.components['Principal applicant name'].set("TEST1")
+        app.components['Principal applicant name'].set("TEST PA")
         app.components['Principal applicant application'].set("PR")
 
         test_applications = ["Sponsorship", "Study Permit", "Work Permit", "Express Entry Profile", "MPNP"]
         for i in range(1,3):
-            app.components[f'Dependent {i} name'].set(f"TEST{i}")
+            app.components[f'Dependent {i} name'].set(f"TEST DEP{i}")
             app.components[f'Dependent {i} application'].set(test_applications[i-1])
 
 
