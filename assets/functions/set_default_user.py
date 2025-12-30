@@ -6,7 +6,7 @@ from Database import Database
 import os
 
 
-def _write_to_db(new_default_user, loadingsplash):
+def _write_to_db(new_default_user, loadingsplash, app):
     db = Database()
     dbname = db.get_database()
     collection_name = dbname["settings"]
@@ -20,6 +20,7 @@ def _write_to_db(new_default_user, loadingsplash):
         upsert=True,
     )
 
+    app.components["staff name"].set(new_default_user)
     db.client.close()
     loadingsplash.stop()
 
@@ -38,8 +39,9 @@ def callback(app=None):
         def start_write_to_db():
             threading.Thread(
                 target=_write_to_db,
-                args=(new_default_user, loadingsplash),
+                args=(new_default_user, loadingsplash, app),
                 daemon=True
             ).start()
 
-        app.components["staff name"].set(new_default_user)
+        loadingsplash.show(task=start_write_to_db)
+

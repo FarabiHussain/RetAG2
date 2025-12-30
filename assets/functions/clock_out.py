@@ -47,7 +47,7 @@ def _validate_clock_out(collection_name, staff_name, adjusted_datetime, loadings
             loadingsplash.stop()
             return
 
-        _write_to_db(collection_name, staff_name, adjusted_datetime, loadingsplash, app, db)
+    _write_to_db(collection_name, staff_name, adjusted_datetime, loadingsplash, app, db)
 
 
 def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
@@ -69,7 +69,6 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
     collection_name = dbname["attendance"]
 
     loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="VALIDATING")
-    loadingsplash.show()
 
     def start_validate_clock_out():
         threading.Thread(
@@ -78,5 +77,5 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
             daemon=True
         ).start()
 
-    start_validate_clock_out()
+    loadingsplash.show(task=start_validate_clock_out)
 

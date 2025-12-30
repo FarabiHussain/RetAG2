@@ -65,7 +65,6 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
     collection_name = dbname["attendance"]
 
     loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="VALIDATING")
-    loadingsplash.show()
 
     def start_validate_clock_in():
         threading.Thread(
@@ -74,5 +73,5 @@ def callback(app=None, adjusted_datetime=None, adjusted_staffname=None):
             daemon=True
         ).start()
 
-    start_validate_clock_in()
+    loadingsplash.show(task=start_validate_clock_in)
 

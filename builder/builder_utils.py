@@ -87,7 +87,7 @@ def build_exe(cwd, ver):
     print("building application exe...")
     check_call(['python', '-m', 'PyInstaller', 'main.py', '--noconsole', '--onefile', '-w', '--icon=' + cwd + '\\assets\\icons\\.ico', f'--name={((os.getcwd()).split("\\")[-1])}'], stdout=DEVNULL, stderr=STDOUT)
     print("building updater exe...")
-    check_call(['python', '-m', 'PyInstaller', 'updater_worker.py', '--onefile', '-w', '--icon=' + cwd + '\\assets\\icons\\updater.ico', f'--name=Updater'], stderr=STDOUT)
+    check_call(['python', '-m', 'PyInstaller', 'updater_worker.py', '--onefile', '--icon=' + cwd + '\\assets\\icons\\updater.ico', f'--name=Updater'], stderr=STDOUT)
     print("done")
 
     # after the exe is built, copy over the assets folder

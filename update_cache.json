@@ -1,11 +1,11 @@
 {
-  "etag": "W/\"88066fc13a8ef30bc5fd04ee1b5408496d6b343502162545c1bad489fe0be26f\"",
+  "etag": "W/\"8acf0923e933e392b0f9a4fda92d66b34ef70e4cdc5b783b1b9a10bc221ae983\"",
   "latest": {
-    "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273306517",
-    "assets_url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273306517/assets",
-    "upload_url": "https://uploads.github.com/repos/FarabiHussain/RetAG2/releases/273306517/assets{?name,label}",
-    "html_url": "https://github.com/FarabiHussain/RetAG2/releases/tag/v2.1.20",
-    "id": 273306517,
+    "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273476941",
+    "assets_url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/273476941/assets",
+    "upload_url": "https://uploads.github.com/repos/FarabiHussain/RetAG2/releases/273476941/assets{?name,label}",
+    "html_url": "https://github.com/FarabiHussain/RetAG2/releases/tag/v2.1.28",
+    "id": 273476941,
     "author": {
       "login": "FarabiHussain",
       "id": 61535150,
@@ -27,22 +27,22 @@
       "user_view_type": "public",
       "site_admin": false
     },
-    "node_id": "RE_kwDOMTOijM4QSlOV",
-    "tag_name": "v2.1.20",
+    "node_id": "RE_kwDOMTOijM4QTO1N",
+    "tag_name": "v2.1.28",
     "target_commitish": "main",
-    "name": "v2.1.20",
+    "name": "v2.1.28",
     "draft": false,
     "immutable": false,
     "prerelease": false,
-    "created_at": "2025-12-30T00:24:06Z",
-    "updated_at": "2025-12-30T00:25:19Z",
-    "published_at": "2025-12-30T00:25:19Z",
+    "created_at": "2025-12-30T20:36:04Z",
+    "updated_at": "2025-12-30T22:35:48Z",
+    "published_at": "2025-12-30T20:38:20Z",
     "assets": [
       {
-        "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/assets/334272761",
-        "id": 334272761,
-        "node_id": "RA_kwDOMTOijM4T7Jj5",
-        "name": "v2.1.20.zip",
+        "url": "https://api.github.com/repos/FarabiHussain/RetAG2/releases/assets/334610632",
+        "id": 334610632,
+        "node_id": "RA_kwDOMTOijM4T8cDI",
+        "name": "v2.1.28.zip",
         "label": null,
         "uploader": {
           "login": "FarabiHussain",
@@ -67,16 +67,16 @@
         },
         "content_type": "application/x-zip-compressed",
         "state": "uploaded",
-        "size": 80576352,
-        "digest": "sha256:3adda1d9039019ccdb30449159b01342e7af4d3a4834b06d94c39286f2ba4858",
-        "download_count": 1,
-        "created_at": "2025-12-30T00:25:07Z",
-        "updated_at": "2025-12-30T00:25:12Z",
-        "browser_download_url": "https://github.com/FarabiHussain/RetAG2/releases/download/v2.1.20/v2.1.20.zip"
+        "size": 87700944,
+        "digest": "sha256:690e4f96919a2ccfe789cee2c55cdc59aff6d1f427b26aa905c6f324727b3754",
+        "download_count": 4,
+        "created_at": "2025-12-30T22:35:40Z",
+        "updated_at": "2025-12-30T22:35:46Z",
+        "browser_download_url": "https://github.com/FarabiHussain/RetAG2/releases/download/v2.1.28/v2.1.28.zip"
       }
     ],
-    "tarball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/tarball/v2.1.20",
-    "zipball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/zipball/v2.1.20",
-    "body": "Created an updater tool to make updates independent from Syncthing."
+    "tarball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/tarball/v2.1.28",
+    "zipball_url": "https://api.github.com/repos/FarabiHussain/RetAG2/zipball/v2.1.28",
+    "body": "Added multi-threading to database operations to prevent UI freezing\r\nUpdated the builder and updater"
   }
 }

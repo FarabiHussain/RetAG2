@@ -72,7 +72,7 @@ def apply_update(zip_path: Path, target_dir: Path):
         extracted_root = find_extracted_root(tmp_path)
 
         # Avoid clobbering updater itself if it lives in the same folder
-        exclude = {"updater_worker.py", "updater.py"}  # add more if needed
+        exclude = {"Updater.exe", "updater.exe", "updater_worker.py", "updater_worker.exe"}  # add more if needed
 
         overwrite_copy(extracted_root, target_dir, exclude_names=exclude)
 
@@ -119,10 +119,21 @@ def main():
     # Apply update
     apply_update(zip_path, target_dir)
 
+    # cleanup downloads folder
+    downloads_dir = Path(target_dir) / "downloads"
+    try:
+        if downloads_dir.exists():
+            shutil.rmtree(downloads_dir)
+            print(f"Deleted: {downloads_dir}", flush=True)
+    except Exception as e:
+        print(f"Failed to delete {downloads_dir}: {e}", flush=True)
+
+    restart_app(args.restart, target_dir)
+
     # Restart app
     restart_app(args.restart, target_dir)
 
 
 if __name__ == "__main__":
-    print("Updater worker started.")
+    print("Updating RETAG2...")
     main()
