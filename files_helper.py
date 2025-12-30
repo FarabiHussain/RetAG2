@@ -1,6 +1,8 @@
 from __future__ import annotations
 from pathlib import Path
+from icecream import ic
 import os, re, datetime as dt, requests
+from Popups import PromptPopup
 import globals, calendar
 import requests
 
@@ -34,9 +36,62 @@ TYPE_CHOICES = {
 }
 
 
-def _download_file(url: str, out_path: Path, normalized_name: str, form_name: str, console_messages: list, loadingsplash: None) -> None:
+def _get_latest_form_version(form_number: str, new_versions_found: list) -> dict:
+
+    # Only process IMM forms, rest will throw errors as the link would be invalid and not found on IRCC site
+    if not form_number.startswith("imm"):
+        return
+
+    # Avoid duplicate popups for the same form in one session
+    if form_number in new_versions_found:
+        return
+
+    from Popups import InfoPopup
+    from bs4 import BeautifulSoup
+
+    BASE = "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/"
+
+    r = requests.get(f"{BASE}{form_number}.html", timeout=30)
+    r.raise_for_status()
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    text = soup.get_text("\n", strip=True)
+
+    # Look for "A new version of this form is available ..."
+    m = re.search(r"A new version of this form is available\s*\((\d{2}-\d{4})\)", text)
+    version = m.group(1) if m else None
+
+    if not version:
+        m2 = re.search(r"Last updated:\s*([A-Za-z]+)\s+(\d{4})", text)
+        month_name, year = m2.group(1), m2.group(2)
+        month_num = list(calendar.month_name).index(month_name)   # "November" -> 11
+        mm_yyyy = f"{month_num:02d}-{year}"                       # "11-2025"
+        version = mm_yyyy if mm_yyyy else None
+    else:
+        new_versions_found.append(form_number)
+        ic(new_versions_found)
+        PromptPopup(f"A new version of form {form_number} ({version}) is currently available.\n\nPlease ensure you download the latest version from the IRCC website. Would you like to open the form page now?")
+
+    # Find the PDF link
+    pdf_link = None
+    for a in soup.find_all("a", href=True):
+        if "PDF" in a.get_text(strip=True).upper() or a["href"].lower().endswith(".pdf"):
+            href = a["href"]
+            if form_number in href.lower():
+                pdf_link = href if href.startswith("http") else "https://www.canada.ca" + href
+                break
+
+    return {
+        "version": version,
+        "pdf_link": pdf_link
+    }
+
+
+def _download_file(url: str, out_path: Path, normalized_name: str, form_name: str, console_messages: list, loadingsplash: None, new_versions_found: list) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     _set_messages(normalized_name, form_name, console_messages, loadingsplash)
+
+    ic(_get_latest_form_version(form_name, new_versions_found))
 
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -145,6 +200,8 @@ def _retrieve_files_worker(components, loadingsplash):
         collection_name = dbname["links"]
         entries = collection_name.find()
 
+        new_versions_found = []
+
         for row in entries:
             url = row['url']
             globals.links_dict[row['form']] = (url + "&download=1") if not url.endswith("&download=1") else url
@@ -159,21 +216,21 @@ def _retrieve_files_worker(components, loadingsplash):
                 application_type = "PR"
 
             info_name = f"_{normalized_name}_{application['type']}_{date_stamp}.{TYPE_CHOICES[application_type]['ext']}"
-            _download_file(TYPE_CHOICES[application_type]["downloadUrl"], target_folder / info_name, normalized_name, "info sheet", console_messages, loadingsplash)
-            _download_file(links["5476"], target_folder / f"{normalized_name} - imm5476.pdf", normalized_name, "imm5476", console_messages, loadingsplash)
+            _download_file(TYPE_CHOICES[application_type]["downloadUrl"], target_folder / info_name, normalized_name, "info sheet", console_messages, loadingsplash, new_versions_found)
+            _download_file(links["5476"], target_folder / f"{normalized_name} - imm5476.pdf", normalized_name, "imm5476", console_messages, loadingsplash, new_versions_found)
 
             if application['type'].lower() == "work permit":
-                _download_file(links["5710"], target_folder / f"{normalized_name} - imm5710.pdf", normalized_name, "imm5710", console_messages, loadingsplash)
-                _download_file(links["5707"], target_folder / f"{normalized_name} - imm5707.pdf", normalized_name, "imm5707", console_messages, loadingsplash)
+                _download_file(links["5710"], target_folder / f"{normalized_name} - imm5710.pdf", normalized_name, "imm5710", console_messages, loadingsplash, new_versions_found)
+                _download_file(links["5707"], target_folder / f"{normalized_name} - imm5707.pdf", normalized_name, "imm5707", console_messages, loadingsplash, new_versions_found)
 
             elif application['type'].lower() == "study permit":
-                _download_file(links["5709"], target_folder / f"{normalized_name} - imm5709.pdf", normalized_name, "imm5709", console_messages, loadingsplash)
-                _download_file(links["5645"], target_folder / f"{normalized_name} - imm5645.pdf", normalized_name, "imm5645", console_messages, loadingsplash)
+                _download_file(links["5709"], target_folder / f"{normalized_name} - imm5709.pdf", normalized_name, "imm5709", console_messages, loadingsplash, new_versions_found)
+                _download_file(links["5645"], target_folder / f"{normalized_name} - imm5645.pdf", normalized_name, "imm5645", console_messages, loadingsplash, new_versions_found)
 
             elif application['type'].lower() == "sponsorship" and index == 1:
-                _download_file(links["5532"], target_folder / f"{normalized_name} - imm5532.pdf", normalized_name, "imm5645", console_messages, loadingsplash)
-                _download_file(links["1344"], target_folder / f"{normalized_name} - imm1344.pdf", normalized_name, "imm5645", console_messages, loadingsplash)
-                _download_file(links["photos"], target_folder / f"{normalized_name} - Proof of Relationship to Sponsor - Relationship Photos.docx", normalized_name, "Relationship Photos", console_messages, loadingsplash)
+                _download_file(links["5532"], target_folder / f"{normalized_name} - imm5532.pdf", normalized_name, "imm5645", console_messages, loadingsplash, new_versions_found)
+                _download_file(links["1344"], target_folder / f"{normalized_name} - imm1344.pdf", normalized_name, "imm5645", console_messages, loadingsplash, new_versions_found)
+                _download_file(links["photos"], target_folder / f"{normalized_name} - Proof of Relationship to Sponsor - Relationship Photos.docx", normalized_name, "Relationship Photos", console_messages, loadingsplash, new_versions_found)
 
         components['progress output'].set("\n".join(console_messages))
 
@@ -203,42 +260,3 @@ def retrieve_files(components, root) -> None:
 
     loadingsplash.show(task=start_worker)
 
-
-def get_latest_form_version(form_number: str) -> dict:
-    from Popups import InfoPopup
-    from bs4 import BeautifulSoup
-
-    BASE = "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/"
-
-    r = requests.get(f"{BASE}{form_number}.html", timeout=30)
-    r.raise_for_status()
-
-    soup = BeautifulSoup(r.text, "html.parser")
-    text = soup.get_text("\n", strip=True)
-
-    # Look for "A new version of this form is available ..."
-    m = re.search(r"A new version of this form is available\s*\((\d{2}-\d{4})\)", text)
-    version = m.group(1) if m else None
-
-    if not version:
-        m2 = re.search(r"Last updated:\s*([A-Za-z]+)\s+(\d{4})", text)
-        month_name, year = m2.group(1), m2.group(2)
-        month_num = list(calendar.month_name).index(month_name)   # "November" -> 11
-        mm_yyyy = f"{month_num:02d}-{year}"                       # "11-2025"
-        version = mm_yyyy if mm_yyyy else None
-    else:
-        InfoPopup(f"A new version of form {form_number} ({version}) is currently available. Please ensure you download the latest version from the IRCC website.", title="Form Update Available")
-
-    # Find the PDF link
-    pdf_link = None
-    for a in soup.find_all("a", href=True):
-        if "PDF" in a.get_text(strip=True).upper() or a["href"].lower().endswith(".pdf"):
-            href = a["href"]
-            if form_number in href.lower():
-                pdf_link = href if href.startswith("http") else "https://www.canada.ca" + href
-                break
-
-    return {
-        "version": version,
-        "pdf_link": pdf_link
-    }

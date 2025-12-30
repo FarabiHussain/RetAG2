@@ -2,6 +2,7 @@ from datetime import datetime as dt
 import os
 from icecream import ic
 from Database import Database
+from Popups import InfoPopup
 
 global default_device_user
 global attendance_queried_time
@@ -44,8 +45,9 @@ def init():
     mongodb.init_staff_names()
     mongodb.init_device_settings()
 
-    if len(device_settings) > 0:
+    if len(device_settings) > 0 and os.environ['COMPUTERNAME'] in device_settings:
         set_dark_theme = True if device_settings[os.environ['COMPUTERNAME']]['dark_mode'] == 1 else False
         default_device_user = device_settings[os.environ['COMPUTERNAME']]['username']
+
 
     return

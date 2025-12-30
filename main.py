@@ -1,9 +1,11 @@
+import subprocess
 import customtkinter as ctk
 import os
 from Path import *
 from Img import *
 from GUI import *
 from App import *
+from Popups import InfoPopup, PromptPopup
 from Subapps import *
 from actions import set_attendance
 from reader import *
@@ -11,12 +13,52 @@ from RenderFont import RenderFont
 from tkinter import messagebox
 from Database import Database
 import globals
+from updater import check_latest_release, download_update
+
 
 globals.init()
 imgs = Img("md")
 app = App()
 app.set_size(w=1640, h=900)
 rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
+
+# check for updates before querying attendance
+# ic(check_latest_release(app.version))
+
+
+latest_release = {
+    'assets': [('v2.1.19.zip', 'https://github.com/FarabiHussain/RetAG2/releases/download/v2.1.19/v2.1.19.zip')],
+    'error': None,
+    'latest_tag': 'v2.1.19',
+    'ok': True,
+    'release_url': 'https://github.com/FarabiHussain/RetAG2/releases/tag/v2.1.19',
+    'update_available': True
+}
+
+if latest_release['update_available']:
+    print("Applying update...")
+    # zip_path = download_update(latest_release)
+    zip_path = "downloads\\v2.1.19.zip"
+    pid = os.getpid()
+    target_dir = os.getcwd()
+    restart_target = "RETAG2.exe"  # or RetAG2.exe
+
+    subprocess.Popen(
+        [
+            "cmd.exe", "/k",
+            "python", "-u", "updater_worker.py",
+            "--pid", str(pid),
+            "--zip", str(zip_path),
+            "--target", target_dir,
+            "--restart", restart_target
+        ],
+        cwd=target_dir,
+        creationflags=subprocess.CREATE_NEW_CONSOLE
+    )
+
+    raise SystemExit
+
+
 query_attendance()
 
 blueprint = app.get_blueprint()
@@ -60,17 +102,22 @@ for i, subapp_name in enumerate(blueprint):
 
 
 def on_startup():
-    def set_attendance_as_default():
+    def navigate_to_default_page():
         if globals.default_device_user != "":
             app.components['staff name'].set(globals.default_device_user)
 
         set_attendance(app, is_callback=True, is_first_tab=True, override_entries=globals.queried_attendance_entries)
         app.components['attendance start date'].set(d="01")
-        subapp_components[0]['subapp_obj'].lift_app(subapp_components)
+
+        if os.environ['COMPUTERNAME'] in globals.device_settings:
+            subapp_components[0]['subapp_obj'].lift_app(subapp_components)
+        else:
+            subapp_components[3]['subapp_obj'].lift_app(subapp_components)
+            InfoPopup("No device settings found for this device.\n\nPlease select the default user from the settings tab")
 
     def task():
         time.sleep(0.01)
-        set_attendance_as_default()
+        navigate_to_default_page()
         app.components.get('staff name').add_options(new_options=sorted(globals.staff_names))
         app.components.get('default staff').add_options(new_options=sorted(globals.staff_names))
 

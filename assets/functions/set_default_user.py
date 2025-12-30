@@ -16,9 +16,18 @@ def callback(app=None):
     new_default_user = app.components["default staff"].get()
 
     if PromptPopup(f"Set default user to {new_default_user}?").get():
-        collection_name.update_one(
+        response = collection_name.update_one(
             {"device_name": os.environ["COMPUTERNAME"]},
             {"$set": {"username": new_default_user}},
         )
+
+        if response.modified_count == 0:
+            response = collection_name.insert_one(
+                {
+                    "device_name": os.environ["COMPUTERNAME"],
+                    "dark_mode": 0,
+                    "username": new_default_user,
+                }
+            )
 
         app.components["staff name"].set(new_default_user)
