@@ -23,17 +23,7 @@ app.set_size(w=1640, h=900)
 rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
 
 # check for updates before querying attendance
-# ic(check_latest_release(app.version))
-
-
-latest_release = {
-    'assets': [('v2.1.19.zip', 'https://github.com/FarabiHussain/RetAG2/releases/download/v2.1.19/v2.1.19.zip')],
-    'error': None,
-    'latest_tag': 'v2.1.19',
-    'ok': True,
-    'release_url': 'https://github.com/FarabiHussain/RetAG2/releases/tag/v2.1.19',
-    'update_available': True
-}
+latest_release = (check_latest_release(app.version))
 
 if latest_release['update_available']:
     print("Applying update...")
@@ -46,7 +36,7 @@ if latest_release['update_available']:
     subprocess.Popen(
         [
             "cmd.exe", "/k",
-            "python", "-u", "updater_worker.py",
+            "python", "-u", "Updater.exe",
             "--pid", str(pid),
             "--zip", str(zip_path),
             "--target", target_dir,
