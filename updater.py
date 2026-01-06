@@ -51,17 +51,17 @@ def save_cache(cache: dict):
         pass
 
 
-def check_latest_release(current_version: str) -> dict:
+def _get_latest_release(current_version: str) -> dict:
     """
     Returns:
-      {
+    {
         "ok": bool,
         "update_available": bool,
         "latest_tag": str|None,
         "release_url": str|None,
         "assets": list[(name,url)],
         "error": str|None,
-      }
+    }
     """
     cache = load_cache()
     etag = cache.get("etag")
@@ -158,7 +158,7 @@ def _download_asset(url: str, out_path: str | Path) -> Path:
     return out_path
 
 
-def download_update(result: dict):
+def _download_update(result: dict):
     # - surrounding single quotes REQUIRED
     # - leading v optional, any case
     # - each numeric section is 1 or 2 digits
@@ -177,3 +177,51 @@ def download_update(result: dict):
     raise RuntimeError("No matching .zip asset found.")
 
 
+def search_update_on_startup(app):
+    import subprocess
+
+    # check for updates before querying attendance
+    latest_release = (_get_latest_release(app.version))
+
+    if not latest_release["update_available"]:
+        print("on latest version")
+        return
+
+    try:
+        if latest_release["update_available"]:
+            subprocess.Popen(
+                ["cmd.exe", "/k", "echo RETAG2 Update found. Downloading update. Do not attempt to open RETAG. It will open after updating & ping -n 6 127.0.0.1 >nul & exit"],
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+
+            target_dir = Path(os.getcwd()).resolve()
+            updater_exe = (target_dir / "Updater.exe").resolve()
+            restart_target = "RETAG2.exe"
+            pid = os.getpid()
+
+            if not updater_exe.exists():
+                raise FileNotFoundError(f"{updater_exe} not found")
+
+            zip_path = Path(_download_update(latest_release)).resolve()
+
+            if zip_path.exists():
+                subprocess.Popen(
+                    [
+                        str(updater_exe),
+                        "--pid", str(pid),
+                        "--zip", str(zip_path),
+                        "--target", str(target_dir),
+                        "--restart", str(restart_target),
+                        "--wait", "180",
+                    ],
+                    cwd=str(target_dir),
+                    creationflags=subprocess.CREATE_NEW_CONSOLE
+                )
+
+                app.root.destroy()
+                raise SystemExit
+
+            else:
+                print(f"`{zip_path}` does not exist")
+    except Exception as e:
+        print(e)

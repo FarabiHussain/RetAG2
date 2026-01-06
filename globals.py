@@ -1,8 +1,7 @@
-from datetime import datetime as dt
 import os
 from icecream import ic
 from Database import Database
-from Popups import InfoPopup
+from fonts import loadfont
 
 global default_device_user
 global attendance_queried_time
@@ -12,11 +11,9 @@ global queried_attendance_entries
 global links_dict
 global staff_names
 global device_settings
+global font_settings
 
 def init():
-    # db = Database()
-    # db.init_tables()
-
     global attendance_queried_time
     attendance_queried_time = None
 
@@ -41,6 +38,15 @@ def init():
     global set_dark_theme
     set_dark_theme = False
 
+    global font_settings
+    font_settings = {'family': "Roboto Condensed Bold", 'size': 13}
+
+    loadfont(
+        fontpath=os.path.join(os.getcwd(), "assets", "fonts", f"{font_settings}.ttf"),
+        private=False,
+        enumerable=True
+    )
+
     mongodb = Database()
     mongodb.init_staff_names()
     mongodb.init_device_settings()
@@ -48,6 +54,3 @@ def init():
     if len(device_settings) > 0 and os.environ['COMPUTERNAME'] in device_settings:
         set_dark_theme = True if device_settings[os.environ['COMPUTERNAME']]['dark_mode'] == 1 else False
         default_device_user = device_settings[os.environ['COMPUTERNAME']]['username']
-
-
-    return

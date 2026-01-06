@@ -11,15 +11,13 @@ from icecream import ic
 
 class App():
     def __init__(self) -> None:
-        os.system("cls")
-
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("dark-blue")
 
         self.root = ctk.CTk()
         self.root.resizable(False, False)
         self.root.configure(fg_color='#dbdbdb')
-        self.version = "v2.1.30"
+        self.version = "v2.1.33"
         self.root.title(f"RETAG {self.version}")
         self.blueprint = self.__read_blueprint()
         self.subapp_components = {}
@@ -27,6 +25,7 @@ class App():
         self.buttons = {}
         self.windows = {}
         self.app_icon_passed = self.__check_app_ico()
+        self.font_family = None
 
         if globals.set_dark_theme:
             ctk.set_appearance_mode("dark")
@@ -132,7 +131,7 @@ class App():
         try:
             return self.windows[label]
         except Exception as e:
-            print(f'no window found with label {e}')
+            pass
 
         return None
 

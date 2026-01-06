@@ -190,7 +190,8 @@ class Subapp():
                     left_offset=10, 
                     top_offset=offset, 
                     label=specs['label'],
-                    method=specs['method']
+                    method=specs['method'],
+                    params=specs['params'] if 'params' in specs else None
                 )
 
             elif specs['type'] == "table":
@@ -239,7 +240,8 @@ class Subapp():
                     action=btn, 
                     app=app, 
                     blueprint=blueprint, 
-                    image=imgs.get(f"{btn}.png"), 
+                    # image=imgs.get(f"{btn}.png"), 
+                    btn_text=btn if "spacer" not in btn else "", 
                     btn_color=blueprint['buttons'][btn], 
                     row=0, 
                     col=index, 

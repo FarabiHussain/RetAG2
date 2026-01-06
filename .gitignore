@@ -12,3 +12,6 @@
 *.pyc
 *.env
 *.csv
+update_cache.json
+RETAG2.exe
+Updater.exe

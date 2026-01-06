@@ -1,8 +1,7 @@
 from pathlib import Path
-import signal
-import subprocess
 import customtkinter as ctk
 import os
+import globals
 from Path import *
 from Img import *
 from GUI import *
@@ -11,65 +10,16 @@ from Popups import InfoPopup
 from Subapps import *
 from actions import set_attendance
 from reader import *
-from RenderFont import RenderFont
-from tkinter import messagebox
 from Database import Database
-import globals
-from updater import check_latest_release, download_update
+from updater import search_update_on_startup
 
-
+os.system("cls")
 globals.init()
 imgs = Img("md")
 app = App()
 app.set_size(w=1640, h=900)
-rf = RenderFont(f"{os.getcwd()}\\assets\\fonts\\Product Sans.ttf", '#000')
 
-# check for updates before querying attendance
-latest_release = (check_latest_release(app.version))
-ic(latest_release)
-subpro = None
-
-try:
-    if latest_release["update_available"]:
-        subprocess.Popen(
-            ["cmd.exe", "/k", "echo RETAG2 Update found. Downloading update. Do not attempt to open RETAG. It will open after updating & ping -n 6 127.0.0.1 >nul & exit"],
-            creationflags=subprocess.CREATE_NEW_CONSOLE
-        )
-
-        target_dir = Path(os.getcwd()).resolve()
-        updater_exe = (target_dir / "Updater.exe").resolve()
-        restart_target = "RETAG2.exe"
-        pid = os.getpid()
-
-        if not updater_exe.exists():
-            raise FileNotFoundError(f"{updater_exe} not found")
-
-        zip_path = Path(download_update(latest_release)).resolve()
-
-        if zip_path.exists():
-            subprocess.Popen(
-                [
-                    str(updater_exe),
-                    "--pid", str(pid),
-                    "--zip", str(zip_path),
-                    "--target", str(target_dir),
-                    "--restart", str(restart_target),
-                    "--wait", "180",
-                ],
-                cwd=str(target_dir),
-                creationflags=subprocess.CREATE_NEW_CONSOLE
-            )
-
-            app.root.destroy()
-            raise SystemExit
-
-        else:
-            print(f"`{zip_path}` does not exist")
-
-except Exception as e:
-    print(e)
-
-
+search_update_on_startup(app)
 query_attendance()
 
 blueprint = app.get_blueprint()
@@ -90,7 +40,7 @@ for subapp_name in blueprint:
         fg_color="lightgray",
         width=170,
         height=70,
-        font=ctk.CTkFont(family="Roboto Bold", weight="bold"),
+        font=ctk.CTkFont(**globals.font_settings),
         hover_color='#dddddd'
     )
 
@@ -132,15 +82,17 @@ def on_startup():
         app.components.get('staff name').add_options(new_options=sorted(globals.staff_names))
         app.components.get('default staff').add_options(new_options=sorted(globals.staff_names))
 
+        if "-test" in sys.argv:
+            app.components['attendance start date'].set(d="01", m="Dec", y="2025")
+
     from GUI import LoadingSplash
     loadingsplash = LoadingSplash(app.root, opacity=1.0, splash_text="RETAG2")
     loadingsplash.show(task=task)
 
 
 def on_closing():
-    if "--test" not in sys.argv or messagebox.askokcancel("Quit", "Do you want to quit?"):
-        Database().close()
-        app.root.destroy()
+    Database().close()
+    app.root.destroy()
 
 
 on_startup()

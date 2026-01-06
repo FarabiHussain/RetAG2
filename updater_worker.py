@@ -65,6 +65,16 @@ def overwrite_copy(src_dir: Path, dst_dir: Path, exclude_names: set[str] | None 
             shutil.copy2(item, dst_item)
 
 
+def remove_assets_folder(target_dir: Path):
+    assets_dir = target_dir / "assets"
+    try:
+        if assets_dir.exists() and assets_dir.is_dir():
+            shutil.rmtree(assets_dir)
+            print(f"Deleted assets folder: {assets_dir}", flush=True)
+    except Exception as e:
+        print(f"Failed to delete assets folder {assets_dir}: {e}", flush=True)
+
+
 def apply_update(zip_path: Path, target_dir: Path):
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)
@@ -72,7 +82,7 @@ def apply_update(zip_path: Path, target_dir: Path):
         extracted_root = find_extracted_root(tmp_path)
 
         # Avoid clobbering updater itself if it lives in the same folder
-        exclude = {"Updater.exe", "updater.exe", "updater_worker.py", "updater_worker.exe"}  # add more if needed
+        exclude = {"Updater.exe", "updater.exe"}  # add more if needed
 
         overwrite_copy(extracted_root, target_dir, exclude_names=exclude)
 
@@ -80,8 +90,8 @@ def apply_update(zip_path: Path, target_dir: Path):
 def restart_app(restart_cmd: str, target_dir: Path):
     """
     restart_cmd can be:
-      - path to exe
-      - or a full command string
+    - path to exe
+    - or a full command string
     """
     # If restart_cmd is a path relative to target_dir, fix it
     cmd_path = Path(restart_cmd)
@@ -116,6 +126,9 @@ def main():
         # Hard fail: don't half-update a running app
         return
 
+    # Remove old assets before applying update
+    remove_assets_folder(target_dir)
+
     # Apply update
     apply_update(zip_path, target_dir)
 
@@ -127,8 +140,6 @@ def main():
             print(f"Deleted: {downloads_dir}", flush=True)
     except Exception as e:
         print(f"Failed to delete {downloads_dir}: {e}", flush=True)
-
-    restart_app(args.restart, target_dir)
 
     # Restart app
     restart_app(args.restart, target_dir)

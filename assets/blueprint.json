@@ -1,3 +1,4 @@
+
 {
     "Attendance": {
         "column_weights": [1,2,0],
@@ -5,9 +6,20 @@
         "break 0": {"column": 0, "type": "break", "heading": "STAFF SELECTION"},
         "staff name": {"column": 0, "type": "combo", "default": "Select", "options": []},
         
-        "clock buttons": {"column": 0, "type": "rowbutton", "label": ["Clock in", "Clock out"], "method": [
-                "/assets/functions/clock_in.py", 
-                "/assets/functions/clock_out.py"
+        "clock buttons": {
+            "column": 0, 
+            "type": "rowbutton", 
+            "label": [
+                "Clock in", 
+                "Clock out"
+            ], 
+            "method": [
+                "/assets/functions/attendance_creator.py", 
+                "/assets/functions/attendance_creator.py"
+            ],
+            "params":[
+                {"is_clock_in": true},
+                {"is_clock_in": false}
             ]
         },
 
@@ -41,215 +53,6 @@
             "edit attendance": "#291792",
             "edit staff": "#1E1457",
             "add staff": "#17113b"
-        }
-    },
-
-    "#Agreements": {
-        "column_weights": [1,1,1],
-
-        "break 0": {"column": 0, "type": "break", "heading": "CLIENT 1 INFORMATION"},
-        "case ID": {"column": 0, "type": "entry"},
-        "client 1 first name": {"column": 0, "type": "entry"},
-        "client 1 last name": {"column": 0, "type": "entry"},
-        "client 1 phone": {"column": 0, "type": "entry"},
-        "client 1 email": {"column": 0, "type": "entry"},
-        "client 1 UCI": {"column": 0, "type": "entry"},
-        "client 1 date of birth": {"column": 0, "type": "datepicker", "show_day":"true"},
-
-        "break 1": {"column": 0, "type": "break", "heading": "CLIENT 2 INFORMATION"},
-        "client 2 first name": {"column": 0, "type": "entry"},
-        "client 2 last name": {"column": 0, "type": "entry"},
-        "client 2 phone": {"column": 0, "type": "entry"},
-        "client 2 email": {"column": 0, "type": "entry"},
-
-        "break 2": {"column": 1, "type": "break", "heading": "APPLICATION DETAILS"},
-        "date on document": {"column": 1, "type": "datepicker", "show_day":"true"},
-        "application type": {"column": 1, "type": "combo", "options": [
-                "EOI", 
-                "Express Entry", 
-                "MPNP", 
-                "H&C Grounds", 
-                "LMIA Based Work Permit", 
-                "Permanent Residence", 
-                "PGWP", 
-                "PR Card Renewal", 
-                "PFL Response", 
-                "Common-Law Sponsorship", 
-                "Spousal Open Work Permit", 
-                "Spousal Sponsorship", 
-                "Spousal Visa", 
-                "SRI", 
-                "Study Permit", 
-                "Study Permit Extension", 
-                "Super Visa", 
-                "Visitor Record", 
-                "Visitor Visa"
-            ]
-        },
-        "add taxes": {"column": 1, "type": "combo", "options": ["5%", "12%", "No"], "default": "5%"},
-
-        "break 3": {"column": 1, "type": "break", "heading": "PAYER INFORMATION"},
-        "address": {"column": 1, "type": "entry"},
-        "phone": {"column": 1, "type": "entry"},
-        "email": {"column": 1, "type": "entry"},
-
-        "break 4": {"column": 1, "type": "break", "heading": "PAYMENT METHOD"},
-        "payment type": {"column": 1, "type": "combo", "options": ["Visa", "MasterCard"]},
-        "card number": {"column": 1, "type": "entry"},
-        "cardholder name": {"column": 1, "type": "entry"},
-        "expiration": {"column": 1, "type": "datepicker", "show_day":"false"},
-        "security code": {"column": 1, "type": "entry"},
-
-        "break 5": {"column": 2, "type": "break", "heading": "PAYMENT PLAN"},
-        "application fee": {"column": 2, "type": "paymentsplitter"},
-        "payment 1": {"column": 2, "type": "paymentinfo"},
-        "payment 2": {"column": 2, "type": "paymentinfo"},
-        "payment 3": {"column": 2, "type": "paymentinfo"},
-        "payment 4": {"column": 2, "type": "paymentinfo"},
-        "payment 5": {"column": 2, "type": "paymentinfo"},
-        "payment 6": {"column": 2, "type": "paymentinfo"},
-        "payment 7": {"column": 2, "type": "paymentinfo"},
-        "payment 8": {"column": 2, "type": "paymentinfo"},
-        "payment 9": {"column": 2, "type": "paymentinfo"},
-        "payment 10": {"column": 2, "type": "paymentinfo"},
-        "payment 11": {"column": 2, "type": "paymentinfo"},
-        "payment 12": {"column": 2, "type": "paymentinfo"},
-
-        "callbacks": {
-            "client 1 first name": "/assets/functions/client_name.py",
-            "client 1 last name": "/assets/functions/client_name.py"
-        },
-
-        "buttons": {
-            "agreements output": "#545454",
-            "retainer": "#383FBC",
-            "payments": "#000042",
-            "conduct": "#1A8405",
-            "representative": "#114707",
-            "generate case ID": "#ff7b00",
-            "retainer history": "#545454",
-            "decrypt": "#545454",
-            "get checklist": "#545454",
-            "spacer 2": "#ffffff",
-            "spacer 3": "#ffffff",
-            "spacer 4": "#ffffff",
-            "spacer 5": "#ffffff",
-            "spacer 6": "#ffffff",
-            "test": "#d3d3d3",
-            "reset agreement": "#BA0600"
-        }
-    },
-
-    "#Receipts": {
-        "column_weights": [1,2,0],
-
-        "break 0": {"column": 0, "type": "break", "heading": "CLIENT AND CASE INFORMATION"},
-        "matter type": {"column": 0, "type": "entry"},
-        "client name": {"column": 0, "type": "entry"},
-        "document type": {"column": 0, "type": "combo", "options": ["Invoice", "Receipt"], "default": "Invoice"},
-        "break 1": {"column": 0, "type": "break", "heading": "INVOICE CREATION"},
-        "invoice total": {"column": 0, "type": "entry", "default": "1000.0"},
-        "paid amount": {"column": 0, "type": "entry"},
-        "due date": {"column": 0, "type": "datepicker", "show_day":"true"},
-        "break 2": {"column": 0, "type": "break", "heading": "ITEM CREATION"},
-        "service": {"column": 0, "type": "combo", "options": ["Payment", "Immigration", "Affidavit", "Invitation Letter", "Notary"], "default": "Immigration"},
-        "rate": {"column": 0, "type": "entry", "default": "$500.00"},
-        "quantity": {"column": 0, "type": "entry", "default": "1"},
-        "GST percentage": {"column": 0, "type": "entry", "default": "5.0"},
-        "PST percentage": {"column": 0, "type": "entry", "default": "0.0"},
-        "cart": {"column": 1, "type": "table", "title_text": "items in cart", "headers": ["service", "quantity", "rate", "taxes", "total price"]},
-
-        "callbacks": {
-            "service": "/assets/functions/service.py",
-            "rate": "/assets/functions/rate.py",
-            "quantity": "/assets/functions/rate.py",
-            "GST percentage": "/assets/functions/rate.py",
-            "PST percentage": "/assets/functions/rate.py",
-            "case ID": "/assets/functions/payment_for_case_id.py"
-        },
-
-        "buttons": {
-            "receipts output": "#545454",
-            "add item": "#1A8405",
-            "remove item": "#BA0600",
-            "create receipt": "#000042",
-            "find receipt": "#545454",
-            "payment history": "#545454",
-            "spacer 1": "#ffffff",
-            "spacer 2": "#ffffff",
-            "spacer 3": "#ffffff",
-            "spacer 4": "#ffffff",
-            "spacer 5": "#ffffff",
-            "spacer 6": "#ffffff",
-            "spacer 7": "#ffffff",
-            "spacer 8": "#ffffff",
-            "test": "#d3d3d3",
-            "reset receipt": "#BA0600"
-        }
-    },
-
-    "#Payment Dates": {
-        "column_weights": [1,2,0],
-
-        "break 0": {"column": 0, "type": "break", "heading": "SEARCH PAYMENTS BY FILTERS"},
-        "show payments on date": {"column": 0, "type": "datepicker", "show_day":"true"},
-        "day buttons": {"column": 0, "type": "rowbutton", "label": ["Previous Day", "Today", "Following Day"], "method": [
-                "/assets/functions/yesterday.py", 
-                "/assets/functions/today.py", 
-                "/assets/functions/tomorrow.py"
-            ]
-        },
-        "payment status": {"column": 0, "type": "combo", "default": "All", "options": ["All", "Paid", "Unpaid"]},
-
-        "due payments": {"column": 1, "type": "table", "title_text": "payments due", "headers": ["case ID", "client name", "contact info", "payment amount", "payment made"]},
-
-        "buttons": {
-            "search payments": "#383FBC",
-            "switch payment status": "#000042"
-        }
-    },
-
-    "#Files": {
-        "column_weights": [1,2,0],
-        "break 0": {"column": 0, "type": "break", "heading": "FILTERS"},
-        "search case ID": {"column": 0, "type": "entry"},
-        "search client name": {"column": 0, "type": "entry"},
-        "search category": {"column": 0, "type": "combo", "default": "All", "options": [
-                "All", 
-                "Retainer Agreement", 
-                "Payment Receipt", 
-                "Payment Authorization", 
-                "Code of Conduct", 
-                "Use of Representative"
-            ]
-        },
-
-        "search results": {"column": 1, "type": "table", "title_text": "search results", "headers": [
-                "document type", 
-                "client name", 
-                "created date", 
-                "created by", 
-                "remarks"
-            ]
-        },
-
-        "buttons": {
-            "search files": "#383FBC",
-            "open selected": "#000042",
-            "cancel selected": "#C11919",
-            "spacer 3": "#ffffff",
-            "spacer 4": "#ffffff",
-            "spacer 5": "#ffffff",
-            "spacer 6": "#ffffff",
-            "spacer 7": "#ffffff",
-            "spacer 8": "#ffffff",
-            "spacer 9": "#ffffff",
-            "spacer 10": "#ffffff",
-            "spacer 11": "#ffffff",
-            "spacer 12": "#ffffff",
-            "spacer 13": "#ffffff",
-            "test": "#d3d3d3",
-            "reset receipt": "#BA0600"
         }
     },
 
@@ -359,7 +162,7 @@
 
         "break 2": {"column": 2, "type": "break", "heading": "LETTER CONCLUSION"},
         "conclusion content": {
-            "column": 2, "type": "textbox", "lines":5, "box_height": 435, 
+            "column": 2, "type": "textbox", "lines":8, "box_height": 435, 
             "instructions_text": "Include details about the guest(s)'s responsibilities and strong ties to their home country to communicate that they will not overstay the validity of their status. Include other details about financial and social standing that may be beneficial, and any documents from the host(s) that they wish to include with the invitation."
         },
 
@@ -373,13 +176,6 @@
             "spacer 4": "#ffffff",
             "spacer 5": "#ffffff",
             "spacer 6": "#ffffff",
-            "spacer 7": "#ffffff",
-            "spacer 8": "#ffffff",
-            "spacer 9": "#ffffff",
-            "spacer 10": "#ffffff",
-            "spacer 11": "#ffffff",
-            "spacer 12": "#ffffff",
-            "spacer 13": "#ffffff",
             "reset fields": "#BA0600",
             "test": "#d3d3d3"
         }
@@ -431,22 +227,17 @@
             "spacer 5": "#ffffff",
             "spacer 6": "#ffffff",
             "spacer 7": "#ffffff",
-            "spacer 8": "#ffffff",
-            "spacer 9": "#ffffff",
-            "spacer 10": "#ffffff",
-            "spacer 11": "#ffffff",
-            "spacer 12": "#ffffff",
-            "spacer 13": "#ffffff",
-            "spacer 14": "#ffffff",
             "test": "#d3d3d3"
         }
     },
 
     "Settings": {
         "column_weights": [1,1,1],
+        "break 0": {"column": 0, "type": "break", "heading": "DARK THEME"},
         "dark theme": {"column": 0, "type": "switch", "method": "/assets/functions/set_dark_mode.py"},
+        "break 1": {"column": 0, "type": "break", "heading": "DEFAULT USER ON ATTENDANCE"},
         "default staff": {"column": 0, "type": "combo", "default": "Select", "options": []},
-        "generate conclusion": {"column": 0, "type": "rowbutton", "label": "Save Default User", "method": "/assets/functions/set_default_user.py"}
+        "save default user": {"column": 0, "type": "rowbutton", "label": "Save Default User", "method": "/assets/functions/set_default_user.py"}
     },
 
     "Init": {}

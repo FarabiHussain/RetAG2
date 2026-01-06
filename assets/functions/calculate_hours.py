@@ -34,6 +34,7 @@ def _callback_helper(app=None, loadingsplash=None, filter_staff=""):
     )
 
     if len(retrieved_entries) == 0:
+        loadingsplash.stop()
         ErrorPopup(f"No hours recorded for {filter_staff} within the selected dates")
         return
 

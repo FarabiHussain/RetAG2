@@ -25,8 +25,13 @@ def query_attendance():
     dbname = db.get_database()
     collection_name = dbname["attendance"]
 
-    retrieved_entries = collection_name.find().sort([("date", -1), ("time", -1)]).limit(75)
-    globals.queried_attendance_entries = list(retrieved_entries)
+    try:
+        retrieved_entries = collection_name.find().sort([("date", -1), ("time", -1)]).limit(75)
+        globals.queried_attendance_entries = list(retrieved_entries)
+    except Exception as e:
+        print(e)
+        retrieved_entries = []
+        globals.queried_attendance_entries = list(retrieved_entries)
 
     return globals.queried_attendance_entries
 

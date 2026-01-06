@@ -70,7 +70,8 @@ def _get_latest_form_version(form_number: str, new_versions_found: list) -> dict
         version = mm_yyyy if mm_yyyy else None
     else:
         new_versions_found.append(form_number)
-        if PromptPopup(f"A new version of form {form_number} ({version}) is currently available.\n\nPlease ensure you download the latest version from the IRCC website. Would you like to open the form page now?"):
+
+        if PromptPopup(f"A new version of form {form_number} ({version}) is currently available.\n\nPlease ensure you download the latest version from the IRCC website. Would you like to open the form page now?").get():
             webbrowser.open(f"{BASE}{form_number}.html")
 
     # Find the PDF link
@@ -104,7 +105,7 @@ def _download_file(url: str, out_path: Path, normalized_name: str, form_name: st
 
 def _set_messages(normalized_name: str, form_name: str, console_messages: list, loadingsplash: None) -> None:
     console_messages.append(f">>> downloaded {form_name} for {normalized_name}")
-    loadingsplash.set_splash_text(f"{form_name} for\n{normalized_name}", text_size=70)
+    loadingsplash.set_splash_text(f"{form_name} for\n{normalized_name}", 100)
 
 
 def _sanitize_name(name: str, replacement: str = "_") -> str:

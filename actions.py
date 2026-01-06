@@ -5,6 +5,7 @@ import os
 import names
 import random
 import threading
+import sys
 from datetime import datetime as dt
 from Database import Database
 from Popups import ErrorPopup, InfoPopup, PromptPopup
@@ -14,8 +15,6 @@ from reader import import_function, query_attendance
 from docx import Document
 from Path import resource_path
 from files_helper import retrieve_files
-
-
 
 
 def _reset_button(app=None, blueprint={}, action=""):
@@ -80,6 +79,7 @@ def _test_button(app):
 def _adjust_time_button(app):
     from GUI import WindowView, DatePicker, TimePicker, RowBreak, Entry, ComboBox
     from datetime import datetime as dt
+
     load_dotenv()
 
     # retrieve object from app.components
@@ -98,21 +98,36 @@ def _adjust_time_button(app):
         frame.place(x=20, y=20)
 
         RowBreak(frame, heading="details of adjusted clock in/out", top_offset=0)
-        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(globals.staff_names))
+        staffpicker = ComboBox(frame, label_text="staff name", top_offset=1, options=sorted(globals.staff_names), default_option=globals.default_device_user)
         timepicker = TimePicker(frame, label_text="time (24-hour format)", top_offset=2)
         datepicker = DatePicker(frame, label_text="date", top_offset=3)
         adminpass = Entry(frame, label_text="admin password", top_offset=4, is_password=True)
 
-        ctk.CTkButton(frame, text="CLOCK IN", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:run_decryptor("/assets/functions/clock_in.py"), width=180, height=36).grid(row=5, column=0, columnspan=2, pady=10)
-        ctk.CTkButton(frame, text="CLOCK OUT", border_width=0, corner_radius=2, fg_color="#23265e", command=lambda:run_decryptor("/assets/functions/clock_out.py"), width=180, height=36).grid(row=5, column=1, columnspan=3, pady=10)
+        ctk.CTkButton(
+            frame, text="CLOCK IN", border_width=0, corner_radius=2, fg_color="#235e32", 
+            width=180, height=36, font=ctk.CTkFont(**globals.font_settings),
+            command=lambda:run_decryptor("/assets/functions/attendance_creator.py", True), 
+        ).grid(row=5, column=0, columnspan=2, pady=10)
 
-        def run_decryptor(functionpath) -> str:
+        ctk.CTkButton(
+            frame, text="CLOCK OUT", border_width=0, corner_radius=2, fg_color="#5e2323", 
+            width=180, height=36, font=ctk.CTkFont(**globals.font_settings),
+            command=lambda:run_decryptor("/assets/functions/attendance_creator.py", False), 
+        ).grid(row=5, column=1, columnspan=3, pady=10)
+
+
+        def run_decryptor(functionpath, is_clock_in) -> str:
             input_password = adminpass.get()
 
-            if os.getenv('PW') == obscure(input_password):
+            # allows for passwordless testing
+            if ('-test' in sys.argv) or (os.getenv('PW') == obscure(input_password)):
                 staff_name = staffpicker.get()
                 adjusted_time = f'{dt.strftime(dt.strptime(datepicker.get(), "%b %d, %Y"), "%Y%m%d")}_{dt.strftime(dt.strptime(timepicker.get(), "%H:%M"), "%H%M")}'
-                import_function(functionpath, "callback")(app, adjusted_time, staff_name)
+                import_function(functionpath, "callback")(app, {
+                    "adjusted_time": adjusted_time, 
+                    "staff_name": staff_name, 
+                    "is_clock_in": is_clock_in,
+                })
             else:
                 ErrorPopup(msg='Incorrect password')
 
@@ -174,7 +189,7 @@ def _adjust_sources_button(app):
         adjust_sources_window.show()
 
 
-def _edit_attendance_button(app, row_to_edit=None):
+def _edit_attendance_button(app):
     table = app.components.get('clocked in today')
     selected_info = table.get_selected_info()
 
@@ -210,23 +225,36 @@ def _edit_attendance_button(app, row_to_edit=None):
         datepicker = DatePicker(frame, label_text="date", top_offset=4)
         adminpass = Entry(frame, label_text="admin password", top_offset=5, is_password=True)
 
+        # set the newly-created date and time pickers with the info from the selected row
         timepicker.set(hr=dt_obj.strftime("%H"), min=dt_obj.strftime("%M"))
         datepicker.set(m=int(dt_obj.strftime("%m"))-1, d=int(dt_obj.strftime("%d")), y=int(dt_obj.strftime("%Y")))
 
-        ctk.CTkButton(frame, text="SAVE", border_width=0, corner_radius=2, fg_color="#235e27", command=lambda:run_decryptor("/assets/functions/edit_attendance.py"), width=180, height=36).grid(row=6, column=0, columnspan=2, pady=10)
-        ctk.CTkButton(frame, text="DELETE", border_width=0, corner_radius=2, fg_color="#a11111", command=lambda:run_decryptor("/assets/functions/delete_attendance.py"), width=180, height=36).grid(row=6, column=1, columnspan=3, pady=10)
+        ctk.CTkButton(
+            frame, text="EDIT", border_width=0, corner_radius=2, fg_color="#235e27", 
+            command=lambda:run_decryptor("/assets/functions/attendance_modifier.py", "edit"), width=180, height=36,
+            font=ctk.CTkFont(**globals.font_settings)
+        ).grid(row=6, column=0, columnspan=2, pady=10)
 
-        def run_decryptor(functionpath) -> str:
+        ctk.CTkButton(
+            frame, text="DELETE", border_width=0, corner_radius=2, fg_color="#a11111", 
+            command=lambda:run_decryptor("/assets/functions/attendance_modifier.py", "delete"), width=180, height=36,
+            font=ctk.CTkFont(**globals.font_settings)
+        ).grid(row=6, column=1, columnspan=3, pady=10)
+
+        def run_decryptor(functionpath, operation_type) -> str:
             input_password = adminpass.get()
 
-            if os.getenv('PW') == obscure(input_password):
-                import_function(functionpath, "callback")(
-                    app, 
-                    staffpicker.get(), 
-                    dt_obj, 
-                    1 if clockpicker.get() == "in" else 0,
-                    selected_info['_id']
-                )
+            if ('-test' in sys.argv) or (os.getenv('PW') == obscure(input_password)):
+                # update the dt object with the info entered by the user
+                dt_obj = dt.strptime(f"{datepicker.get()} {timepicker.get()}", "%b %d, %Y %H:%M")
+
+                import_function(functionpath, "callback")(app, {
+                    "new_staff_name": staffpicker.get(), 
+                    "new_dt_object": dt_obj, 
+                    "new_clock_type": 1 if clockpicker.get() == "in" else 0,
+                    "new_entry_id": selected_info['_id'],
+                    "operation_type": operation_type
+                })
             else:
                 ErrorPopup(msg='Incorrect password')
 
@@ -235,7 +263,7 @@ def _edit_attendance_button(app, row_to_edit=None):
         adjust_time_window.show()
 
 
-def _edit_staff_button(app, row_to_edit=None):
+def _edit_staff_button(app):
     if len(globals.staff_names) == 0:
         ErrorPopup(msg="No staff names found in database.")
         return
@@ -263,14 +291,28 @@ def _edit_staff_button(app, row_to_edit=None):
         new_name = Entry(frame, label_text="rename staff to", top_offset=2, is_password=False)
         adminpass = Entry(frame, label_text="admin password", top_offset=3, is_password=True)
 
-        ctk.CTkButton(frame, text="SAVE", border_width=0, corner_radius=2, fg_color="#235e27", command=lambda:run_decryptor("/assets/functions/edit_staff.py"), width=180, height=36).grid(row=4, column=0, columnspan=2, pady=10)
-        ctk.CTkButton(frame, text="DELETE", border_width=0, corner_radius=2, fg_color="#a11111", command=lambda:run_decryptor("/assets/functions/delete_staff.py"), width=180, height=36).grid(row=4, column=1, columnspan=3, pady=10)
+        ctk.CTkButton(
+            frame, text="EDIT", border_width=0, corner_radius=2, fg_color="#235e27", 
+            command=lambda:run_decryptor("/assets/functions/staff_modifier.py", "edit"), width=180, height=36,
+            font=ctk.CTkFont(**globals.font_settings)
+        ).grid(row=4, column=0, columnspan=2, pady=10)
 
-        def run_decryptor(functionpath) -> str:
+        ctk.CTkButton(
+            frame, text="DELETE", border_width=0, corner_radius=2, fg_color="#a11111", 
+            command=lambda:run_decryptor("/assets/functions/staff_modifier.py", "delete"), width=180, height=36,
+            font=ctk.CTkFont(**globals.font_settings)
+        ).grid(row=4, column=1, columnspan=3, pady=10)
+
+        def run_decryptor(functionpath, operation_type) -> str:
             input_password = adminpass.get()
 
-            if os.getenv('PW') == obscure(input_password):
-                import_function(functionpath, "callback")(app, staffpicker.get(), new_name.get(), staffpicker)
+            if ('-test' in sys.argv) or (os.getenv('PW') == obscure(input_password)):
+                import_function(functionpath, "callback")(app, {
+                    "selected_staff": staffpicker.get(), 
+                    "new_name": new_name.get(), 
+                    "staffpicker": staffpicker, 
+                    "operation_type": operation_type,
+                })
             else:
                 ErrorPopup(msg='Incorrect password')
 
@@ -279,7 +321,7 @@ def _edit_staff_button(app, row_to_edit=None):
         adjust_time_window.show()
 
 
-def _add_staff_button(app, row_to_edit=None):
+def _add_staff_button(app):
     if len(globals.staff_names) == 0:
         ErrorPopup(msg="No staff names found in database.")
         return
@@ -306,13 +348,17 @@ def _add_staff_button(app, row_to_edit=None):
         new_name = Entry(frame, label_text="name of new staff", top_offset=1, is_password=False)
         adminpass = Entry(frame, label_text="admin password", top_offset=2, is_password=True)
 
-        ctk.CTkButton(frame, text="ADD", border_width=0, corner_radius=2, fg_color="#2711a1", command=lambda:run_decryptor("/assets/functions/add_staff.py"), width=180, height=36).grid(row=4, column=0, columnspan=5, pady=10)
+        ctk.CTkButton(
+            frame, text="ADD", border_width=0, corner_radius=2, fg_color="#2711a1", 
+            command=lambda:run_decryptor("/assets/functions/staff_modifier.py", "add"), width=180, height=36,
+            font=ctk.CTkFont(**globals.font_settings)
+        ).grid(row=4, column=0, columnspan=5, pady=10)
 
-        def run_decryptor(functionpath) -> str:
+        def run_decryptor(functionpath, operation_type) -> str:
             input_password = adminpass.get()
 
-            if os.getenv('PW') == obscure(input_password):
-                import_function(functionpath, "callback")(app, new_name.get())
+            if ('-test' in sys.argv) or (os.getenv('PW') == obscure(input_password)):
+                import_function(functionpath, "callback")(app, {"new_name":new_name.get(), "operation_type": operation_type})
             else:
                 ErrorPopup(msg='Incorrect password')
 

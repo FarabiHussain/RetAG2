@@ -11,14 +11,13 @@ from Popups import ErrorPopup
 from Path import *
 from tkinter import StringVar
 from icecream import ic
-from subprocess import DEVNULL, STDOUT, check_call
+from subprocess import check_call
 from dateutil import relativedelta as rd
 from typing import Literal
 from actions import handle_action
 from reader import import_function
 
-family_medium="Roboto Bold"
-family_bold="Roboto Bold"
+SET_BLOCK_LETTERS = False
 
 
 class GUI:
@@ -30,7 +29,7 @@ class GUI:
         self.stringvar = StringVar(value="")
         self.component = None
 
-        self.label = ctk.CTkLabel(master, width=190, text=label_text, anchor="w", font=ctk.CTkFont(family=family_bold), text_color="white" if globals.set_dark_theme else "black")
+        self.label = ctk.CTkLabel(master, width=190, text=label_text.upper() if SET_BLOCK_LETTERS else label_text, anchor="w", font=ctk.CTkFont(**globals.font_settings), text_color="white" if globals.set_dark_theme else "black")
         self.label.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=1)
 
     def get(self) -> str:
@@ -55,7 +54,7 @@ class RowBreak():
             bg_color="#ffffff" if not globals.set_dark_theme else "#444444", 
             text_color=text_color, 
             corner_radius=3, 
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
         )
 
         self.breakline.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
@@ -65,10 +64,12 @@ class RowBreak():
 
 
 class RowButton(GUI):
-    def __init__(self, master=None, app=None, left_offset=0, top_offset=0, label="", method=None) -> None:
+    def __init__(self, master=None, app=None, left_offset=0, top_offset=0, label="", method=None, params=None) -> None:
 
         if type(label) != list:
             label = [label]
+        else:
+            self.labels = label
 
         if type(method) != list:
             method = [method]
@@ -77,6 +78,7 @@ class RowButton(GUI):
             print("button count can only be 1, 2, or 3")
 
         btn_count = len(label)
+        self.function_params = params
         self.component = []
         column_offset = 1 if (btn_count % 2 == 0) else 0 # offset needs to be 1 if len(column) is even for the math to work
         column_span = (btn_count*btn_count) - (6*btn_count) + 10
@@ -91,7 +93,7 @@ class RowButton(GUI):
                 fg_color="#33008B", 
                 text_color="#ffffff", 
                 corner_radius=3, 
-                font=ctk.CTkFont(family=family_bold, weight='bold'), 
+                font=ctk.CTkFont(**globals.font_settings), 
                 bg_color="white" if not globals.set_dark_theme else "#444444"
             )
 
@@ -101,7 +103,6 @@ class RowButton(GUI):
             self.component[i].grid(row=top_offset, column=(btn_count * i) + column_offset, pady=0, padx=2, columnspan=column_span)
 
         self.assign_command(app, method, 0)
-
         self.button_frame.grid(row=top_offset, column=0, pady=10, padx=5, columnspan=5)
 
     def assign_command(self, app, all_commands, curr_command_index):
@@ -109,7 +110,12 @@ class RowButton(GUI):
             return
 
         else:
-            self.component[curr_command_index].configure(command=lambda: import_function(all_commands[curr_command_index], "callback")(app))
+            curr_index_param = {}
+            if self.function_params is not None and (curr_command_index) < len(self.function_params):
+                curr_index_param = (self.function_params[curr_command_index])
+
+            attendance_creator = import_function(all_commands[curr_command_index], "callback")
+            self.component[curr_command_index].configure(command=lambda: attendance_creator(app, **curr_index_param))
             self.assign_command(app, all_commands, curr_command_index + 1)
             return
 
@@ -145,8 +151,8 @@ class ComboBox(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=options,
             variable=self.stringvar,
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
-            dropdown_font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
+            dropdown_font=ctk.CTkFont(**globals.font_settings),
         )
 
         if method is not None:
@@ -215,7 +221,7 @@ class Entry(GUI):
             bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             textvariable=self.stringvar,
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
         )
 
         if is_password:
@@ -255,7 +261,7 @@ class Switch(GUI):
             bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             variable=self.switchvar,
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
             onvalue="on", 
             offvalue="off",
             command=lambda: import_function(method, "callback")(app.components),
@@ -287,7 +293,7 @@ class TextBox(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#444444",
             text_color='#444444' if not globals.set_dark_theme else "#666666", 
             wrap='word', 
-            font=ctk.CTkFont(family=family_bold, weight='bold'), 
+            font=ctk.CTkFont(**globals.font_settings), 
         )
 
         self.instructions.insert('0.0', instructions_text)
@@ -304,7 +310,7 @@ class TextBox(GUI):
             bg_color="#ffffff" if not globals.set_dark_theme else "#444444",
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             wrap='word', 
-            font=ctk.CTkFont(family=family_bold, weight='bold'), 
+            font=ctk.CTkFont(**globals.font_settings), 
         )
 
         self.reset()
@@ -344,7 +350,7 @@ class DatePicker(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=self.populate_days(),
             variable=self.stringvar_day,
-            font=ctk.CTkFont(family=family_bold, weight='bold')
+            font=ctk.CTkFont(**globals.font_settings)
         )
 
         # in some cases, like credit card expirations, the day is not needed
@@ -364,7 +370,7 @@ class DatePicker(GUI):
             values=self.populate_months(),
             variable=self.stringvar_month,
             command=self.repopulate_days,
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
         )
 
         self.component_month.grid(row=top_offset, column=2, pady=10, padx=5)
@@ -380,7 +386,7 @@ class DatePicker(GUI):
             values=self.populate_years(populate_years_with),
             variable=self.stringvar_year,
             command=self.repopulate_days,
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
         )
 
         self.component_year.grid(row=top_offset, column=3, pady=10, padx=5)
@@ -446,7 +452,7 @@ class DatePicker(GUI):
         self.stringvar_month.set(self.today.strftime("%b"))
         self.stringvar_day.set(("{:02}").format(int(self.today.strftime("%d"))))
         self.stringvar_year.set(self.today.strftime("%Y"))
- 
+
 
     # return a formatted date
     def get(self, formatting="$m $d, $y") -> str:
@@ -468,7 +474,6 @@ class DatePicker(GUI):
             thedate = thedate.replace("%m", ("{:02}").format(m))
 
         return thedate
-
 
 
     # set the date 
@@ -520,7 +525,7 @@ class TimePicker(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=populate_upto(24),
             variable=self.stringvar_hour,
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
         )
 
         self.component_hour.grid(row=top_offset, column=2, pady=10, padx=5)
@@ -535,7 +540,7 @@ class TimePicker(GUI):
             fg_color="#dddddd" if not globals.set_dark_theme else "#222222",
             values=populate_upto(60),
             variable=self.stringvar_min,
-            font=ctk.CTkFont(family=family_bold, weight='bold'),
+            font=ctk.CTkFont(**globals.font_settings),
         )
 
         self.component_min.grid(row=top_offset, column=3, pady=10, padx=5)
@@ -767,8 +772,8 @@ class AppButton():
 
         self.desc_frame.grid(row=row, column=1, pady=10, padx=5)
 
-        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=app_name, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_bold, weight='bold')).place(x=10, y=8)
-        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=desc, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(family=family_bold, weight='bold'), text_color="#777777").place(x=10, y=32)
+        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=app_name, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(**globals.font_settings)).place(x=10, y=8)
+        self.desc_text = ctk.CTkLabel(master=self.desc_frame, text=desc, width=240, wraplength=256, anchor="w", font=ctk.CTkFont(**globals.font_settings), text_color="#777777").place(x=10, y=32)
 
 
     def __open_app(self, app_name, app):
@@ -786,14 +791,14 @@ class AppButton():
 
 
 class ActionButton():
-    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=81, height=40, row=0, col=0, blueprint={}, subapp_name="") -> None:
+    def __init__(self, app=None, action="", master=None, image=None, btn_text="", btn_color="transparent", width=149, height=40, row=0, col=0, blueprint={}, subapp_name="") -> None:
 
         if btn_color == '#ffffff':
             btn_color = "#444444" if globals.set_dark_theme else "#ffffff"
 
         self.component = ctk.CTkButton(
             master=master,
-            text=btn_text,
+            text=btn_text.upper(),
             image=image,
             border_width=0,
             corner_radius=0,
@@ -802,7 +807,8 @@ class ActionButton():
             width=width,
             height=height,
             state='disabled' if 'spacer' in action else 'normal',
-            hover_color="dark gray" if not globals.set_dark_theme else "#222222"
+            hover_color="dark gray" if not globals.set_dark_theme else "#222222",
+            font=ctk.CTkFont(**globals.font_settings),
         )
 
         self.component.grid(row=row, column=col, pady=[20,5], padx=4)
@@ -866,7 +872,7 @@ class TabView():
                     )
 
                 elif comp_type == "break":
-                   self.tab_contents[comp] = RowBreak(
+                    self.tab_contents[comp] = RowBreak(
                         master=self.tabs[new_tabs[index]], 
                         heading=each_tab[comp]['heading']
                     )
@@ -884,7 +890,7 @@ class TabView():
                 corner_radius=0, 
                 border_width=0,
                 border_color='#fff', 
-                font=ctk.CTkFont(family=family_bold, weight='bold'), 
+                font=ctk.CTkFont(**globals.font_settings), 
             )
 
     def set_tabs(self, new_tabs):
@@ -911,7 +917,7 @@ class WindowView():
         w = app.get_size('w')*0.5 if width == 0 else width
         h = app.get_size('h')*0.5 if height == 0 else height
         x = (app.get_size('w')/2) - (w/2)
-        y = (app.get_size('h')/2) - (h/2)
+        y = (app.get_size('h')/2) - (h/1.9)
 
         self.body.title(window_name)
         self.body.geometry('%dx%d+%d+%d' % (w, h, x, y))
@@ -960,7 +966,6 @@ class CellWidget():
 
             if on_enter is not None or on_leave is not None:
                 self.set_hover_methods(None, on_enter, on_leave)
-
 
     def set_hover_methods(self, hover_color=None, on_enter=None, on_leave=None):
         if hover_color is not None:
@@ -1044,7 +1049,7 @@ class RowWidget():
                     bg_color='transparent',
                     width=(parent_width-61)/table_width,
                     height=38,
-                    font=ctk.CTkFont(family=family_bold, size=12, weight='bold'),
+                    font=ctk.CTkFont(**globals.font_settings),
                     state="disabled" if row_contents[i] == "" else "normal",
                     command=row_content_methods[i],
                 )
@@ -1062,10 +1067,10 @@ class RowWidget():
                         type='button' if (not is_blank and mode != 'header') else 'label',
                         width=(parent_width-61)/table_width, 
                         height=38, 
-                        text=content, 
+                        text=content.upper() if SET_BLOCK_LETTERS else content, 
                         text_color="#ffffff" if (mode == "header" or globals.set_dark_theme) else "#000000", 
                         fg_color="#000000" if mode == "header" else set_fg_color, 
-                        font=ctk.CTkFont(family=family_bold, size=12, weight='bold') if mode == "header" else ctk.CTkFont(family=family_medium, size=12),
+                        font=ctk.CTkFont(**globals.font_settings),
                         command=lambda *args: select_row(),
                         on_enter=lambda *args: highlight_row(),
                         on_leave=lambda *args: unhighlight_row(),
@@ -1378,7 +1383,6 @@ class TableWidget():
         self.update(page=self.page)
 
 
-
     def remove(self) -> None:
         rows_after_removal = []
 
@@ -1457,9 +1461,16 @@ class LoadingSplash():
             height=300, 
             width=1500, 
             text=splash_text, 
-            font=ctk.CTkFont(family=family_bold, size=text_size), 
+            font=ctk.CTkFont(size=text_size), 
             text_color="#4e4e4e" if globals.set_dark_theme else "#dddddd"
         )
+
+        # not setting the font and size separately like this resets the font size, and tiny text isn't helpful on the splash screen
+        if 'family' in globals.font_settings:
+            self.label.configure(font=ctk.CTkFont(
+                family=globals.font_settings['family'], 
+                size=text_size
+            ))
 
         self.label.place(x=0, y=200+(text_size)/3)
 
@@ -1469,11 +1480,11 @@ class LoadingSplash():
             print("No label to set text on!")
             return
 
-        self.label.configure(text=new_text, font=ctk.CTkFont(family=family_bold, size=text_size))
+        self.label.configure(text=new_text, font=ctk.CTkFont(family=globals.font_settings['family'], size=text_size))
         self.label.place(x=0, y=200+(text_size)/3)
 
 
-    def show(self, task=None, waitfor=0.1):
+    def show(self, task=None, waitfor=0.05):
         self.component.place(x=170, y=0)
         self.component.lift()
 

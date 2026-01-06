@@ -1,7 +1,6 @@
 from writer import get_prompt_response
 from icecream import ic
 import threading
-import time
 
 
 def callback(app=None):
