@@ -11,7 +11,7 @@ from Subapps import *
 from actions import set_attendance
 from reader import *
 from Database import Database
-from updater import search_update_on_startup
+from updater import search_update_on_startup, swap_updater_if_present
 
 os.system("cls")
 globals.init()
@@ -81,6 +81,7 @@ def on_startup():
         navigate_to_default_page()
         app.components.get('staff name').add_options(new_options=sorted(globals.staff_names))
         app.components.get('default staff').add_options(new_options=sorted(globals.staff_names))
+        swap_updater_if_present()
 
         if "-test" in sys.argv:
             app.components['attendance start date'].set(d="01", m="Dec", y="2025")

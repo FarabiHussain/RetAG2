@@ -225,3 +225,34 @@ def search_update_on_startup(app):
                 print(f"`{zip_path}` does not exist")
     except Exception as e:
         print(e)
+
+
+def swap_updater_if_present():
+    target_dir = Path(os.getcwd()).resolve()
+
+    new_updater = target_dir / "Updater.new.exe"
+    updater = target_dir / "Updater.exe"
+    old_updater  = target_dir / "Updater.old.exe"
+    print(f"searching for ```{new_updater}```")
+
+    if not new_updater.exists():
+        return
+
+    try:
+        # Remove any previous old updater
+        if old_updater.exists():
+            old_updater.unlink()
+
+        # Replace Updater.exe with Updater.new.exe (keep a temporary backup)
+        if updater.exists():
+            updater.replace(old_updater)
+
+        new_updater.replace(updater)
+
+        # If we got here, the swap worked. Delete the backup.
+        if old_updater.exists():
+            old_updater.unlink()
+
+        print("Updater updated.", flush=True)
+    except Exception as e:
+        print(f"Failed to update Updater.exe: {e}", flush=True)
